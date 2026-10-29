@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import '../domain/musical_scale/musical_scale.dart';
 import '../domain/tuning/tuning_target_computer.dart';
+import 'oscilloscope_data_extractor.dart';
 import 'tuner_dsp_pipeline.dart';
 import 'tuner_worker_protocol.dart';
 
@@ -46,6 +47,7 @@ class TunerSyncPipelineRunner implements TunerPipelineRunner {
   late TunerDspPipeline _dspPipeline;
   late MusicalScale _scale;
   late TuningTargetComputer _targetComputer;
+  OscilloscopeDataExtractor? _oscilloscopeExtractor;
 
   final _resultController = StreamController<TunerWorkerResult>.broadcast();
   final _errorController = StreamController<String>.broadcast();
@@ -82,6 +84,15 @@ class TunerSyncPipelineRunner implements TunerPipelineRunner {
       instrumentStrings: _config.instrumentStrings,
       inTuneToleranceCents: _config.inTuneToleranceCents,
     );
+
+    if (_config.exportSpectrum || _config.exportCorrelation) {
+      _oscilloscopeExtractor = OscilloscopeDataExtractor(
+        windowSize: _config.windowSize,
+        sampleRate: _config.sampleRate,
+      );
+    } else {
+      _oscilloscopeExtractor = null;
+    }
   }
 
   @override
@@ -109,6 +120,12 @@ class TunerSyncPipelineRunner implements TunerPipelineRunner {
         manualTargetNote: _config.manualTargetNote,
       );
 
+      final oscData = _oscilloscopeExtractor?.extract(
+        samples: samples,
+        exportSpectrum: _config.exportSpectrum,
+        exportCorrelation: _config.exportCorrelation,
+      );
+
       final timestampUs = DateTime.now().microsecondsSinceEpoch;
 
       final result = TunerWorkerResult(
@@ -116,6 +133,9 @@ class TunerSyncPipelineRunner implements TunerPipelineRunner {
         pitchResult: pitchResult,
         frameIndex: frameIndex,
         timestampUs: timestampUs,
+        spectrum: oscData?.spectrum,
+        correlation: oscData?.correlation,
+        correlationZero: oscData?.correlationZero ?? 0.0,
       );
 
       if (!_resultController.isClosed) {

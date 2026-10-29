@@ -10,6 +10,7 @@ import '../../domain/models/tuning_state.dart';
 import '../../domain/musical_scale/musical_scale.dart';
 import '../../state/audio_permission_provider.dart';
 import '../../state/instrument_provider.dart';
+import '../../state/scientific_mode_provider.dart';
 import '../../state/tuner_worker_provider.dart';
 import '../plot/pitch_history_plot.dart';
 import '../widgets/instrument_selector_sheet.dart';
@@ -80,6 +81,15 @@ class _InstrumentTunerScreenState extends ConsumerState<InstrumentTunerScreen> {
         ),
         centerTitle: false,
         actions: [
+          // Switch to Scientific Mode
+          IconButton(
+            tooltip: 'Switch to Scientific Tuner',
+            icon: const Icon(Icons.analytics_outlined),
+            onPressed: () {
+              ref.read(scientificModeProvider.notifier).setScientificMode(true);
+            },
+          ),
+
           // Audio streaming live indicator and toggle
           IconButton(
             icon: Icon(

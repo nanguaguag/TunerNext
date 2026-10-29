@@ -109,6 +109,7 @@ class TunerWorkerResult {
     required this.timestampUs,
     this.spectrum,
     this.correlation,
+    this.correlationZero = 0.0,
   });
 
   final TuningEvaluation evaluation;
@@ -117,6 +118,7 @@ class TunerWorkerResult {
   final int timestampUs;
   final Float32List? spectrum;
   final Float32List? correlation;
+  final double correlationZero;
 
   double get frequency => pitchResult.frequency;
   bool get isSilence => pitchResult.isSilence;

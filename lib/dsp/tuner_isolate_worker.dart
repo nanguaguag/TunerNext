@@ -7,6 +7,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 import '../domain/musical_scale/musical_scale.dart';
 import '../domain/tuning/tuning_target_computer.dart';
+import 'oscilloscope_data_extractor.dart';
 import 'tuner_dsp_pipeline.dart';
 import 'tuner_pipeline_runner.dart';
 import 'tuner_worker_protocol.dart';
@@ -130,6 +131,7 @@ class TunerIsolateWorker implements TunerPipelineRunner {
     late TunerDspPipeline dspPipeline;
     late MusicalScale scale;
     late TuningTargetComputer targetComputer;
+    OscilloscopeDataExtractor? oscilloscopeExtractor;
 
     void initPipeline() {
       dspPipeline = TunerDspPipeline(
@@ -153,6 +155,15 @@ class TunerIsolateWorker implements TunerPipelineRunner {
         instrumentStrings: config.instrumentStrings,
         inTuneToleranceCents: config.inTuneToleranceCents,
       );
+
+      if (config.exportSpectrum || config.exportCorrelation) {
+        oscilloscopeExtractor = OscilloscopeDataExtractor(
+          windowSize: config.windowSize,
+          sampleRate: config.sampleRate,
+        );
+      } else {
+        oscilloscopeExtractor = null;
+      }
     }
 
     initPipeline();
@@ -174,6 +185,12 @@ class TunerIsolateWorker implements TunerPipelineRunner {
             manualTargetNote: config.manualTargetNote,
           );
 
+          final oscData = oscilloscopeExtractor?.extract(
+            samples: command.samples,
+            exportSpectrum: config.exportSpectrum,
+            exportCorrelation: config.exportCorrelation,
+          );
+
           final timestampUs = DateTime.now().microsecondsSinceEpoch;
 
           final result = TunerWorkerResult(
@@ -181,6 +198,9 @@ class TunerIsolateWorker implements TunerPipelineRunner {
             pitchResult: pitchResult,
             frameIndex: command.frameIndex,
             timestampUs: timestampUs,
+            spectrum: oscData?.spectrum,
+            correlation: oscData?.correlation,
+            correlationZero: oscData?.correlationZero ?? 0.0,
           );
 
           params.sendPort.send(result);
