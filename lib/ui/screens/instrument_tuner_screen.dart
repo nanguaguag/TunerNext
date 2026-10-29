@@ -16,6 +16,7 @@ import '../plot/pitch_history_plot.dart';
 import '../widgets/instrument_selector_sheet.dart';
 import '../widgets/strings_sidebar.dart';
 import '../widgets/tuning_indicator_banner.dart';
+import 'preferences_screen.dart';
 
 /// Primary Instrument Tuner screen implementing the Material Design 3 UI,
 /// real-time pitch history canvas, strings gauge sidebar, and dynamic feedback.
@@ -106,6 +107,15 @@ class _InstrumentTunerScreenState extends ConsumerState<InstrumentTunerScreen> {
                 await controller.start();
               }
               setState(() {});
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const PreferencesScreen()),
+              );
             },
           ),
           const SizedBox(width: 8.0),

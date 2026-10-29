@@ -15,7 +15,8 @@ class _ThrowingRecorder extends AudioRecorder {
     disposeCallCount++;
     throw PlatformException(
       code: 'record',
-      message: 'Recorder has not yet been created or has already been disposed.',
+      message:
+          'Recorder has not yet been created or has already been disposed.',
     );
   }
 }

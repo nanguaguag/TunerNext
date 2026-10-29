@@ -16,6 +16,7 @@ import '../plot/spectrum_plot.dart';
 import '../staff/note_staff.dart';
 import '../staff/staff_models.dart';
 import '../widgets/tuning_indicator_banner.dart';
+import 'preferences_screen.dart';
 
 /// Screen displaying real-time scientific audio analysis tools:
 /// 1. Power Spectrum FFT Oscilloscope with harmonic markers
@@ -73,6 +74,15 @@ class ScientificTunerScreen extends ConsumerWidget {
               ref
                   .read(scientificModeProvider.notifier)
                   .setScientificMode(false);
+            },
+          ),
+          IconButton(
+            tooltip: 'Settings',
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const PreferencesScreen()),
+              );
             },
           ),
         ],
