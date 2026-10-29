@@ -37,6 +37,7 @@ class AudioStreamController {
   final _errorController = StreamController<AudioSourceError>.broadcast();
 
   bool _isRunning = false;
+  bool _isDisposed = false;
 
   WaveWriter get waveWriter => _waveWriter;
   CircularAudioBuffer get buffer => _buffer;
@@ -140,9 +141,21 @@ class AudioStreamController {
 
   /// Releases all resources.
   Future<void> dispose() async {
+    if (_isDisposed) return;
+    _isDisposed = true;
+
     await stop();
-    await audioSource.dispose();
-    await pipelineRunner.dispose();
-    await _errorController.close();
+
+    try {
+      await audioSource.dispose();
+    } catch (_) {}
+
+    try {
+      await pipelineRunner.dispose();
+    } catch (_) {}
+
+    if (!_errorController.isClosed) {
+      await _errorController.close();
+    }
   }
 }

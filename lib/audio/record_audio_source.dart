@@ -19,6 +19,7 @@ class RecordAudioSource implements AudioSource {
   final _errorController = StreamController<AudioSourceError>.broadcast();
   StreamSubscription<Uint8List>? _recordSubscription;
   AudioSourceState _state = AudioSourceState.idle;
+  bool _isDisposed = false;
 
   @override
   Stream<Uint8List> get pcmByteStream => _pcmController.stream;
@@ -31,7 +32,7 @@ class RecordAudioSource implements AudioSource {
 
   @override
   Future<void> start({int sampleRate = 44100}) async {
-    if (_state == AudioSourceState.recording) return;
+    if (_isDisposed || _state == AudioSourceState.recording) return;
 
     try {
       final hasPermission = await _recorder.hasPermission();
@@ -89,9 +90,22 @@ class RecordAudioSource implements AudioSource {
 
   @override
   Future<void> dispose() async {
+    if (_isDisposed) return;
+    _isDisposed = true;
+
     await stop();
-    await _recorder.dispose();
-    await _pcmController.close();
-    await _errorController.close();
+
+    try {
+      await _recorder.dispose();
+    } catch (_) {
+      // Ignore if recorder was not created or already disposed on the native platform channel
+    }
+
+    if (!_pcmController.isClosed) {
+      await _pcmController.close();
+    }
+    if (!_errorController.isClosed) {
+      await _errorController.close();
+    }
   }
 }
