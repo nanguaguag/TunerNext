@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/tuner_theme.dart';
+import 'ui/screens/instrument_tuner_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,23 +20,7 @@ class TunerApp extends ConsumerWidget {
       theme: TunerTheme.light(),
       darkTheme: TunerTheme.dark(),
       themeMode: ThemeMode.system,
-      home: const Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.tune, size: 64),
-              SizedBox(height: 16),
-              Text(
-                'Tuner Flutter',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('Phase 2: Architectural Foundation Ready'),
-            ],
-          ),
-        ),
-      ),
+      home: const InstrumentTunerScreen(),
     );
   }
 }
