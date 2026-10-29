@@ -51,6 +51,7 @@ abstract class PitchDetector {
     required int sampleRate,
     double frequencyMin = 16.0,
     double frequencyMax = 20000.0,
+    int? framePosition,
   });
 
   /// Resets internal state (buffers, filters, history).

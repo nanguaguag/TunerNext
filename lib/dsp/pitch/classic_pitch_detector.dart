@@ -23,7 +23,7 @@ class ClassicPitchDetector implements PitchDetector {
   AutoCorrelationData? _autoCorr;
   Float32List? _spectrumStorage;
   Float32List? _previousSpectrum;
-  double _previousFrameTime = -1.0;
+  int _previousFramePosition = -1;
 
   @override
   PitchDetectionResult detectPitch({
@@ -31,6 +31,7 @@ class ClassicPitchDetector implements PitchDetector {
     required int sampleRate,
     double frequencyMin = 16.0,
     double frequencyMax = 20000.0,
+    int? framePosition,
   }) {
     final size = samples.length;
     if (size < 64) return PitchDetectionResult.silence;
@@ -183,18 +184,24 @@ class ClassicPitchDetector implements PitchDetector {
     );
 
     double refinedFreq = rawFreq;
-    if (_previousFrameTime > 0 && _previousSpectrum != null) {
-      refinedFreq = accurateComputer.computeFrequency(
-        specBin,
-        _spectrumStorage!,
-        previousSpectrum: _previousSpectrum,
-        timeShift: size * dt,
-      );
+    if (_previousFramePosition >= 0 &&
+        framePosition != null &&
+        _previousSpectrum != null) {
+      final timeShift = (framePosition - _previousFramePosition) / sampleRate;
+      if (timeShift > 0.0) {
+        refinedFreq = accurateComputer.computeFrequency(
+          specBin,
+          _spectrumStorage!,
+          previousSpectrum: _previousSpectrum,
+          timeShift: timeShift,
+          rawFrequency: rawFreq,
+        );
+      }
     }
 
-    // Save previous spectrum for next frame
+    // Save previous spectrum and frame position for next frame
     _previousSpectrum!.setAll(0, _spectrumStorage!);
-    _previousFrameTime = 1.0;
+    _previousFramePosition = framePosition ?? -1;
 
     final confidence = (fittedPeak / r0).clamp(0.0, 1.0);
 
@@ -229,6 +236,6 @@ class ClassicPitchDetector implements PitchDetector {
 
   @override
   void reset() {
-    _previousFrameTime = -1.0;
+    _previousFramePosition = -1;
   }
 }

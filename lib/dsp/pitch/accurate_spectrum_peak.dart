@@ -22,9 +22,10 @@ class AccurateSpectrumPeakFrequency {
     Float32List currentSpectrum, {
     Float32List? previousSpectrum,
     double timeShift = 0.0,
+    double? rawFrequency,
   }) {
     final numBins = currentSpectrum.length ~/ 2;
-    if (index < 0 || index >= numBins) return index * df;
+    if (index < 0 || index >= numBins) return rawFrequency ?? (index * df);
 
     var jacobsenOffset = 0.0;
     if (useJacobsen && index > 0 && index < numBins - 1) {
@@ -46,7 +47,9 @@ class AccurateSpectrumPeakFrequency {
       }
     }
 
-    final freqSeed = (index + jacobsenOffset) * df;
+    final freqSeed = useJacobsen
+        ? (index + jacobsenOffset) * df
+        : (rawFrequency ?? (index * df));
     if (previousSpectrum == null || timeShift <= 0.0) {
       return freqSeed;
     }

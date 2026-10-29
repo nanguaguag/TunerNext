@@ -40,6 +40,7 @@ class TwoWayMismatchDetector implements PitchDetector {
     required int sampleRate,
     double frequencyMin = 16.0,
     double frequencyMax = 20000.0,
+    int? framePosition,
   }) {
     final size = samples.length;
     if (size < 64) return PitchDetectionResult.silence;

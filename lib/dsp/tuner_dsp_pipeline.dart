@@ -76,12 +76,14 @@ class TunerDspPipeline {
     required int sampleRate,
     double frequencyMin = AcousticConstants.defaultFrequencyMin,
     double frequencyMax = AcousticConstants.defaultFrequencyMax,
+    int? framePosition,
   }) {
     final rawResult = _detector.detectPitch(
       samples: samples,
       sampleRate: sampleRate,
       frequencyMin: frequencyMin,
       frequencyMax: frequencyMax,
+      framePosition: framePosition,
     );
 
     if (rawResult.isSilence || rawResult.frequency <= 0.0) {
