@@ -55,10 +55,13 @@ tuner_flutter/
    - **切片 3.1: 基础数学与 FFT/IFFT 引擎 (Pure Dart)** (`VERIFIED`):
      - 代码: `lib/dsp/fft/fft.dart`
      - 单测: `test/unit/fft_test.dart` (14 组测试全部通过，消除 `FORK-NEW-02` 原地覆盖 Bug)
+   - **切片 3.2: 窗函数与自相关计算器 (Pure Dart)** (`VERIFIED`):
+     - 代码: `lib/dsp/windowing/windowing.dart`, `lib/dsp/correlation/correlation.dart`, `lib/dsp/correlation/auto_correlation.dart`
+     - 单测: `test/unit/windowing_test.dart`, `test/unit/correlation_test.dart` (11 组测试全部通过，与 Kotlin `CorrelationTest.kt` 基准向量对齐)
 3. **下一个允许执行的任务**:
-   - **切片 3.2: 窗函数与自相关计算器 (Pure Dart)**
-   - 目标: 在 `lib/dsp/windowing/` 与 `lib/dsp/correlation/` 实现窗函数（Tophat, Hanning, Hamming）及能量积分补偿，实现零填充频域快速互相关计算器。
-   - 门禁: 编写 `test/unit/correlation_test.dart`，与 Kotlin `CorrelationTest.kt` 基准向量对齐，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后提交 Git 检查点。
+   - **切片 3.3: 抛物线拟合与声学计权曲线 (Pure Dart)**
+   - 目标: 在 `lib/dsp/pitch/polynomial_fit.dart` 实现三点抛物线极值精修算法（带零分母保护与边界截断），在 `lib/dsp/filters/acoustic_weighting.dart` 实现 IEC 61672-1 A/C 计权滤波。
+   - 门禁: 编写 `test/unit/polynomial_fit_test.dart` 与 `test/unit/acoustic_weighting_test.dart`，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后提交 Git 检查点。
 
 ---
 

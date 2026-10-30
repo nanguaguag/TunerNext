@@ -87,9 +87,9 @@
 | ID | 功能名称 | Kotlin 源码位置及行为 | Flutter 对应文件/方法 | 实现度 | 依赖项 | 测试文件/用例 | 测试结果 | 尚未完成工作 | 最终验收标准 | 当前状态 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **DSP-01** | 实数/复数 Radix-2 FFT/IFFT | `notedetection/FFT.kt`: 原版含结合过程。重构版需消除 `FORK-NEW-02` 原地覆盖缺陷。 | `lib/dsp/fft/fft.dart` | 100% | 无 | `test/unit/fft_test.dart` | 14组测试全部通过 | 无 (已完全移植并消除 FORK-NEW-02 原地覆盖缺陷与负相位符号误差) | NumPy 向量差分比对误差 $< 10^{-4}$，往返 IFFT 还原误差 $< 10^{-5}$。 | `VERIFIED` |
-| **DSP-02** | 窗函数及数值积分 | `notedetection/Windowing.kt`: Tophat, Hanning, Hamming 窗口及能量积分因子。 | 无 | 0% | 无 | 无 | 未测试 | 纯 Dart 实现向量加窗与面积积分。 | 窗函数能量衰减补偿与理论一致。 | `NOT_STARTED` |
-| **DSP-03** | 零填充自相关计算器 | `notedetection/Correlation.kt`: 零填充至 $2N$，通过 FFT/IFFT 快速计算离散互相关。 | 无 | 0% | DSP-01, DSP-02 | 无 | 未测试 | 移植 `CorrelationComputer` 并支持位反转直充。 | 与时域直接相关比对误差 $< 10^{-4}$。 | `NOT_STARTED` |
-| **DSP-04** | 归一化自相关波形缓冲 | `AutoCorrelation.kt`: 将自相关序列归一化至 $[0.0, 1.0]$ 供 UI 曲线渲染。 | 无 | 0% | DSP-03 | 无 | 未测试 | 计算零延迟最大值与动态范围重映射。 | 波形垂直居中且动态缩放稳定。 | `NOT_STARTED` |
+| **DSP-02** | 窗函数及数值积分 | `notedetection/Windowing.kt`: Tophat, Hanning, Hamming 窗口及能量积分因子。 | `lib/dsp/windowing/windowing.dart` | 100% | 无 | `test/unit/windowing_test.dart` | 5组测试全部通过 | 无 (已实现Tophat/Hamming/Hanning生成、解析积分与能量补偿因子) | 窗函数能量衰减补偿与理论一致，解析积分与数值平均差分 $< 10^{-3}$。 | `VERIFIED` |
+| **DSP-03** | 零填充自相关计算器 | `notedetection/Correlation.kt`: 零填充至 $2N$，通过 FFT/IFFT 快速计算离散互相关。 | `lib/dsp/correlation/correlation.dart` | 100% | DSP-01, DSP-02 | `test/unit/correlation_test.dart` | 6组测试全部通过 | 无 (已实现零填充维纳-辛钦频域自相关与位反转直充优化) | 与时域直接卷积自相关及 Kotlin 基准向量比对误差 $< 10^{-4}$。 | `VERIFIED` |
+| **DSP-04** | 归一化自相关波形缓冲 | `AutoCorrelation.kt`: 将自相关序列归一化至 $[0.0, 1.0]$ 供 UI 曲线渲染。 | `lib/dsp/correlation/auto_correlation.dart` | 100% | DSP-03 | `test/unit/correlation_test.dart` | 测试通过 | 无 (已实现自相关序列时移数组与 [0, 1] 动态重映射与零基线标记) | 波形归一化至 [0, 1]，零基线映射准确，静音段安全处理。 | `VERIFIED` |
 | **DSP-05** | 三点抛物线极值精修 | `MaximumOfPolynomialFit.kt`: 连续二次插值求极值点与峰值。 | 无 | 0% | 无 | 无 | 未测试 | 实现带零分母保护与边界截断的抛物线拟合。 | 对称二次曲线极值恢复误差为 0。 | `NOT_STARTED` |
 | **DSP-06** | IEC 61672-1 声学计权滤波 | `AcousticWeighting.kt`: A-weighting 与 C-weighting 频响公式。 | 无 | 0% | 无 | 无 | 未测试 | 实现计权因子计算与 1000Hz 归一化。 | 50Hz 工频交流电衰减 $> 30\text{ dB}$。 | `NOT_STARTED` |
 | **DSP-07** | 经典自相关检测器 (Classic) | `CorrelationBasedFrequency.kt`: 首个极小值搜索、全局最大值与次谐波惩罚判决。 | 无 | 0% | DSP-03, DSP-05 | 无 | 未测试 | 移植经典检测状态机，集成 15% 零延迟能量门限。 | 440Hz 纯音测量误差 $< 0.2\text{ Hz}$。 | `NOT_STARTED` |
