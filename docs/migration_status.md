@@ -57,6 +57,10 @@
    - 文件: `lib/dsp/filters/acoustic_weighting.dart`
    - 实现 A 计权（人耳等响度模拟）与 C 计权（高声压/宽带模拟），严格执行 1000Hz 归一化与 50Hz 工频交流电衰减（$> 30\text{ dB}$）。
    - 测试: `test/unit/acoustic_weighting_test.dart` (5 组测试 100% 通过)。
+9. **McLeod Pitch Method (MPM) 引擎 (`McLeodPitchDetector`)**:
+   - 文件: `lib/dsp/pitch/mcleod_pitch_method.dart`
+   - 实现归一化平方差函数 (NSDF)，首峰 0.85 阈值比率选择机制彻底根除弓弦起奏二次谐波翻倍跳跃，集成抛物线插值与 RMS 静音门限。
+   - 测试: `test/unit/mcleod_pitch_method_test.dart` (6 组测试 100% 通过，小提琴强泛音场景与纯正弦波高精度锁定)。
 
 ---
 
@@ -73,13 +77,10 @@
 3. **切片 3.3: 抛物线拟合与声学计权曲线** (`VERIFIED`):
    - 已实现三点二次极值拟合（带零分母与边界安全拦截），实现 IEC 61672-1 A/C 计权。
    - 测试: `test/unit/polynomial_fit_test.dart` 与 `test/unit/acoustic_weighting_test.dart` 10 组测试 100% 通过。
-4. **切片 3.4: McLeod Pitch Method (MPM) 引擎** (下一任务):
-   - 移植 NSDF 与首峰 0.85 阈值比率算法，防范小提琴高把位八度倍频。
-   - 测试: 编写 `test/unit/mcleod_pitch_method_test.dart`。
-4. **切片 3.4: McLeod Pitch Method (MPM) 引擎**:
-   - 移植 NSDF 与首峰 0.85 阈值比率算法，防范小提琴高把位八度倍频。
-   - 测试: 编写 `test/unit/mcleod_pitch_method_test.dart`。
-5. **切片 3.5: Two-Way Mismatch (TWM) 引擎**:
+4. **切片 3.4: McLeod Pitch Method (MPM) 引擎** (`VERIFIED`):
+   - 已移植 NSDF 与首峰 0.85 阈值比率算法，防范小提琴高把位八度倍频。
+   - 测试: `test/unit/mcleod_pitch_method_test.dart` 6 组测试 100% 通过。
+5. **切片 3.5: Two-Way Mismatch (TWM) 引擎** (下一任务):
    - 实现 Maher & Beauchamp 双向谐波失配与刚度非谐性补偿，解决缺失基频问题。
    - 测试: 编写 `test/unit/two_way_mismatch_test.dart`。
 6. **切片 3.6: 经典自相关、Jacobsen 插值与 Phase Vocoder**:

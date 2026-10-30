@@ -61,10 +61,13 @@ tuner_flutter/
    - **切片 3.3: 抛物线拟合与声学计权曲线 (Pure Dart)** (`VERIFIED`):
      - 代码: `lib/dsp/pitch/polynomial_fit.dart`, `lib/dsp/filters/acoustic_weighting.dart`
      - 单测: `test/unit/polynomial_fit_test.dart`, `test/unit/acoustic_weighting_test.dart` (10 组测试全部通过，对齐 Kotlin 基准与 IEC 61672)
+   - **切片 3.4: McLeod Pitch Method (MPM) 引擎 (Pure Dart)** (`VERIFIED`):
+     - 代码: `lib/dsp/pitch/mcleod_pitch_method.dart`
+     - 单测: `test/unit/mcleod_pitch_method_test.dart` (6 组测试全部通过，强二次谐波八度倍频规避验证)
 3. **下一个允许执行的任务**:
-   - **切片 3.4: McLeod Pitch Method (MPM) 引擎 (Pure Dart)**
-   - 目标: 在 `lib/dsp/pitch/mcleod_pitch_method.dart` 实现归一化平方差函数 (NSDF) 与首峰 0.85 阈值比率算法，防范小提琴高把位八度倍频。
-   - 门禁: 编写 `test/unit/mcleod_pitch_method_test.dart`，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后提交 Git 检查点。
+   - **切片 3.5: Two-Way Mismatch (TWM) 引擎 (Pure Dart)**
+   - 目标: 在 `lib/dsp/pitch/two_way_mismatch.dart` 实现 Maher & Beauchamp (1994) 双向谐波失配评估与琴弦非谐性刚度补偿 $B$，解决低音乐器粗弦基频缺失问题。
+   - 门禁: 编写 `test/unit/two_way_mismatch_test.dart`，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后提交 Git 检查点。
 
 ---
 
