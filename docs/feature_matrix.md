@@ -110,14 +110,14 @@
 
 | ID | 功能名称 | Kotlin 源码位置及行为 | Flutter 对应文件/方法 | 实现度 | 依赖项 | 测试文件/用例 | 测试结果 | 尚未完成工作 | 最终验收标准 | 当前状态 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **THEORY-01**| 音符实体与音名表示 | `musicalscale/MusicalScale.kt`: 八度、音级、半音偏置、变音记号。 | `lib/domain/models/musical_note.dart` | 80% | 无 | `test/domain/musical_note_test.dart` | 通过 | 支持多种语言变音符号 (♯, ♭, ♮) 与 Unicode 兼容输出。 | 完整覆盖 C-1 到 B9 范围音符与音名。 | `TESTED` |
-| **THEORY-02**| 频率与音符转换公式 | $f = f_{A4} \cdot 2^{(n - 69)/12}$，支持反向求最近音符与音分偏差。 | 无 | 0% | THEORY-01 | 无 | 未测试 | 实现高精度对数音符映射器。 | 440Hz 对应 A4 (0 cents)，差分 $< 10^{-5}$。 | `NOT_STARTED` |
+| **THEORY-01**| 音符实体与音名表示 | `musicalscale/MusicalScale.kt`: 八度、音级、半音偏置、变音记号。 | `lib/domain/models/musical_note.dart` | 100% | 无 | `test/domain/musical_note_test.dart`, `pitch_frequency_converter_test.dart` | 全部通过 | 无 (已支持 C-1 至 B9 全音域、MIDI 编号映射、变音记号与等音双向转换) | 完整覆盖 C-1 到 B9 范围音符与音名，MIDI 往返一致。 | `VERIFIED` |
+| **THEORY-02**| 频率与音符转换公式 | $f = f_{A4} \cdot 2^{(n - 69)/12}$，支持反向求最近音符与音分偏差。 | `lib/domain/tuning/frequency_to_note_converter.dart`, `musical_scale_frequencies.dart` | 100% | THEORY-01 | `test/domain/pitch_frequency_converter_test.dart` | 13组测试全部通过 | 无 (已实现对数频率-音符双向转换、A4基准频率调节、吉他标准定弦锁定、对数插值与迟滞防抖) | 440Hz 严格对应 A4 (0 cents)，差分 $< 10^{-7}$，支持连续浮点对数插值。 | `VERIFIED` |
 | **THEORY-03**| 十二平均律 (12-EDO) | 标准 100 cents/半音均匀分布。 | 无 | 0% | THEORY-02 | 无 | 未测试 | 封装标准平均律基类。 | 纯八度频率严格为 2.0 倍。 | `NOT_STARTED` |
 | **THEORY-04**| 微分音等分律制 (EDO 5-72) | 支持 19-EDO, 24-EDO, 31-EDO, 41-EDO, 53-EDO 等。 | 无 | 0% | THEORY-02 | 无 | 未测试 | 支持动态分段等分八度。 | 任意等分数下音分间隔严格相等。 | `NOT_STARTED` |
 | **THEORY-05**| 19 种欧洲历史良律与纯律 | 纯律、毕达哥拉斯律、1/4逗音中庸律、Werckmeister III、Kirnberger III 等。 | 无 | 0% | THEORY-01 | 无 | 未测试 | 移植 19 组历史音分偏移基准数组。 | 与 Kotlin 版本音分表逐音符一致。 | `NOT_STARTED` |
 | **THEORY-06**| Scala (.scl) 格式解析与导出 | 支持读取标准 Huygens-Fokker Scala 音阶定义文本。 | 无 | 0% | 无 | 无 | 未测试 | 编写纯 Dart `.scl` 解析器与序列化器。 | 成功解析包含纯律分数与小数音分的 scl。 | `NOT_STARTED` |
 | **THEORY-07**| Railsback 延展调音曲线 | 钢琴低音下沉、高音抬升的经验五次多项式模型。 | 无 | 0% | THEORY-02 | 无 | 未测试 | 移植多项式求值器与散点插值器。 | A0 延展约 -30 cents，C8 延展约 +35 cents。| `NOT_STARTED` |
-| **THEORY-08**| 音分偏差对数计算 | $\text{cents} = 1200 \times \log_2(f_{\text{actual}} / f_{\text{target}})$。 | 无 | 0% | 无 | 无 | 未测试 | 实现数值安全（防零防负）音分转换函数。 | 频率翻倍严格输出 1200.0 音分。 | `NOT_STARTED` |
+| **THEORY-08**| 音分偏差对数计算 | $\text{cents} = 1200 \times \log_2(f_{\text{actual}} / f_{\text{target}})$。 | `lib/domain/tuning/tuning_math.dart` | 100% | 无 | `test/domain/pitch_frequency_converter_test.dart` | 全部通过 | 无 (已实现数值安全防零防负对数转换与互逆验证) | 频率翻倍严格输出 1200.0 音分，逆变换精度 $< 10^{-7}$。 | `VERIFIED` |
 
 ---
 

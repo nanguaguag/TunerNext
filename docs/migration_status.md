@@ -13,8 +13,8 @@
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **阶段 1** | 全面代码审计与迁移设计方案 | 已完成 | 审计白皮书完备 | 189 项 Kotlin 单测验证通过 | **VERIFIED** |
 | **阶段 2** | Flutter 独立工程脚手架与 M3 主题 | 已完成 | `e58c406` 提交 | M3 主题与 Note 模型单测通过 | **VERIFIED** |
-| **阶段 3** | 纯 Dart DSP 算法引擎与基准测试 | 重新规划中 | 待以单切片重构 | 待构建纯 Dart 基准套件 | **NOT_STARTED** |
-| **阶段 4** | 乐理模型、19种律制与 Scala IO | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
+| **阶段 3** | 纯 Dart DSP 算法引擎与基准测试 | 已完成 | `7a01bea` 提交 | 全量 78 项测试通过 | **VERIFIED** |
+| **阶段 4** | 乐理模型、19种律制与 Scala IO | 进行中 | 切片 4.1 已完成 | 91 项单测全部通过 | **IN_PROGRESS** |
 | **阶段 5** | 平台音频流采集与 Isolate 并发管道 | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 6** | 乐器调音主界面 (琴弦/表盘/历史图) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 7** | 科学调音界面 (示波器/FFT谱/波形) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
@@ -116,13 +116,18 @@
 7. **切片 3.7: 时域滤波、平滑器与调音管线门面 (Facade)** (`VERIFIED`):
    - 已整合 `PitchMedianFilter`, `OctaveJumpGate`, `OutlierRemovingSmoother` 到 `TunerDspPipeline`，支持运行时算法与计权切换、双重静音与全链条平滑。
    - 测试: `test/unit/pitch_temporal_filter_test.dart`, `test/unit/outlier_removing_smoother_test.dart`, `test/unit/tuner_dsp_pipeline_test.dart` 16 组测试 100% 通过。
-8. **阶段 4 / 切片 4.1: 乐理音符模型与对数音符映射器 (Musical Theory)** (下一任务):
-   - 完善乐理模型体系：标准频率-音高对数映射公式 $f = f_{A4} \cdot 2^{(n-69)/12}$、音分偏差计算、最近音符吸附与平均律 (12-EDO)。
-   - 测试: 编写 `test/domain/pitch_frequency_converter_test.dart`。
+8. **阶段 4 / 切片 4.1: 对数音符与频率双向映射器 (Frequency-to-Note Converter)** (`VERIFIED`):
+   - 文件: `lib/domain/tuning/tuning_math.dart`, `lib/domain/tuning/musical_scale_frequencies.dart`, `lib/domain/tuning/frequency_to_note_converter.dart`, `lib/domain/models/musical_note.dart`
+   - 实现高精度对数音符映射公式 $f = f_{A4} \cdot 2^{(n-69)/12}$，支持 A4 基准频率可调、音分偏差计算与调准状态评估 (`TuningState`)。
+   - 纯 Dart 移植 Kotlin `MusicalScaleFrequencies`，支持全音域二分查找、连续对数插值与几何外推；并在目标音符吸附中集成 0.6 迟滞门控 (Hysteresis)，彻底消除临界半音抖动。
+   - 测试: `test/domain/pitch_frequency_converter_test.dart` 13 组测试全部通过。
+9. **阶段 4 / 切片 4.2: 律制体系架构与十二平均律 (12-EDO)** (下一任务):
+   - 封装抽象律制基类 `Temperament` 与 `EqualTemperament`，验证全八度音级等比分布。
+   - 测试: 编写 `test/domain/equal_temperament_test.dart`。
 
 ---
 
 ## 四、当前阻塞条件与后续准入
 
-- **当前任务**: 会话基线固化与交接文档建立（已完成）。
-- **下一步准入要求**: 新会话启动后，必须阅读 `AGENTS.md` 与本 `migration_status.md`，经审查确认后方可开启【切片 3.1】开发。
+- **当前任务**: 阶段 4 / 切片 4.1 开发与验证已完成，工作区通过全部三道质量门禁。
+- **下一步准入要求**: 等待用户代码审查确认后，方可启动【切片 4.2：律制体系架构与十二平均律 (12-EDO)】。

@@ -1,7 +1,7 @@
 # 会话交接备忘录 (Session Handoff & Context Continuity)
 
-> **交接时间**: 2026-10-30  
-> **会话状态**: 【阶段 3：纯 Dart DSP 算法引擎】全部 7 个切片已 100% 完成并验证，代码工作区已通过三道质量门禁并固化提交。下一会话将全面推进【阶段 4：乐理模型、19 种律制、延展调音与 Scala 文件 IO】。
+> **交接时间**: 2026-10-31  
+> **会话状态**: 【阶段 4 / 切片 4.1：对数音符与频率双向映射器 (Frequency-to-Note Converter)】已 100% 完成并验证，全量 91 项自动化测试通过，代码工作区已通过全部三道质量门禁。下一切片为【阶段 4 / 切片 4.2：律制体系架构与十二平均律 (12-EDO)】。
 
 ---
 
@@ -87,13 +87,26 @@ tuner_flutter/
 
 在下一会话中，严格按功能切片渐进式推进【阶段 4】：
 
-- **切片 4.1: 对数音符与频率双向映射器 (Frequency-to-Note Converter)**:
-  - 对应 Kotlin: `musicalscale/MusicalScale.kt`
-  - 实现 $f \leftrightarrow n$ 连续转换公式：$f = f_{A4} \cdot 2^{(n - 69)/12}$，支持 A4 基准频率可调 ($415.0 \text{ Hz} \sim 466.0 \text{ Hz}$，默认 $440.0 \text{ Hz}$)。
-  - 计算最近半音音级、音分偏差 ($\text{cents} = 1200 \log_2(f / f_{\text{target}})$) 与调准判定 ($\le \pm 3.0 \text{ cents}$)。
-  - 测试: `test/domain/pitch_frequency_converter_test.dart`。
+- **切片 4.1: 对数音符与频率双向映射器 (Frequency-to-Note Converter)** (`VERIFIED`):
+  - 文件: `lib/domain/tuning/tuning_math.dart`, `lib/domain/tuning/musical_scale_frequencies.dart`, `lib/domain/tuning/frequency_to_note_converter.dart`, `lib/domain/models/musical_note.dart`
+  - 测试: `test/domain/pitch_frequency_converter_test.dart` (13 组测试全部通过)
+  - 核心突破:
+    1. 乐理声学基础数学公式与对数互逆运算（`ratioToCents`, `centsToRatio`, `centsToFrequency`, `frequencyToCents`）。
+    2. 扩展 `MusicalNote` 支持 MIDI 编号映射（A4=69, C4=60, A0=21, C8=108）与变音记号、等音双向转换。
+    3. 对齐 Kotlin `MusicalScaleFrequencies`，实现全音域二分查找、连续浮点对数插值与几何外推。
+    4. 统一门面 `FrequencyToNoteConverter`：支持 A4 基准调节（390Hz~490Hz）、开弦乐器标准定弦识别、音分偏差计算与调准状态评估 (`TuningState`)。
+    5. 集成 0.6 迟滞门控 (Hysteresis Auto Detection)，彻底消除临界半音边界由于微小声学扰动引发的高频跳动。
+
+---
+
+### 2. 下一步规划：阶段 4 律制体系架构与十二平均律 (12-EDO)
+
+在下一任务中，推进【切片 4.2】：
+
 - **切片 4.2: 律制体系架构与十二平均律 (12-EDO)**:
+  - 对应 Kotlin: `temperaments/Temperament.kt`, `temperaments/Temperament3.kt`
   - 封装抽象律制基类 `Temperament` 与 `EqualTemperament`，验证全八度音级等比分布。
+  - 测试: `test/domain/equal_temperament_test.dart`。
 - **切片 4.3: 纯律与历史律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)**:
   - 移植 19 种古典历史律制音分偏置表，实现基准根音切换。
 - **切片 4.4: 延展调音曲线 (Stretch Tuning)**:
@@ -110,9 +123,9 @@ tuner_flutter/
 在新会话启动时，请直接发送以下提示词，即可无缝承接当前进度并安全启动阶段 4 开发：
 
 ```text
-你好！我们正在进行将开源 Android Kotlin 调音器（/Users/huzongyao/flutterProjects/Tuner，分支 feature/advanced-pitch-algorithms）渐进式重构为 Flutter 应用（/Users/huzongyao/flutterProjects/tuner_flutter，分支 feature/rollback，基线 7a01bea）的项目。
+你好！我们正在进行将开源 Android Kotlin 调音器（/Users/huzongyao/flutterProjects/Tuner，分支 feature/advanced-pitch-algorithms）渐进式重构为 Flutter 应用（/Users/huzongyao/flutterProjects/tuner_flutter，分支 feature/rollback）的项目。
 
-在上一会话中，我们已经顺利完成了【阶段 3：纯 Dart DSP 算法引擎】的全部 7 个切片，全量 78 项自动化测试 100% 通过，工作区纯净。
+在上一会话中，我们已经顺利完成了【阶段 4 / 切片 4.1：对数音符与频率双向映射器 (Frequency-to-Note Converter)】的实现与验证，全量 91 项自动化测试 100% 通过，工作区纯净。
 
 请首先阅读以下关键文档建立上下文：
 1. /Users/huzongyao/flutterProjects/tuner_flutter/AGENTS.md
@@ -121,5 +134,5 @@ tuner_flutter/
 4. /Users/huzongyao/flutterProjects/tuner_flutter/docs/feature_matrix.md
 5. /Users/huzongyao/flutterProjects/tuner_flutter/docs/algorithm_specification.md
 
-在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 4 / 切片 4.1：对数音符与频率双向映射器 (Frequency-to-Note Converter)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
+在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 4 / 切片 4.2：律制体系架构与十二平均律 (12-EDO)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
 ```
