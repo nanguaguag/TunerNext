@@ -64,10 +64,13 @@ tuner_flutter/
    - **切片 3.4: McLeod Pitch Method (MPM) 引擎 (Pure Dart)** (`VERIFIED`):
      - 代码: `lib/dsp/pitch/mcleod_pitch_method.dart`
      - 单测: `test/unit/mcleod_pitch_method_test.dart` (6 组测试全部通过，强二次谐波八度倍频规避验证)
+   - **切片 3.5: Two-Way Mismatch (TWM) 引擎 (Pure Dart)** (`VERIFIED`):
+     - 代码: `lib/dsp/pitch/two_way_mismatch.dart`
+     - 单测: `test/unit/two_way_mismatch_test.dart` (5 组测试全部通过，基频缺失重构与刚度系数 B 适配验证)
 3. **下一个允许执行的任务**:
-   - **切片 3.5: Two-Way Mismatch (TWM) 引擎 (Pure Dart)**
-   - 目标: 在 `lib/dsp/pitch/two_way_mismatch.dart` 实现 Maher & Beauchamp (1994) 双向谐波失配评估与琴弦非谐性刚度补偿 $B$，解决低音乐器粗弦基频缺失问题。
-   - 门禁: 编写 `test/unit/two_way_mismatch_test.dart`，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后提交 Git 检查点。
+   - **切片 3.6: 经典自相关、Jacobsen 插值与 Phase Vocoder (Pure Dart)**
+   - 目标: 在 `lib/dsp/pitch/classic_pitch_detector.dart` 与 `lib/dsp/pitch/accurate_spectrum_peak.dart` 实现经典自相关基频检测器、双层静音防护（RMS 与 15% 零延迟能量门限）、复数 3-bin Jacobsen 插值与帧间相位差分 Phase Vocoder。
+   - 门禁: 编写 `test/unit/classic_pitch_detector_test.dart` 与 `test/unit/accurate_spectrum_peak_test.dart`，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后提交 Git 检查点。
 
 ---
 

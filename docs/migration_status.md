@@ -61,6 +61,10 @@
    - 文件: `lib/dsp/pitch/mcleod_pitch_method.dart`
    - 实现归一化平方差函数 (NSDF)，首峰 0.85 阈值比率选择机制彻底根除弓弦起奏二次谐波翻倍跳跃，集成抛物线插值与 RMS 静音门限。
    - 测试: `test/unit/mcleod_pitch_method_test.dart` (6 组测试 100% 通过，小提琴强泛音场景与纯正弦波高精度锁定)。
+10. **Two-Way Mismatch (TWM) 引擎 (`TwoWayMismatchDetector`)**:
+   - 文件: `lib/dsp/pitch/two_way_mismatch.dart`
+   - 实现 Maher & Beauchamp (1994) 双向谐波失配算法与琴弦刚度非谐性色散补偿，攻克低音大提琴粗弦基频缺失 (BUG-05/ACOUSTIC-03) 虚拟音高锁定。
+   - 测试: `test/unit/two_way_mismatch_test.dart` (5 组测试 100% 通过，理想谐波、基频缺失虚拟音高与刚度系数 B 适配验证)。
 
 ---
 
@@ -80,9 +84,12 @@
 4. **切片 3.4: McLeod Pitch Method (MPM) 引擎** (`VERIFIED`):
    - 已移植 NSDF 与首峰 0.85 阈值比率算法，防范小提琴高把位八度倍频。
    - 测试: `test/unit/mcleod_pitch_method_test.dart` 6 组测试 100% 通过。
-5. **切片 3.5: Two-Way Mismatch (TWM) 引擎** (下一任务):
-   - 实现 Maher & Beauchamp 双向谐波失配与刚度非谐性补偿，解决缺失基频问题。
-   - 测试: 编写 `test/unit/two_way_mismatch_test.dart`。
+5. **切片 3.5: Two-Way Mismatch (TWM) 引擎** (`VERIFIED`):
+   - 已实现 Maher & Beauchamp 双向谐波失配与刚度非谐性补偿，解决缺失基频问题。
+   - 测试: `test/unit/two_way_mismatch_test.dart` 5 组测试 100% 通过。
+6. **切片 3.6: 经典自相关、Jacobsen 插值与 Phase Vocoder** (下一任务):
+   - 实现经典自相关检测器，集成双层静音门限 (`ACOUSTIC-01`) 与相位细化。
+   - 测试: 编写 `test/unit/classic_pitch_detector_test.dart`。
 6. **切片 3.6: 经典自相关、Jacobsen 插值与 Phase Vocoder**:
    - 实现经典自相关检测器，集成双层静音门限 (`ACOUSTIC-01`) 与相位细化。
    - 测试: 编写 `test/unit/classic_pitch_detector_test.dart`。

@@ -96,7 +96,7 @@
 | **DSP-08** | 复数 3-bin Jacobsen 插值 | `AccurateSpectrumPeakFrequency.kt`: 利用复频谱实部虚部插值突破 FFT 频率分辨率限制。 | 无 | 0% | DSP-01 | 无 | 未测试 | 移植 Jacobsen 公式，确保偏移量符号准确。 | 偏离 Bin 中心频率时准确纠偏。 | `NOT_STARTED` |
 | **DSP-09** | 帧间相位差分 Phase Vocoder | `AccurateSpectrumPeakFrequency.kt`: 利用两帧间相位旋转度与时间差超精确求解。 | 无 | 0% | DSP-01 | 无 | 未测试 | 实现对称相位展开与整周数折叠。 | 连续音频帧频率解析精度 $< 0.01\text{ Hz}$。 | `NOT_STARTED` |
 | **DSP-10** | McLeod Pitch Method (MPM) | `McLeodPitchMethod.kt`: 计算 NSDF，通过首峰阈值比（0.85）抑制八度倍频。 | `lib/dsp/pitch/mcleod_pitch_method.dart` | 100% | DSP-03, DSP-05 | `test/unit/mcleod_pitch_method_test.dart` | 6组测试全部通过 | 无 (已实现NSDF计算、首峰0.85阈值比率选择、抛物线插值与静音门限) | 纯音精度 $< 1.0\text{ Hz}$，小提琴高次谐波场景下彻底杜绝八度倍频误判。 | `VERIFIED` |
-| **DSP-11** | Two-Way Mismatch (TWM) | 预测谐波与测量谱峰双向失配误差度量，刚度系数 $B$ 非谐性补偿。 | 无 | 0% | DSP-01, DSP-05 | 无 | 未测试 | 实现 Maher & Beauchamp TWM 与旁瓣抑制。 | 缺失基频谐波信号正确锁定真实基频。 | `NOT_STARTED` |
+| **DSP-11** | Two-Way Mismatch (TWM) | 预测谐波与测量谱峰双向失配误差度量，刚度系数 $B$ 非谐性补偿。 | `lib/dsp/pitch/two_way_mismatch.dart` | 100% | DSP-01, DSP-05 | `test/unit/two_way_mismatch_test.dart` | 5组测试全部通过 | 无 (已实现双向谐波失配评估、琴弦非谐性刚度B补偿、二次细搜索插值与缺失基频重构) | 缺失基频谐波信号正确锁定真实虚拟基频（误差 $< 2.0\text{ Hz}$）。 | `VERIFIED` |
 | **DSP-12** | Probabilistic YIN (pYIN) | 差分函数、累积均值归一化差分（CMNDF）与隐马尔可夫 Viterbi 路径解码。 | 无 | 0% | 无 | 无 | 未测试 | 实现 pYIN 观测概率计算与状态平滑转移。 | 高噪声弱信号下提供最高跟踪置信度。 | `NOT_STARTED` |
 | **DSP-13** | ACOUSTIC-01 静音门限 | 双层静音防护：时域 RMS $< 10^{-4}$ + 自相关峰值 $< 0.15 \times R_{xx}(0)$。 | 无 | 0% | AUDIO-06, DSP-03 | 无 | 未测试 | 在管线头部与自相关判决处植入双重防护。 | 静音环境下绝不发生 G1-D3 乱跳。 | `NOT_STARTED` |
 | **DSP-14** | 三阶时域中值滤波 | `PitchTemporalFilter.kt`: 维护最近 3 帧输出，取中值消除孤立脉冲。 | 无 | 0% | 无 | 无 | 未测试 | 实现 `PitchMedianFilter` 循环队列。 | 单帧极值噪声被彻底剔除。 | `NOT_STARTED` |
