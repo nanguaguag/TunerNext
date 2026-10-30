@@ -1,7 +1,7 @@
 # 会话交接备忘录 (Session Handoff & Context Continuity)
 
 > **交接时间**: 2026-10-31  
-> **会话状态**: 【阶段 4 / 切片 4.1：对数音符与频率双向映射器 (Frequency-to-Note Converter)】已 100% 完成并验证，全量 91 项自动化测试通过，代码工作区已通过全部三道质量门禁。下一切片为【阶段 4 / 切片 4.2：律制体系架构与十二平均律 (12-EDO)】。
+> **会话状态**: 【阶段 4 / 切片 4.2：律制体系架构与十二平均律 (12-EDO)】已 100% 完成并验证，全量 106 项自动化测试全部通过，工作区纯净。下一切片为【阶段 4 / 切片 4.3：纯律与历史律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)】。
 
 ---
 
@@ -99,14 +99,25 @@ tuner_flutter/
 
 ---
 
-### 2. 下一步规划：阶段 4 律制体系架构与十二平均律 (12-EDO)
+- **切片 4.2: 律制体系架构与十二平均律 (12-EDO)** (`VERIFIED`):
+  - 文件: `lib/domain/temperaments/rational_number.dart`, `lib/domain/temperaments/fifth_modification.dart`, `lib/domain/temperaments/temperament_circle_of_fifths.dart`, `lib/domain/temperaments/temperament.dart`, `lib/domain/temperaments/equal_temperament.dart`
+  - 测试: `test/domain/equal_temperament_test.dart` (15 组测试全部通过)
+  - 核心突破:
+    1. 精确有理数模型 `RationalNumber`：欧几里得最大公约数约分化简、四则运算、幂运算与精确关系比较，杜绝浮点累积误差。
+    2. 微音差五度修正项 `FifthModification`：毕氏音差 (PC)、普通音差 (SC)、劈音 (S) 与古典声学恒等式（$PC = SC + S$）化简。
+    3. 五度相生圈模型 `TemperamentCircleOfFifths`：闭合 12 步五度圈，验证在每个五度收窄 -1/12 毕氏音差下与理想 12 平均律完全一致。
+    4. 抽象律制基类 `Temperament` 与 `EqualTemperament`：支持标准 12-EDO（每级严格 100 音分，纯八度比率严格 2.0 倍）及通用微分音等分音阶（如 19/24/31-EDO）。
 
-在下一任务中，推进【切片 4.2】：
+---
 
-- **切片 4.2: 律制体系架构与十二平均律 (12-EDO)**:
-  - 对应 Kotlin: `temperaments/Temperament.kt`, `temperaments/Temperament3.kt`
-  - 封装抽象律制基类 `Temperament` 与 `EqualTemperament`，验证全八度音级等比分布。
-  - 测试: `test/domain/equal_temperament_test.dart`。
+### 2. 下一步规划：阶段 4 纯律与历史古典律制 (Slice 4.3)
+
+在下一任务中，推进【切片 4.3】：
+
+- **切片 4.3: 纯律与历史古典律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)**:
+  - 对应 Kotlin: `temperaments/PredefinedTemperaments.kt`, `temperaments/TemperamentCircleOfFifths.kt`, `temperaments/TemperamentRationalNumbers.kt`
+  - 移植 19 种古典历史律制音分偏置表，实现基准主音（Root Note）任意切换与五度相生圈对应。
+  - 测试: 编写 `test/domain/historical_temperament_test.dart`。
 - **切片 4.3: 纯律与历史律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)**:
   - 移植 19 种古典历史律制音分偏置表，实现基准根音切换。
 - **切片 4.4: 延展调音曲线 (Stretch Tuning)**:
@@ -125,7 +136,7 @@ tuner_flutter/
 ```text
 你好！我们正在进行将开源 Android Kotlin 调音器（/Users/huzongyao/flutterProjects/Tuner，分支 feature/advanced-pitch-algorithms）渐进式重构为 Flutter 应用（/Users/huzongyao/flutterProjects/tuner_flutter，分支 feature/rollback）的项目。
 
-在上一会话中，我们已经顺利完成了【阶段 4 / 切片 4.1：对数音符与频率双向映射器 (Frequency-to-Note Converter)】的实现与验证，全量 91 项自动化测试 100% 通过，工作区纯净。
+在上一会话中，我们已经顺利完成了【阶段 4 / 切片 4.2：律制体系架构与十二平均律 (12-EDO)】的实现与验证，全量 106 项自动化测试 100% 通过，工作区纯净。
 
 请首先阅读以下关键文档建立上下文：
 1. /Users/huzongyao/flutterProjects/tuner_flutter/AGENTS.md
@@ -134,5 +145,5 @@ tuner_flutter/
 4. /Users/huzongyao/flutterProjects/tuner_flutter/docs/feature_matrix.md
 5. /Users/huzongyao/flutterProjects/tuner_flutter/docs/algorithm_specification.md
 
-在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 4 / 切片 4.2：律制体系架构与十二平均律 (12-EDO)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
+在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 4 / 切片 4.3：纯律与历史古典律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
 ```

@@ -14,7 +14,7 @@
 | **阶段 1** | 全面代码审计与迁移设计方案 | 已完成 | 审计白皮书完备 | 189 项 Kotlin 单测验证通过 | **VERIFIED** |
 | **阶段 2** | Flutter 独立工程脚手架与 M3 主题 | 已完成 | `e58c406` 提交 | M3 主题与 Note 模型单测通过 | **VERIFIED** |
 | **阶段 3** | 纯 Dart DSP 算法引擎与基准测试 | 已完成 | `7a01bea` 提交 | 全量 78 项测试通过 | **VERIFIED** |
-| **阶段 4** | 乐理模型、19种律制与 Scala IO | 进行中 | 切片 4.1 已完成 | 91 项单测全部通过 | **IN_PROGRESS** |
+| **阶段 4** | 乐理模型、19种律制与 Scala IO | 进行中 | 切片 4.2 已完成 | 106 项单测全部通过 | **IN_PROGRESS** |
 | **阶段 5** | 平台音频流采集与 Isolate 并发管道 | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 6** | 乐器调音主界面 (琴弦/表盘/历史图) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 7** | 科学调音界面 (示波器/FFT谱/波形) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
@@ -121,13 +121,18 @@
    - 实现高精度对数音符映射公式 $f = f_{A4} \cdot 2^{(n-69)/12}$，支持 A4 基准频率可调、音分偏差计算与调准状态评估 (`TuningState`)。
    - 纯 Dart 移植 Kotlin `MusicalScaleFrequencies`，支持全音域二分查找、连续对数插值与几何外推；并在目标音符吸附中集成 0.6 迟滞门控 (Hysteresis)，彻底消除临界半音抖动。
    - 测试: `test/domain/pitch_frequency_converter_test.dart` 13 组测试全部通过。
-9. **阶段 4 / 切片 4.2: 律制体系架构与十二平均律 (12-EDO)** (下一任务):
-   - 封装抽象律制基类 `Temperament` 与 `EqualTemperament`，验证全八度音级等比分布。
-   - 测试: 编写 `test/domain/equal_temperament_test.dart`。
+9. **阶段 4 / 切片 4.2: 律制体系架构与十二平均律 (12-EDO)** (`VERIFIED`):
+   - 文件: `lib/domain/temperaments/rational_number.dart`, `lib/domain/temperaments/fifth_modification.dart`, `lib/domain/temperaments/temperament_circle_of_fifths.dart`, `lib/domain/temperaments/temperament.dart`, `lib/domain/temperaments/equal_temperament.dart`
+   - 建立高精度有理数分数运算体系 (`RationalNumber`)、微音差修正项 (`FifthModification`) 与五度相生圈模型。
+   - 封装抽象律制基类 `Temperament`，实现十二平均律 (`EqualTemperament.edo12`) 与通用任意等分微分音音阶 ($N$-EDO，如 19/24/31-EDO)。
+   - 测试: `test/domain/equal_temperament_test.dart` 15 组测试全部通过。
+10. **阶段 4 / 切片 4.3: 纯律与历史律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)** (下一任务):
+   - 移植 19 种古典欧洲历史律制（纯律、毕达哥拉斯律、1/4逗音中庸律、Werckmeister III、Kirnberger III 等），实现基准根音任意切换。
+   - 测试: 编写 `test/domain/historical_temperament_test.dart`。
 
 ---
 
 ## 四、当前阻塞条件与后续准入
 
-- **当前任务**: 阶段 4 / 切片 4.1 开发与验证已完成，工作区通过全部三道质量门禁。
-- **下一步准入要求**: 等待用户代码审查确认后，方可启动【切片 4.2：律制体系架构与十二平均律 (12-EDO)】。
+- **当前任务**: 阶段 4 / 切片 4.2 开发与验证已完成，工作区通过全部三道质量门禁。
+- **下一步准入要求**: 等待用户代码审查确认后，方可启动【切片 4.3：纯律与历史律制】。
