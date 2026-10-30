@@ -67,10 +67,13 @@ tuner_flutter/
    - **切片 3.5: Two-Way Mismatch (TWM) 引擎 (Pure Dart)** (`VERIFIED`):
      - 代码: `lib/dsp/pitch/two_way_mismatch.dart`
      - 单测: `test/unit/two_way_mismatch_test.dart` (5 组测试全部通过，基频缺失重构与刚度系数 B 适配验证)
+   - **切片 3.6: 经典自相关、Jacobsen 插值与 Phase Vocoder (Pure Dart)** (`VERIFIED`):
+     - 代码: `lib/dsp/fft/frequency_spectrum.dart`, `lib/dsp/pitch/classic_pitch_detector.dart`, `lib/dsp/pitch/accurate_spectrum_peak.dart`
+     - 单测: `test/unit/classic_pitch_detector_test.dart`, `test/unit/accurate_spectrum_peak_test.dart` (12 组测试全部通过，对齐 Kotlin 基准向量与跨帧扫频验证)
 3. **下一个允许执行的任务**:
-   - **切片 3.6: 经典自相关、Jacobsen 插值与 Phase Vocoder (Pure Dart)**
-   - 目标: 在 `lib/dsp/pitch/classic_pitch_detector.dart` 与 `lib/dsp/pitch/accurate_spectrum_peak.dart` 实现经典自相关基频检测器、双层静音防护（RMS 与 15% 零延迟能量门限）、复数 3-bin Jacobsen 插值与帧间相位差分 Phase Vocoder。
-   - 门禁: 编写 `test/unit/classic_pitch_detector_test.dart` 与 `test/unit/accurate_spectrum_peak_test.dart`，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后提交 Git 检查点。
+   - **切片 3.7: 时域滤波、平滑器与调音管线门面 (Facade)**
+   - 目标: 整合 `PitchMedianFilter`, `OctaveJumpGate`, `OutlierRemovingSmoother`，构建并测试统一多引擎门面 `TunerDspPipeline`。
+   - 门禁: 编写 `test/unit/pitch_detectors_benchmark_test.dart`，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后提交 Git 检查点。
 
 ---
 

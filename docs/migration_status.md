@@ -65,6 +65,17 @@
    - 文件: `lib/dsp/pitch/two_way_mismatch.dart`
    - 实现 Maher & Beauchamp (1994) 双向谐波失配算法与琴弦刚度非谐性色散补偿，攻克低音大提琴粗弦基频缺失 (BUG-05/ACOUSTIC-03) 虚拟音高锁定。
    - 测试: `test/unit/two_way_mismatch_test.dart` (5 组测试 100% 通过，理想谐波、基频缺失虚拟音高与刚度系数 B 适配验证)。
+11. **频谱数据结构 (`FrequencySpectrum`)**:
+   - 文件: `lib/dsp/fft/frequency_spectrum.dart`
+   - 承载复数傅里叶谱、平方幅度谱、物理频率网格与归一化绘图缓冲。
+12. **经典自相关音高检测 (`ClassicPitchDetector`, `findCorrelationBasedFrequency`)**:
+   - 文件: `lib/dsp/pitch/classic_pitch_detector.dart`
+   - 包含首个局部极小值绕行、全局极值搜索、次谐波 division 多重惩罚及 ACOUSTIC-01 双层静音门限防护。
+   - 测试: `test/unit/classic_pitch_detector_test.dart` (8 组测试 100% 通过，完全对齐 Kotlin 基准)。
+13. **Jacobsen 3-bin 插值与 Phase Vocoder 相位修正 (`AccurateSpectrumPeakFrequency`)**:
+   - 文件: `lib/dsp/pitch/accurate_spectrum_peak.dart`
+   - 实现 Jacobsen 复数 3-bin 二次插值与跨帧相位展开折叠计算，扫频相对误差严格 $< 1.0\%$。
+   - 测试: `test/unit/accurate_spectrum_peak_test.dart` (4 组测试 100% 通过)。
 
 ---
 
@@ -87,13 +98,10 @@
 5. **切片 3.5: Two-Way Mismatch (TWM) 引擎** (`VERIFIED`):
    - 已实现 Maher & Beauchamp 双向谐波失配与刚度非谐性补偿，解决缺失基频问题。
    - 测试: `test/unit/two_way_mismatch_test.dart` 5 组测试 100% 通过。
-6. **切片 3.6: 经典自相关、Jacobsen 插值与 Phase Vocoder** (下一任务):
-   - 实现经典自相关检测器，集成双层静音门限 (`ACOUSTIC-01`) 与相位细化。
-   - 测试: 编写 `test/unit/classic_pitch_detector_test.dart`。
-6. **切片 3.6: 经典自相关、Jacobsen 插值与 Phase Vocoder**:
-   - 实现经典自相关检测器，集成双层静音门限 (`ACOUSTIC-01`) 与相位细化。
-   - 测试: 编写 `test/unit/classic_pitch_detector_test.dart`。
-7. **切片 3.7: 时域滤波、平滑器与调音管线门面 (Facade)**:
+6. **切片 3.6: 经典自相关、Jacobsen 插值与 Phase Vocoder** (`VERIFIED`):
+   - 已实现经典自相关检测器、次谐波惩罚多重遍历、双层静音门限 (`ACOUSTIC-01`)、Jacobsen 3-bin 插值与 Phase Vocoder 跨帧相位折叠。
+   - 测试: `test/unit/classic_pitch_detector_test.dart` 与 `test/unit/accurate_spectrum_peak_test.dart` 12 组测试 100% 通过。
+7. **切片 3.7: 时域滤波、平滑器与调音管线门面 (Facade)** (下一任务):
    - 整合 `PitchMedianFilter`, `OctaveJumpGate`, `OutlierRemovingSmoother` 到 `TunerDspPipeline`。
    - 测试: 编写 `test/unit/pitch_detectors_benchmark_test.dart` 全场景声学基准套件。
 
