@@ -58,10 +58,13 @@ tuner_flutter/
    - **切片 3.2: 窗函数与自相关计算器 (Pure Dart)** (`VERIFIED`):
      - 代码: `lib/dsp/windowing/windowing.dart`, `lib/dsp/correlation/correlation.dart`, `lib/dsp/correlation/auto_correlation.dart`
      - 单测: `test/unit/windowing_test.dart`, `test/unit/correlation_test.dart` (11 组测试全部通过，与 Kotlin `CorrelationTest.kt` 基准向量对齐)
+   - **切片 3.3: 抛物线拟合与声学计权曲线 (Pure Dart)** (`VERIFIED`):
+     - 代码: `lib/dsp/pitch/polynomial_fit.dart`, `lib/dsp/filters/acoustic_weighting.dart`
+     - 单测: `test/unit/polynomial_fit_test.dart`, `test/unit/acoustic_weighting_test.dart` (10 组测试全部通过，对齐 Kotlin 基准与 IEC 61672)
 3. **下一个允许执行的任务**:
-   - **切片 3.3: 抛物线拟合与声学计权曲线 (Pure Dart)**
-   - 目标: 在 `lib/dsp/pitch/polynomial_fit.dart` 实现三点抛物线极值精修算法（带零分母保护与边界截断），在 `lib/dsp/filters/acoustic_weighting.dart` 实现 IEC 61672-1 A/C 计权滤波。
-   - 门禁: 编写 `test/unit/polynomial_fit_test.dart` 与 `test/unit/acoustic_weighting_test.dart`，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后提交 Git 检查点。
+   - **切片 3.4: McLeod Pitch Method (MPM) 引擎 (Pure Dart)**
+   - 目标: 在 `lib/dsp/pitch/mcleod_pitch_method.dart` 实现归一化平方差函数 (NSDF) 与首峰 0.85 阈值比率算法，防范小提琴高把位八度倍频。
+   - 门禁: 编写 `test/unit/mcleod_pitch_method_test.dart`，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后提交 Git 检查点。
 
 ---
 

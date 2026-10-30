@@ -49,6 +49,14 @@
    - 文件: `lib/dsp/correlation/correlation.dart`, `lib/dsp/correlation/auto_correlation.dart`
    - 维纳-辛钦频域自相关算法，零填充 $2N$ 规避圆周反射，实现位反转直充与频域谱直接导出；提供自相关序列归一化与零点映射。
    - 测试: `test/unit/correlation_test.dart` (6 组测试 100% 通过，与 Kotlin `CorrelationTest.kt` 基准向量误差 $< 10^{-4}$)。
+7. **三点抛物线极值精修 (`MaximumOfPolynomialFit`)**:
+   - 文件: `lib/dsp/pitch/polynomial_fit.dart`
+   - 实现三点连续二次极值插值，具备零分母退化（共线/平坦）防护与数组边界安全截断。
+   - 测试: `test/unit/polynomial_fit_test.dart` (5 组测试 100% 通过)。
+8. **IEC 61672-1 声学计权滤波 (`AcousticWeighting`)**:
+   - 文件: `lib/dsp/filters/acoustic_weighting.dart`
+   - 实现 A 计权（人耳等响度模拟）与 C 计权（高声压/宽带模拟），严格执行 1000Hz 归一化与 50Hz 工频交流电衰减（$> 30\text{ dB}$）。
+   - 测试: `test/unit/acoustic_weighting_test.dart` (5 组测试 100% 通过)。
 
 ---
 
@@ -62,9 +70,12 @@
 2. **切片 3.2: 窗函数与自相关计算器** (`VERIFIED`):
    - 已实现 Tophat / Hanning / Hamming 及其数值积分，实现零填充频域互相关计算器。
    - 测试: `test/unit/windowing_test.dart` 与 `test/unit/correlation_test.dart` 11 组测试 100% 通过，与 Kotlin `CorrelationTest.kt` 基准向量对齐。
-3. **切片 3.3: 抛物线拟合与声学计权曲线** (下一任务):
-   - 实现三点二次极值拟合（带零分母与边界安全拦截），实现 IEC 61672-1 A/C 计权。
-   - 测试: 编写 `test/unit/polynomial_fit_test.dart`, `test/unit/acoustic_weighting_test.dart`。
+3. **切片 3.3: 抛物线拟合与声学计权曲线** (`VERIFIED`):
+   - 已实现三点二次极值拟合（带零分母与边界安全拦截），实现 IEC 61672-1 A/C 计权。
+   - 测试: `test/unit/polynomial_fit_test.dart` 与 `test/unit/acoustic_weighting_test.dart` 10 组测试 100% 通过。
+4. **切片 3.4: McLeod Pitch Method (MPM) 引擎** (下一任务):
+   - 移植 NSDF 与首峰 0.85 阈值比率算法，防范小提琴高把位八度倍频。
+   - 测试: 编写 `test/unit/mcleod_pitch_method_test.dart`。
 4. **切片 3.4: McLeod Pitch Method (MPM) 引擎**:
    - 移植 NSDF 与首峰 0.85 阈值比率算法，防范小提琴高把位八度倍频。
    - 测试: 编写 `test/unit/mcleod_pitch_method_test.dart`。
