@@ -51,10 +51,14 @@ tuner_flutter/
 
 1. **严禁一次性大跃进开发**:
    - 必须以 `feature_matrix.md` 与 `migration_status.md` 为唯一导航，每次仅推进一个可独立验证的功能切片。
-2. **下一个允许执行的任务**:
-   - **切片 3.1: 基础数学与 FFT/IFFT 引擎 (Pure Dart)**
-   - 目标: 在 `lib/dsp/fft/fft.dart` 编写纯 Dart 实数与复数 Radix-2 Cooley-Tukey FFT，消除 `FORK-NEW-02` 原地自覆盖 Bug。
-   - 门禁: 编写 `test/unit/fft_test.dart`，使用 NumPy 向量与正弦波高精度比对，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后方可提交 Git 检查点。
+2. **已完成切片**:
+   - **切片 3.1: 基础数学与 FFT/IFFT 引擎 (Pure Dart)** (`VERIFIED`):
+     - 代码: `lib/dsp/fft/fft.dart`
+     - 单测: `test/unit/fft_test.dart` (14 组测试全部通过，消除 `FORK-NEW-02` 原地覆盖 Bug)
+3. **下一个允许执行的任务**:
+   - **切片 3.2: 窗函数与自相关计算器 (Pure Dart)**
+   - 目标: 在 `lib/dsp/windowing/` 与 `lib/dsp/correlation/` 实现窗函数（Tophat, Hanning, Hamming）及能量积分补偿，实现零填充频域快速互相关计算器。
+   - 门禁: 编写 `test/unit/correlation_test.dart`，与 Kotlin `CorrelationTest.kt` 基准向量对齐，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后提交 Git 检查点。
 
 ---
 

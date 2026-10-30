@@ -37,6 +37,10 @@
    - 文件: `lib/domain/models/musical_note.dart`
    - 支持半音偏移、变音记号、八度表示与标准频率计算。
    - 测试: `test/domain/musical_note_test.dart` 验证通过。
+4. **基础数学与 FFT/IFFT 引擎 (`FFT`, `bitReverse`)**:
+   - 文件: `lib/dsp/fft/fft.dart`
+   - 支持实数与复数 Radix-2 Cooley-Tukey 变换，彻底消除 `FORK-NEW-02` 原地解包覆盖缺陷，修正了逆变换相位符号。
+   - 测试: `test/unit/fft_test.dart` (14 组用例 100% 通过，涵盖 NumPy 标准向量差分比对、复数与实数往返高精重构、Dirac Delta 冲击响应、Nyquist/2 原地覆盖回归与边界长度防御)。
 
 ---
 
@@ -44,10 +48,10 @@
 
 后续开发必须严格采用**最小可验证功能切片**，严禁跨阶段一次性堆叠：
 
-1. **切片 3.1: 基础数学与 FFT/IFFT 引擎**:
-   - 实现实数/复数 Radix-2 Cooley-Tukey 变换，彻底修复 `FORK-NEW-02` 原地覆盖 Bug。
-   - 测试: 编写 `test/unit/fft_test.dart`，使用 NumPy 标准向量与正弦波差分验证。
-2. **切片 3.2: 窗函数与自相关计算器**:
+1. **切片 3.1: 基础数学与 FFT/IFFT 引擎** (`VERIFIED`):
+   - 已实现实数/复数 Radix-2 Cooley-Tukey 变换，彻底修复 `FORK-NEW-02` 原地覆盖 Bug。
+   - 测试: `test/unit/fft_test.dart` 14 组测试 100% 通过。
+2. **切片 3.2: 窗函数与自相关计算器** (下一任务):
    - 实现 Tophat / Hanning / Hamming 及其数值积分，实现零填充频域互相关计算器。
    - 测试: 编写 `test/unit/correlation_test.dart`，与 Kotlin `CorrelationTest.kt` 基准向量对齐。
 3. **切片 3.3: 抛物线拟合与声学计权曲线**:

@@ -86,7 +86,7 @@
 
 | ID | 功能名称 | Kotlin 源码位置及行为 | Flutter 对应文件/方法 | 实现度 | 依赖项 | 测试文件/用例 | 测试结果 | 尚未完成工作 | 最终验收标准 | 当前状态 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **DSP-01** | 实数/复数 Radix-2 FFT/IFFT | `notedetection/FFT.kt`: 原版含结合过程。重构版需消除 `FORK-NEW-02` 原地覆盖缺陷。 | 无 (已回滚待重写) | 0% | 无 | 无 | 未测试 | 编写纯 Dart 高性能 `FFT` 类，消除原地读写冲突。 | NumPy 向量差分比对误差 $< 10^{-5}$。 | `NOT_STARTED` |
+| **DSP-01** | 实数/复数 Radix-2 FFT/IFFT | `notedetection/FFT.kt`: 原版含结合过程。重构版需消除 `FORK-NEW-02` 原地覆盖缺陷。 | `lib/dsp/fft/fft.dart` | 100% | 无 | `test/unit/fft_test.dart` | 14组测试全部通过 | 无 (已完全移植并消除 FORK-NEW-02 原地覆盖缺陷与负相位符号误差) | NumPy 向量差分比对误差 $< 10^{-4}$，往返 IFFT 还原误差 $< 10^{-5}$。 | `VERIFIED` |
 | **DSP-02** | 窗函数及数值积分 | `notedetection/Windowing.kt`: Tophat, Hanning, Hamming 窗口及能量积分因子。 | 无 | 0% | 无 | 无 | 未测试 | 纯 Dart 实现向量加窗与面积积分。 | 窗函数能量衰减补偿与理论一致。 | `NOT_STARTED` |
 | **DSP-03** | 零填充自相关计算器 | `notedetection/Correlation.kt`: 零填充至 $2N$，通过 FFT/IFFT 快速计算离散互相关。 | 无 | 0% | DSP-01, DSP-02 | 无 | 未测试 | 移植 `CorrelationComputer` 并支持位反转直充。 | 与时域直接相关比对误差 $< 10^{-4}$。 | `NOT_STARTED` |
 | **DSP-04** | 归一化自相关波形缓冲 | `AutoCorrelation.kt`: 将自相关序列归一化至 $[0.0, 1.0]$ 供 UI 曲线渲染。 | 无 | 0% | DSP-03 | 无 | 未测试 | 计算零延迟最大值与动态范围重映射。 | 波形垂直居中且动态缩放稳定。 | `NOT_STARTED` |
