@@ -99,9 +99,9 @@
 | **DSP-11** | Two-Way Mismatch (TWM) | 预测谐波与测量谱峰双向失配误差度量，刚度系数 $B$ 非谐性补偿。 | `lib/dsp/pitch/two_way_mismatch.dart` | 100% | DSP-01, DSP-05 | `test/unit/two_way_mismatch_test.dart` | 5组测试全部通过 | 无 (已实现双向谐波失配评估、琴弦非谐性刚度B补偿、二次细搜索插值与缺失基频重构) | 缺失基频谐波信号正确锁定真实虚拟基频（误差 $< 2.0\text{ Hz}$）。 | `VERIFIED` |
 | **DSP-12** | Probabilistic YIN (pYIN) | 差分函数、累积均值归一化差分（CMNDF）与隐马尔可夫 Viterbi 路径解码。 | 无 | 0% | 无 | 无 | 未测试 | 实现 pYIN 观测概率计算与状态平滑转移。 | 高噪声弱信号下提供最高跟踪置信度。 | `NOT_STARTED` |
 | **DSP-13** | ACOUSTIC-01 静音门限 | 双层静音防护：时域 RMS $< 10^{-4}$ + 自相关峰值 $< 0.15 \times R_{xx}(0)$。 | `lib/dsp/pitch/classic_pitch_detector.dart`, `mcleod_pitch_method.dart` | 100% | AUDIO-06, DSP-03 | `test/unit/classic_pitch_detector_test.dart` | 测试通过 | 无 (已在自相关判决核心函数与检测引擎前端双层植入) | 静音与工频底噪环境下严格判定静音，彻底杜绝音符乱跳。 | `VERIFIED` |
-| **DSP-14** | 三阶时域中值滤波 | `PitchTemporalFilter.kt`: 维护最近 3 帧输出，取中值消除孤立脉冲。 | 无 | 0% | 无 | 无 | 未测试 | 实现 `PitchMedianFilter` 循环队列。 | 单帧极值噪声被彻底剔除。 | `NOT_STARTED` |
-| **DSP-15** | 八度跳变门控 (Jump Gate) | `PitchTemporalFilter.kt`: 识别 8% 八度跳跃并要求持续 2 帧才确认切换。 | 无 | 0% | 无 | 无 | 未测试 | 实现 `OctaveJumpGate` 折叠状态机。 | 瞬态破音跳度被平滑吸附。 | `NOT_STARTED` |
-| **DSP-16** | 离群点剔除平滑器 | `OutlierRemovingSmoother.kt`: 多缓冲区循环平均，自动剔除偏离过大的噪点。 | 无 | 0% | 无 | 无 | 未测试 | 纯 Dart 移植多环形平滑队列。 | 调音指示平稳收敛且不牺牲瞬态响应。 | `NOT_STARTED` |
+| **DSP-14** | 三阶时域中值滤波 | `PitchTemporalFilter.kt`: 维护最近 3 帧输出，取中值消除孤立脉冲。 | `lib/dsp/filters/pitch_temporal_filter.dart` | 100% | 无 | `test/unit/pitch_temporal_filter_test.dart` | 8组测试全部通过 | 无 (已实现3-tap滑动中值滤波，静音自动重置与平滑音符过渡) | 单帧极值突刺被彻底滤除，音符切换延迟仅 1 帧。 | `VERIFIED` |
+| **DSP-15** | 八度跳变门控 (Jump Gate) | `PitchTemporalFilter.kt`: 识别 8% 八度跳跃并要求持续 2 帧才确认切换。 | `lib/dsp/filters/pitch_temporal_filter.dart` | 100% | 无 | `test/unit/pitch_temporal_filter_test.dart` | 8组测试全部通过 | 无 (已实现2x~4x高次谐波与1/2~1/4分频折叠及持续多帧确认机制) | 弓弦乐器瞬态摩擦破音跳度被平滑折回基音，持续意图跳度准确响应。 | `VERIFIED` |
+| **DSP-16** | 离群点剔除平滑器 | `OutlierRemovingSmoother.kt`: 多缓冲区循环平均，自动剔除偏离过大的噪点。 | `lib/dsp/filters/outlier_removing_smoother.dart` | 100% | 无 | `test/unit/outlier_removing_smoother_test.dart` | 3组测试全部通过 | 无 (已实现多缓冲在线平滑、动态容差校验与连续异常清空重置) | 对齐 Kotlin 基准用例，平滑指示稳定收敛且保留快速响应。 | `VERIFIED` |
 | **DSP-17** | 琴弦非谐性系数估算 | `Inharmonicity.kt`: 分析高次谐波偏离理想整数倍的曲率，提取刚度系数 $B$。 | 无 | 0% | DSP-05 | 无 | 未测试 | 移植非谐性最小二乘拟合器。 | 正确输出钢琴与低音提琴真实 $B$ 值。 | `NOT_STARTED` |
 
 ---

@@ -76,6 +76,18 @@
    - 文件: `lib/dsp/pitch/accurate_spectrum_peak.dart`
    - 实现 Jacobsen 复数 3-bin 二次插值与跨帧相位展开折叠计算，扫频相对误差严格 $< 1.0\%$。
    - 测试: `test/unit/accurate_spectrum_peak_test.dart` (4 组测试 100% 通过)。
+14. **三阶中值滤波与八度跳变门控 (`PitchMedianFilter`, `OctaveJumpGate`)**:
+   - 文件: `lib/dsp/filters/pitch_temporal_filter.dart`
+   - 消除瞬态单帧突刺噪声，抑制起奏摩擦导致的 2x~4x 及 1/2~1/4 泛音跳跃。
+   - 测试: `test/unit/pitch_temporal_filter_test.dart` (8 组测试 100% 通过)。
+15. **多缓冲离群点剔除平滑器 (`OutlierRemovingSmoother`)**:
+   - 文件: `lib/dsp/filters/outlier_removing_smoother.dart`
+   - 环形缓冲、动态容差校验与多候选队列并发平滑。
+   - 测试: `test/unit/outlier_removing_smoother_test.dart` (3 组测试 100% 通过)。
+16. **统一调音管线门面 (`TunerDspPipeline`)**:
+   - 文件: `lib/dsp/pipeline/tuner_dsp_pipeline.dart`
+   - 串联静音门控、声学计权、多引擎调度 (MPM/TWM/Classic)、八度门控、中值滤波与平滑输出。
+   - 测试: `test/unit/tuner_dsp_pipeline_test.dart` (5 组测试 100% 通过)。
 
 ---
 
@@ -101,9 +113,12 @@
 6. **切片 3.6: 经典自相关、Jacobsen 插值与 Phase Vocoder** (`VERIFIED`):
    - 已实现经典自相关检测器、次谐波惩罚多重遍历、双层静音门限 (`ACOUSTIC-01`)、Jacobsen 3-bin 插值与 Phase Vocoder 跨帧相位折叠。
    - 测试: `test/unit/classic_pitch_detector_test.dart` 与 `test/unit/accurate_spectrum_peak_test.dart` 12 组测试 100% 通过。
-7. **切片 3.7: 时域滤波、平滑器与调音管线门面 (Facade)** (下一任务):
-   - 整合 `PitchMedianFilter`, `OctaveJumpGate`, `OutlierRemovingSmoother` 到 `TunerDspPipeline`。
-   - 测试: 编写 `test/unit/pitch_detectors_benchmark_test.dart` 全场景声学基准套件。
+7. **切片 3.7: 时域滤波、平滑器与调音管线门面 (Facade)** (`VERIFIED`):
+   - 已整合 `PitchMedianFilter`, `OctaveJumpGate`, `OutlierRemovingSmoother` 到 `TunerDspPipeline`，支持运行时算法与计权切换、双重静音与全链条平滑。
+   - 测试: `test/unit/pitch_temporal_filter_test.dart`, `test/unit/outlier_removing_smoother_test.dart`, `test/unit/tuner_dsp_pipeline_test.dart` 16 组测试 100% 通过。
+8. **阶段 4 / 切片 4.1: 乐理音符模型与对数音符映射器 (Musical Theory)** (下一任务):
+   - 完善乐理模型体系：标准频率-音高对数映射公式 $f = f_{A4} \cdot 2^{(n-69)/12}$、音分偏差计算、最近音符吸附与平均律 (12-EDO)。
+   - 测试: 编写 `test/domain/pitch_frequency_converter_test.dart`。
 
 ---
 

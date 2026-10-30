@@ -70,10 +70,13 @@ tuner_flutter/
    - **切片 3.6: 经典自相关、Jacobsen 插值与 Phase Vocoder (Pure Dart)** (`VERIFIED`):
      - 代码: `lib/dsp/fft/frequency_spectrum.dart`, `lib/dsp/pitch/classic_pitch_detector.dart`, `lib/dsp/pitch/accurate_spectrum_peak.dart`
      - 单测: `test/unit/classic_pitch_detector_test.dart`, `test/unit/accurate_spectrum_peak_test.dart` (12 组测试全部通过，对齐 Kotlin 基准向量与跨帧扫频验证)
+   - **切片 3.7: 时域滤波、平滑器与调音管线门面 (Facade) (Pure Dart)** (`VERIFIED`):
+     - 代码: `lib/dsp/filters/pitch_temporal_filter.dart`, `lib/dsp/filters/outlier_removing_smoother.dart`, `lib/dsp/pipeline/tuner_dsp_pipeline.dart`
+     - 单测: `test/unit/pitch_temporal_filter_test.dart`, `test/unit/outlier_removing_smoother_test.dart`, `test/unit/tuner_dsp_pipeline_test.dart` (16 组测试全部通过，覆盖中值滤波、八度门控、多缓冲平滑与多引擎门面)
 3. **下一个允许执行的任务**:
-   - **切片 3.7: 时域滤波、平滑器与调音管线门面 (Facade)**
-   - 目标: 整合 `PitchMedianFilter`, `OctaveJumpGate`, `OutlierRemovingSmoother`，构建并测试统一多引擎门面 `TunerDspPipeline`。
-   - 门禁: 编写 `test/unit/pitch_detectors_benchmark_test.dart`，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后提交 Git 检查点。
+   - **阶段 4 / 切片 4.1: 乐理音符模型与对数音符映射器 (Musical Theory)**
+   - 目标: 完善乐理模型体系：标准频率-音高对数映射公式 $f = f_{A4} \cdot 2^{(n-69)/12}$、音分偏差计算、最近音符吸附与平均律 (12-EDO)。
+   - 门禁: 编写 `test/domain/pitch_frequency_converter_test.dart`，`dart format`、`flutter analyze` 与 `flutter test` 100% 通过后提交 Git 检查点。
 
 ---
 
