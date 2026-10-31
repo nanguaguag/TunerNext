@@ -1,7 +1,7 @@
 # 迁移基线与阶段开发状态 (Migration Status)
 
 > **更新时间**: 2026-10-31  
-> **当前可信 Git 基线**: `fe85053` (分支: `feature/rollback`)  
+> **当前可信 Git 基线**: `c6e1eaa` (分支: `feature/rollback`)  
 > **归档参考分支**: `main` (包含历史探索代码，供查阅设计教训，不可直接盲信)  
 > **工作区状态**: 纯净无改动 (`working tree clean`)，`flutter analyze` 零告警，自动化测试 100% 通过 (227/227 项)。
 

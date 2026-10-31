@@ -1,7 +1,8 @@
 # 会话交接备忘录 (Session Handoff & Context Continuity)
 
 > **交接时间**: 2026-10-31  
-> **会话状态**: 【阶段 5：平台音频流采集与 Isolate 并发管道 (Slices 5.1 ~ 5.4)】已 100% 全部完成并验证，全量 227 项自动化测试全部通过，工作区纯净。阶段 5 正式圆满收官！下一任务为启动【阶段 6 / 切片 6.1：琴弦侧边栏与弦宽厚度组件 (Strings.kt)】。
+> **会话状态**: 【阶段 1~5】已 100% 全部完成并验证，全量 227 项自动化测试全部通过，工作区纯净。  
+> **下一目标**: 启动【阶段 6：乐器调音主界面 (Instrument Tuner)】之【切片 6.1：琴弦侧边栏与弦宽厚度组件 (Strings.kt)】。
 
 ---
 
@@ -15,8 +16,8 @@
 2. **Flutter 重构工程 (重构目标仓库)**:
    - 路径: `/Users/huzongyao/flutterProjects/tuner_flutter`
    - 当前分支: `feature/rollback`
-   - 当前最新检出 Commit: `2b2a6cc` ("feat(audio): implement AudioRingBuffer circular queue and sliding window extractor (slice 5.2)")
-   - 工作区状态: 静态分析 `flutter analyze` 零告警 (0 issues)，自动化测试 **215 项用例 100% 全部通过**。
+   - 当前最新检出 Commit: `c6e1eaa` ("feat(audio): implement MicrophoneAudioSource with hardware capture and lifecycle handling (slice 5.4)")
+   - 工作区状态: 静态分析 `flutter analyze` 零告警 (0 issues)，格式化规范 `dart format` 合规，自动化测试 **227 项用例 100% 全部通过**。
    - 历史探索分支: `main`（保留历史记录供查阅，禁止盲目复用）。
 
 ---
@@ -29,25 +30,31 @@
 tuner_flutter/
 ├── AGENTS.md                          # 多 Agent 协同与铁律规范 (纯单切片推进、三道门禁、零污染)
 ├── docs/
-│   ├── audit_and_migration_plan.md    # 基础审计与完整迁移规划白皮书
-│   ├── feature_matrix.md              # 85 项双端功能全量追踪矩阵 (DSP 全切片已标记 VERIFIED)
+│   ├── audit_and_migration_plan.md    # 基础审计与完整迁移规划白皮书 (85 项功能全景路线图)
+│   ├── feature_matrix.md              # 85 项双端功能全量追踪矩阵 (34 项已 VERIFIED, 9 项已部分实现/单测)
 │   ├── architecture.md                # 现代化 Clean Architecture 架构设计
 │   ├── algorithm_specification.md     # 核心 DSP 算法数学规格书 (FFT, MPM, TWM, Jacobsen, PV 等)
 │   ├── known_issues.md                # 原版与历史尝试 Bug 追踪清单 (FORK-NEW-02, ACOUSTIC-01~03 等)
 │   ├── migration_status.md            # 当前迁移进度基线与下一任务定义
-│   ├── decisions.md                   # 架构与技术决策记录 (ADR)
+│   ├── decisions.md                   # 架构与技术决策记录 (ADR-01 ~ ADR-12)
 │   └── session_handoff.md             # 本会话交接备忘录
 ├── test/
-│   ├── unit/                          # 单元测试目录 (纯数学、DSP、滤波器与管线单测)
-│   ├── domain/                        # 乐理测试 (音符、律制、延展调音、Scala、乐器单测)
-│   ├── widget/                        # 组件与视图渲染测试 (M3 主题及烟雾测试)
+│   ├── unit/                          # 单元测试目录 (纯数学、DSP、滤波器与音频流单测: 147 项)
+│   ├── domain/                        # 乐理测试 (音符、律制、延展调音、Scala、乐器单测: 88 项)
+│   ├── widget/                        # 组件与视图渲染测试 (M3 主题脚手架烟雾测试: 1 项)
 │   ├── integration/                   # 端到端测试
 │   └── regression/                    # 回归测试
 └── lib/
     ├── core/                          # 基础常量、主题扩展、语义颜色
-    ├── audio/                         # 音频接口层 (AudioSource)
+    ├── audio/                         # 音频接口层、环形缓冲区、Isolate 后台并发与硬件采集 (全量完成)
+    │   ├── audio_source_interface.dart
+    │   ├── mock_audio_source.dart
+    │   ├── ring_buffer.dart / audio_ring_buffer.dart
+    │   ├── audio_messages.dart
+    │   ├── audio_processing_isolate.dart
+    │   └── microphone_audio_source.dart
     ├── domain/                        # 纯 Dart 乐理模型、律制与调音实体 (全量完成)
-    │   ├── models/                    # MusicalNote, TuningState, TuningTarget
+    │   ├── models/                    # MusicalNote, TuningState, TuningTarget, DspEnums
     │   ├── tuning/                    # TuningMath, MusicalScaleFrequencies, FrequencyToNoteConverter
     │   ├── temperaments/              # RationalNumber, 12-EDO, 19种历史良律, CustomTemperament
     │   ├── stretch_tuning/            # StretchTuning, Railsback 32散点钢琴曲线
@@ -64,160 +71,122 @@ tuner_flutter/
 
 ---
 
-## 三、阶段 3 完成成果与阶段 4 准入标准
+## 三、阶段 1 至阶段 5 已验证成果审计与就绪度分析
 
-### 1. 阶段 3 已完工成果总览 (全部 VERIFIED，78 项自动化单测通过)
-- **切片 3.1: 基础数学与 FFT/IFFT 引擎 (Pure Dart)** (`VERIFIED`):
-  - 文件: `lib/dsp/fft/fft.dart` | 测试: `test/unit/fft_test.dart` (14 组)
-  - 核心突破: Cooley-Tukey 算法，彻底消除 `FORK-NEW-02` 原地解包自覆盖 Bug 与逆变换虚部相位符号错误。
-- **切片 3.2: 窗函数与自相关计算器 (Pure Dart)** (`VERIFIED`):
-  - 文件: `lib/dsp/windowing/windowing.dart`, `lib/dsp/correlation/correlation.dart`, `lib/dsp/correlation/auto_correlation.dart` | 测试: `test/unit/windowing_test.dart`, `test/unit/correlation_test.dart` (11 组)
-  - 核心突破: 维纳-辛钦定理 $2N$ 零填充频域自相关，位反转直充与波形归一化重映射。
-- **切片 3.3: 抛物线拟合与声学计权曲线 (Pure Dart)** (`VERIFIED`):
-  - 文件: `lib/dsp/pitch/polynomial_fit.dart`, `lib/dsp/filters/acoustic_weighting.dart` | 测试: `test/unit/polynomial_fit_test.dart`, `test/unit/acoustic_weighting_test.dart` (10 组)
-  - 核心突破: 连续抛物线极值点亚采样插值（带零分母与边界防卫）；IEC 61672-1 A/C 计权衰减工频电声学干扰。
-- **切片 3.4: McLeod Pitch Method (MPM) 引擎 (Pure Dart)** (`VERIFIED`):
-  - 文件: `lib/dsp/pitch/mcleod_pitch_method.dart` | 测试: `test/unit/mcleod_pitch_method_test.dart` (6 组)
-  - 核心突破: NSDF 归一化平方差与 0.85 首峰阈值比率，攻克小提琴高次谐波八度倍频缺陷 (BUG-04/ACOUSTIC-02)。
-- **切片 3.5: Two-Way Mismatch (TWM) 引擎 (Pure Dart)** (`VERIFIED`):
-  - 文件: `lib/dsp/pitch/two_way_mismatch.dart` | 测试: `test/unit/two_way_mismatch_test.dart` (5 组)
-  - 核心突破: Maher & Beauchamp 谐波失配误差与刚度 $B$ 色散补偿，攻克大提琴粗弦基频缺失虚拟音高难题 (BUG-05/ACOUSTIC-03)。
-- **切片 3.6: 经典自相关、Jacobsen 插值与 Phase Vocoder (Pure Dart)** (`VERIFIED`):
-  - 文件: `lib/dsp/fft/frequency_spectrum.dart`, `lib/dsp/pitch/classic_pitch_detector.dart`, `lib/dsp/pitch/accurate_spectrum_peak.dart` | 测试: `test/unit/classic_pitch_detector_test.dart`, `test/unit/accurate_spectrum_peak_test.dart` (12 组)
-  - 核心突破: 次谐波惩罚多重遍历、ACOUSTIC-01 15% 零延迟能量门限防护、复数 3-bin 二次插值与跨帧相位展开折叠。
-- **切片 3.7: 时域滤波、平滑器与调音管线门面 (Facade) (Pure Dart)** (`VERIFIED`):
-  - 文件: `lib/dsp/filters/pitch_temporal_filter.dart`, `lib/dsp/filters/outlier_removing_smoother.dart`, `lib/dsp/pipeline/tuner_dsp_pipeline.dart` | 测试: `test/unit/pitch_temporal_filter_test.dart`, `test/unit/outlier_removing_smoother_test.dart`, `test/unit/tuner_dsp_pipeline_test.dart` (16 组)
-  - 核心突破: 3-tap 滑动中值滤波剔除尖峰脉冲、八度跳变折叠门控抑制擦弦破音、多缓冲离群点平滑与统一调度门面。
+项目严格按单切片渐进式原则，历经 18 个功能切片，交付了极其扎实的纯 Dart 领域引擎与底层管道基础设施，**全量 227 项测试 100% 通过**：
 
----
+### 1. 阶段 1~2：基础架构、M3 主题与代码规范 (1 项 Widget 烟雾测试)
+- 建立了基于 Clean Architecture 的工程架构规范与三道质量门禁；
+- 实现了 `TunerColors`、`TunerTheme` 与 ThemeExtension 声学语义颜色扩展（准音绿、偏低橙、偏高紫），全面支持 Light/Dark/PureBlack 模式。
 
-### 2. 下一阶段：阶段 4 乐理模型、律制与调音实体任务规划
+### 2. 阶段 3：纯 Dart DSP 多引擎算法体系 (切片 3.1 ~ 3.7，78 项单元测试，全部 VERIFIED)
+- **Radix-2 FFT/IFFT (`fft.dart`)**: Cooley-Tukey 算法，修复 `FORK-NEW-02` 原地自覆盖缺陷与虚部相位符号错误；
+- **窗函数与自相关 (`windowing.dart`, `correlation.dart`)**: 零填充 $2N$ 规避圆周卷积混叠，位反转直充与波形归一化；
+- **抛物线拟合与声学计权 (`polynomial_fit.dart`, `acoustic_weighting.dart`)**: 二次插值求极值，IEC 61672-1 A/C 计权衰减 50Hz 工频电声学干扰；
+- **MPM 引擎 (`mcleod_pitch_method.dart`)**: NSDF 归一化平方差与 0.85 首峰阈值比率，攻克小提琴高次谐波八度倍频缺陷 (BUG-04/ACOUSTIC-02)；
+- **TWM 引擎 (`two_way_mismatch.dart`)**: Maher & Beauchamp 谐波失配误差与刚度 $B$ 色散补偿，攻克大提琴粗弦基频缺失虚拟音高难题 (BUG-05/ACOUSTIC-03)；
+- **经典自相关与 Phase Vocoder (`classic_pitch_detector.dart`, `accurate_spectrum_peak.dart`)**: 次谐波多重惩罚、ACOUSTIC-01 15% 零延迟能量门限、Jacobsen 3-bin 插值与跨帧相位展开；
+- **时域滤波与统一调度门面 (`pitch_temporal_filter.dart`, `outlier_removing_smoother.dart`, `tuner_dsp_pipeline.dart`)**: 3-tap 滑动中值滤波、八度跳变折叠门控、多缓冲离群点平滑器。
 
-在下一会话中，严格按功能切片渐进式推进【阶段 4】：
+### 3. 阶段 4：乐理模型、19 种律制与乐器体系 (切片 4.1 ~ 4.6，88 项单元测试，全部 VERIFIED)
+- **频率与对数音阶转换 (`frequency_to_note_converter.dart`, `musical_scale_frequencies.dart`)**: A4 基准可调，对数二分查找与插值，0.6 迟滞门控消除临界半音抖动；
+- **律制与 12-EDO / N-EDO (`rational_number.dart`, `equal_temperament.dart`)**: 不可变分数模型与微音差五度修正项；
+- **19 种欧洲历史良律与纯律 (`predefined_temperament.dart`, `chain_of_fifths.dart`)**: 五度链折叠算法，支持动态根音切换；
+- **Railsback 延展调音 (`stretch_tuning.dart`)**: 32 散点经典钢琴延展曲线，对数分段线性插值与几何外推；
+- **Scala (.scl & .kbm) 解析与导出 (`scala_parser.dart`, `scala_serializer.dart`, `custom_temperament.dart`)**: 纯律分数/小数混合解析，音符名称绑定与双向往返序列化；
+- **15 种预设乐器与智能琴弦匹配 (`predefined_instruments.dart`, `target_note_auto_detection.dart`, `instrument_io.dart`)**: 吉他/贝斯/提琴四重奏/尤克里里，60% 迟滞带与极值弦无界覆盖。
 
-- **切片 4.1: 对数音符与频率双向映射器 (Frequency-to-Note Converter)** (`VERIFIED`):
-  - 文件: `lib/domain/tuning/tuning_math.dart`, `lib/domain/tuning/musical_scale_frequencies.dart`, `lib/domain/tuning/frequency_to_note_converter.dart`, `lib/domain/models/musical_note.dart`
-  - 测试: `test/domain/pitch_frequency_converter_test.dart` (13 组测试全部通过)
-  - 核心突破:
-    1. 乐理声学基础数学公式与对数互逆运算（`ratioToCents`, `centsToRatio`, `centsToFrequency`, `frequencyToCents`）。
-    2. 扩展 `MusicalNote` 支持 MIDI 编号映射（A4=69, C4=60, A0=21, C8=108）与变音记号、等音双向转换。
-    3. 对齐 Kotlin `MusicalScaleFrequencies`，实现全音域二分查找、连续浮点对数插值与几何外推。
-    4. 统一门面 `FrequencyToNoteConverter`：支持 A4 基准调节（390Hz~490Hz）、开弦乐器标准定弦识别、音分偏差计算与调准状态评估 (`TuningState`)。
-    5. 集成 0.6 迟滞门控 (Hysteresis Auto Detection)，彻底消除临界半音边界由于微小声学扰动引发的高频跳动。
+### 4. 阶段 5：平台音频采集与 Isolate 并发管道 (切片 5.1 ~ 5.4，61 项单元测试，全部 VERIFIED)
+- **音频输入抽象与模拟流发生器 (`audio_source_interface.dart`, `mock_audio_source.dart`)**: 强类型错误与状态流，纯 Dart 内存多波形连续相位发生器；
+- **无锁环形采样缓冲队列 (`audio_ring_buffer.dart`)**: 定长环形缓冲、滑动时窗重叠提取、最新采样快照只读克隆、欠载零填充；
+- **Isolate 后台计算与双向消息总线 (`audio_processing_isolate.dart`, `audio_messages.dart`)**: 密集计算 100% 移出 UI 主线程，动态热更算法参数，60 FPS 高精度 UI 节流器；
+- **平台真实麦克风硬件驱动 (`microphone_audio_source.dart`)**: 基于 `record: ^7.1.2` 插件采集 44.1kHz 16-bit PCM，显式关闭系统 AGC/AEC/ANS 保留乐器泛音，字节非对齐容错归一化，绑定 `WidgetsBindingObserver` 实现切后台自动休眠与前台自动唤醒。
 
 ---
 
-- **切片 4.2: 律制体系架构与十二平均律 (12-EDO)** (`VERIFIED`):
-  - 文件: `lib/domain/temperaments/rational_number.dart`, `lib/domain/temperaments/fifth_modification.dart`, `lib/domain/temperaments/temperament_circle_of_fifths.dart`, `lib/domain/temperaments/temperament.dart`, `lib/domain/temperaments/equal_temperament.dart`
-  - 测试: `test/domain/equal_temperament_test.dart` (15 组测试全部通过)
-  - 核心突破:
-    1. 精确有理数模型 `RationalNumber`：欧几里得最大公约数约分化简、四则运算、幂运算与精确关系比较，杜绝浮点累积误差。
-    2. 微音差五度修正项 `FifthModification`：毕氏音差 (PC)、普通音差 (SC)、劈音 (S) 与古典声学恒等式（$PC = SC + S$）化简。
-    3. 五度相生圈模型 `TemperamentCircleOfFifths`：闭合 12 步五度圈，验证在每个五度收窄 -1/12 毕氏音差下与理想 12 平均律完全一致。
-    4. 抽象律制基类 `Temperament` 与 `EqualTemperament`：支持标准 12-EDO（每级严格 100 音分，纯八度比率严格 2.0 倍）及通用微分音等分音阶（如 19/24/31-EDO）。
+## 四、阶段 6：乐器调音主界面 (Instrument Tuner) 任务拆解与设计规划
+
+在完成底层算法与数据管道后，重构正式进入**用户可见的核心界面呈现阶段**。本阶段严格对标 Kotlin 原版 `ui/instruments/Strings.kt`、`ui/tuning/PitchHistory.kt` 与 `ui/screens/InstrumentTuner.kt`，拆分为 4 个单切片推进：
+
+```mermaid
+flowchart TD
+    subgraph Phase6 ["阶段 6：乐器调音主界面 (Instrument Tuner)"]
+        S6_1["切片 6.1: 琴弦侧边栏与弦宽厚度组件 (Strings.kt)"]
+        S6_2["切片 6.2: 对数音高历史曲线与半音网格 (PitchHistory.kt)"]
+        S6_3["切片 6.3: 动态调准三态指示点与音分角标 (Indicators & Badges)"]
+        S6_4["切片 6.4: 主调音视图脚手架与 Riverpod 数据流集成 (InstrumentTunerScreen)"]
+        
+        S6_1 --> S6_2 --> S6_3 --> S6_4
+    end
+```
+
+### 切片 6.1: 琴弦侧边栏与弦宽厚度组件 (Strings.kt) (下一会话首要任务)
+- **Kotlin 源码对标**: `/Users/huzongyao/flutterProjects/Tuner/app/src/main/java/de/moekadu/tuner/ui/instruments/Strings.kt` (738 行)
+- **核心逻辑与规范**:
+  1. **琴弦粗细计算公式 (`computeStringLineWidth`)**:
+     $$\text{relativeWidth} = \frac{\text{index} - \text{minIndex}}{\text{maxIndex} - \text{minIndex}}$$
+     $$\text{lineWidth} = (\text{maxLineWidth} - \text{minLineWidth}) \times (1 - \text{relativeWidth}) + \text{minLineWidth}$$
+     低音弦（小索引）粗、高音弦（大索引）细；单弦或极值退化时取算术平均值。
+  2. **弦组与色阶模式**:
+     - `strings != null`: 乐器专用琴弦模式（如吉他 6 弦，包含弦名、音阶索引、独立物理粗细）；
+     - `strings == null`: 自由半音模式（Chromatic Mode），自动展示当前调音音阶内的全部半音。
+  3. **高亮与调准状态响应**:
+     - 支持 `highlightedNote` 与 `highlightedNoteKey`；
+     - 结合 `TuningState` 显示语义背景色（准音显绿、偏低显橙、偏高显紫）。
+  4. **滚动与居中状态机 (`StringsScrollMode`)**:
+     - `Automatic`: 随检测音高自动动画平滑滚动使当前弦居中；
+     - `Manual`: 用户手动滑动时脱离自动吸附，浮现“回中图标按钮”(`ScrollCenterIcon`)；
+     - 多音同名时浮现“切换下一同名弦”(`ScrollNextIcon`)。
+  5. **布局与手势**:
+     - 支持侧栏位置配置 (`StringsSidebarPosition.Start` 或 `End`)；
+     - 点击琴弦触发选中或锁定目标音 (`onStringClicked`)。
+- **交付物**:
+  - `lib/ui/instruments/strings_widget.dart`
+  - `lib/ui/instruments/string_line_width.dart`
+  - `test/widget/strings_widget_test.dart`
+
+### 切片 6.2: 对数音高历史轨迹与半音网格组件 (PitchHistory.kt)
+- **Kotlin 源码对标**: `ui/tuning/PitchHistory.kt` (510 行)
+- **核心逻辑**:
+  - Y 轴对数半音网格标尺（基于 `MusicalScaleFrequencies`，半音线等间距，八度线加粗，背景微调色）；
+  - 双缓冲平滑时间轴滚动（1s ~ 10s 可配窗口）；
+  - 针对静音或丢帧（`frequency <= 0`）优雅断开折线，绝不发生飞线穿屏。
+- **交付物**: `lib/ui/tuning/pitch_history_widget.dart`, `lib/ui/tuning/note_grid_painter.dart` 及对应测试。
+
+### 切片 6.3: 动态调准三态指示点与音分角标 (Indicators & Badges)
+- **Kotlin 源码对标**: `ui/tuning/PitchHistory.kt` 中的指示器与 `InstrumentTuner.kt`
+- **核心逻辑**:
+  - 浮动在最新采样点上的调谐圆点；
+  - 动态三角形方向指示箭头（音偏低向上指、偏高向下指）；
+  - 带有抗锯齿微型气泡的音分读数文本（如 `+5 ct`, `-12 ct`）；
+  - 准音容限虚线带（$\pm 3$ 音分）高亮通道。
+- **交付物**: `lib/ui/tuning/tuning_indicator.dart` 及对应测试。
+
+### 切片 6.4: 乐器调音主界面脚手架与 Riverpod 数据流集成
+- **Kotlin 源码对标**: `ui/screens/InstrumentTuner.kt` (731 行), `InstrumentTunerViewModel.kt`
+- **核心逻辑**:
+  - 创建 Riverpod `TunerStateNotifier` 接入 `AudioProcessingIsolate` 的输出流，将实时频点与 `TargetNoteAutoDetection`、`TuningState` 绑定；
+  - 组合顶部 AppBar（A4 基准调节、升降号切换、律制选择入口、乐器入口）+ 主视口（琴弦侧边栏 + 音高历史画布）；
+  - 处理屏幕旋转与横竖屏适配。
+- **交付物**: `lib/state/tuner_state_provider.dart`, `lib/ui/screens/instrument_tuner_screen.dart` 及集成测试。
 
 ---
 
-- **切片 4.3: 纯律与 19 种历史古典律制 (Just Intonation & Historical Temperaments)** (`VERIFIED`):
-  - 文件: `lib/domain/temperaments/chain_of_fifths.dart`, `lib/domain/temperaments/chain_of_fifths_temperament.dart`, `lib/domain/temperaments/rational_temperament.dart`, `lib/domain/temperaments/predefined_temperament.dart`
-  - 测试: `test/domain/historical_temperament_test.dart` (15 组测试全部通过)
-  - 核心突破:
-    1. 沿五度链折叠算法 `ChainOfFifths`：支持正向向上与逆向向下双向相生，并自动八度折叠归一化至 `[1.0, 2.0)`，实现闭合五度圈校正。
-    2. 纯分数有理数律制 `RationalTemperament`：精确承载纯律 (Just Intonation, 5/4 大三度、3/2 纯五度) 与单弦物理弦长比率。
-    3. 全量 19 种历史律制目录 `PredefinedTemperaments`：毕达哥拉斯律 (407.82c 大三度)、纯律 (386.31c 大三度)、中庸律家族 (1/4、15音扩展、1/3、1/5)、魏克迈斯特良律 (III/IV/V/VI)、基恩贝格 (I/II/III)、奈德哈特 (I/II/III)、瓦洛蒂与杨氏第 2 律。
-    4. 动态根音切换：支持以任意主音为基准，实时重构律制频率与音阶。
+## 五、新会话启动提示词 (Prompt for Next Session)
 
----
-
-- **切片 4.4: 延展调音曲线 (Stretch Tuning & Railsback Curve)** (`VERIFIED`):
-  - 文件: `lib/domain/stretch_tuning/stretch_tuning.dart`, `lib/domain/stretch_tuning/predefined_stretch_tunings.dart`
-  - 测试: `test/domain/stretch_tuning_test.dart` (10 组测试全部通过)
-  - 核心突破:
-    1. 纯 Dart `StretchTuning` 模型：支持任意音高散点集合，对数尺度分段线性插值计算延展音分，基于端点斜率实现几何平滑外推。
-    2. 基准音动态归一化：支持任意参考基准音（如 A440、A442），自动保证参考音处的延展偏离量严格为 0 音分。
-    3. 散点单调性校验与不可变编辑：提供 `isValid` 频率单调性检验，以及 `addControlPoint`, `modifyControlPoint`, `removeControlPoint` 纯函数式不可变增删改。
-    4. 32 散点经典 Railsback 曲线：完整录入全钢琴 88 键实测经验延展，覆盖 A0（~28.4Hz, -35.95 cents）至 C8（~4202Hz, +32.07 cents），低音下沉与高音抬升物理声学特征完全对齐。
-    5. 与 `MusicalScaleFrequencies` 完整联动：无缝将延展曲线注入调音音阶频率生成链路。
-
----
-
-- **切片 4.5: Scala 音阶与键盘映射解析与导出 (.scl & .kbm)** (`VERIFIED`):
-  - 文件: `lib/domain/scala/scala_scale.dart`, `lib/domain/scala/keyboard_mapping.dart`, `lib/domain/scala/scala_note_helper.dart`, `lib/domain/scala/scala_parser.dart`, `lib/domain/scala/scala_serializer.dart`, `lib/domain/temperaments/custom_temperament.dart`
-  - 测试: `test/domain/scala_parser_test.dart` (17 组测试全部通过)
-  - 核心突破:
-    1. Huygens-Fokker 标准 Scala (.scl) 纯 Dart 高鲁棒解析与导出：支持纯律分数比率（`9/8`, `5/4`）、纯整数比例（如 `2` 自动解析为 `2/1`）、浮点小数音分（`100.0`）、单/多音阶连续流，以及 UTF-8 BOM 和 Windows CRLF 透明剥离。
-    2. 元数据与音符名称深度解析：提取 `! version=...`, `! abbreviation=...`, `! description=...`，支持行内 `note=D`, `note=C#`, `note=F#/Gb`, `note=D+1` 等复杂变音与等音异名标注。
-    3. Huygens-Fokker 键盘映射 (.kbm) 解析与导出：支持物理键数、参考音 MIDI、参考频率、中音键以及跳键 `'x'`。
-    4. 双向往返序列化一致性：`ScalaSerializer.serializeScl` 导出的文件重新解析后与源数据结构 100% 吻合。
-    5. `CustomTemperament` 领域实体多态支持：继承抽象基类 `Temperament`，直接承接 ScalaScale，支持动态切换根音，并与 `MusicalScaleFrequencies` 闭环集成。
-
----
-
-- **切片 4.6: 预设乐器体系与琴弦音高模型 (Instrument Tunings)** (`VERIFIED`):
-  - 文件: `lib/domain/instruments/instrument.dart`, `lib/domain/instruments/instrument_icon.dart`, `lib/domain/instruments/predefined_instruments.dart`, `lib/domain/instruments/sorted_and_distinct_instrument_strings.dart`, `lib/domain/instruments/target_note_auto_detection.dart`, `lib/domain/instruments/instrument_io.dart`
-  - 测试: `test/domain/instrument_tuning_test.dart` (18 组测试全部通过)
-  - 核心突破:
-    1. 15 种标准乐器与变格定弦预设全量收录：覆盖吉他（标准 EADGBE, Drop D, DADGAD, Open D, Open G）、贝斯（4/5/6 弦）、提琴四重奏家族纯五度（小提琴、中提琴、大提琴、低音提琴）、尤克里里（高四弦重返调弦与次中音调弦）及自由半音模式。
-    2. `SortedAndDistinctInstrumentStrings`: 提取琴弦在调音音阶内的离散音符索引，自动排序去重，非音阶音符折叠至末尾哨兵，提供毫秒级琴弦判定。
-    3. `TargetNoteAutoDetection`: 带有智能迟滞（Hysteresis Band）的物理频率自动匹配状态机。相邻琴弦间 60% 迟滞带有效抑制临界点指针高频跳抖，极值琴弦向外保持无限无界覆盖，支持单弦乐器与 Chromatic 模式无缝调度。
-    4. `InstrumentIO`: 兼容 Android Tuner 文本规范的乐器列表序列化与反序列化工具，支持特殊字符、换行符与未知音名的防御性解析。
-
----
-
-### 2. 下一步规划：阶段 5 平台音频流采集与 Isolate 并发管道
-
-乐理与算法层（阶段 3 与阶段 4 全部 13 个功能切片，166 项自动化单测）已全部固化并闭环验证。接下来启动【阶段 5：平台音频采集与多线程管道】：
-
-- **切片 5.1: 音频输入源抽象与模拟流发生器 (AudioSource & MockAudioSource)** (`VERIFIED`):
-  - 文件: `lib/audio/audio_source_interface.dart`, `lib/audio/mock_audio_source.dart`
-  - 测试: `test/unit/audio_source_test.dart` (19 组测试全部通过)
-  - 核心突破:
-    1. 完善 `AudioSource` 统一抽象（生命周期状态 `idle`, `recording`, `paused`, `error`, `disposed`、单声道 44.1kHz、`Stream<Float32List>` 采样流、`Stream<AudioSourceState>` 状态响应流、强类型硬件异常分级）。
-    2. 实现纯 Dart 内存声学模拟发生器 `MockAudioSource`（支持生成纯正弦波、指定泛音衰减比例的复合谐波、弦乐刚度系数 $B$ 色散波形、白噪声、扫频波 Chirp、自定义 TestFunction 与静音，支持可配置帧率与推流大小）。
-    3. 严格保证跨帧连续时间步进与跨 `pause()`/`resume()` 相位连续性（Phase Continuity），杜绝接缝截断咔哒声，支持实时定时推流与单元测试确定性手动推流。
-- **切片 5.2: 无锁环形采样缓冲队列 (AudioRingBuffer)** (`VERIFIED`):
-  - 文件: `lib/audio/audio_ring_buffer.dart`, `lib/audio/ring_buffer.dart`
-  - 测试: `test/unit/ring_buffer_test.dart` (23 组测试全部通过)
-  - 核心突破:
-    1. 纯 Dart 高性能定长环形队列，支持 `Float32List` 底层块写入与 `Int16List` 零内存分配浮点归一化写入（`1.0 / 32768.0`）。
-    2. 完整支持重叠滑动分析时窗提取（`read(destination, windowSize, stride)`），支持任意重叠率步长推进与欠载零拷贝防护。
-    3. 提供非破坏性最新波形快照提取（`getLatestSnapshot`），自动跨越回卷边界并以前置静音平滑补齐，供 UI 示波器与 WAV 录音器安全共享，绝不阻断 DSP 消费读指针。
-    4. 支持灵活的溢出保护策略（默认覆盖最老采样保证实时低延迟，或拒绝溢出）与丢包、溢出次数完整诊断统计。
-- **切片 5.3: Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)** (`VERIFIED`):
-  - 文件: `lib/audio/audio_processing_isolate.dart`, `lib/audio/audio_messages.dart`
-  - 测试: `test/unit/audio_isolate_test.dart` (7 组测试全部通过)
-  - 核心突破:
-    1. 基于 Dart `Isolate.spawn` 搭建独立的后台音频与 DSP 运算线程，将加窗、自相关、FFT、MPM/TWM 多引擎计算及平滑滤波 100% 移出 UI 主线程。
-    2. 建立强类型双向通信消息总线（`AudioDataMessage`, `ConfigureDspMessage`, `ResetDspMessage`, `DisposeWorkerMessage` $\leftrightarrow$ `WorkerReadyMessage`, `AudioAnalysisResult`, `WorkerErrorMessage`），支持实时动态热更测频算法、声学计权与时窗参数。
-    3. 主线程集成高精度零延迟时间戳 UI 节流器（`setThrottleFps`，默认 60 FPS），有效平抑高频重绘负载，彻底杜绝 UI 掉帧卡顿；同时保留直通全速流（`unthrottledResultStream`）以保障科学示波与单测精度。
-    4. 后台 Worker 集成实时 FFT 频域幅值谱计算，为后续科学示波界面提供开箱即用的高精数据。
-- **切片 5.4: 平台真实麦克风硬件驱动集成 (MicrophoneAudioSource)** (`VERIFIED`):
-  - 文件: `lib/audio/microphone_audio_source.dart`
-  - 测试: `test/unit/microphone_audio_source_test.dart` (12 组测试全部通过)
-  - 核心突破:
-    1. 封装 `MicrophoneDriver` 硬件驱动门面，基于 cross-platform `record: ^7.1.2` 插件实现 44.1kHz 低延迟单声道 16-bit PCM 持续录音流采集。
-    2. 显式关闭系统级人声降噪、回声消除与自动增益（`autoGain: false, echoCancel: false, noiseSuppress: false`），完整保留乐器微弱高次泛音。
-    3. 实现对齐与非对齐容错的 16-bit PCM 字节到 Float32List 归一化转换器（`pcm16BytesToFloat32`），防御性处理非字对齐偏移（`offsetInBytes % 2 != 0`）与奇数字节截断。
-    4. 集成 `WidgetsBindingObserver` 生命周期管理：后台/锁屏状态下自动暂停释放麦克风硬件并熄灭系统隐私指示灯，回到前台无感自动唤醒恢复。
-    5. 完整支持权限拒绝降级（`PermissionDeniedError`）与硬件流异常恢复（`MicrophoneUnavailableError`），状态机先即时同步变更状态再异步清理驱动，杜绝异步间隙竞态。
-
----
-
-## 四、新会话启动提示词 (Prompt for Next Session)
-
-在新会话启动时，请直接发送以下提示词，即可无缝承接当前进度并安全启动阶段 6 开发：
+在新会话启动时，请直接发送以下提示词，即可无缝恢复上下文并启动【阶段 6 / 切片 6.1】：
 
 ```text
 你好！我们正在进行将开源 Android Kotlin 调音器（/Users/huzongyao/flutterProjects/Tuner，分支 feature/advanced-pitch-algorithms）渐进式重构为 Flutter 应用（/Users/huzongyao/flutterProjects/tuner_flutter，分支 feature/rollback）的项目。
 
-在上一会话中，我们已经顺利完成了【阶段 5：平台音频流采集与 Isolate 并发管道 (Slices 5.1 ~ 5.4)】的全部开发与验证，全量 227 项自动化测试 100% 通过，工作区纯净。
+在上一会话中，我们已经顺利完成了【阶段 1~5】的全部开发与验证（包含纯 Dart DSP 多引擎、乐理与 19 种律制体系、音频无锁环形缓冲、Isolate 并发总线及真实麦克风驱动），全量 227 项自动化测试 100% 全部通过，工作区纯净。
 
 请首先阅读以下关键文档建立上下文：
 1. /Users/huzongyao/flutterProjects/tuner_flutter/AGENTS.md
 2. /Users/huzongyao/flutterProjects/tuner_flutter/docs/session_handoff.md
 3. /Users/huzongyao/flutterProjects/tuner_flutter/docs/migration_status.md
 4. /Users/huzongyao/flutterProjects/tuner_flutter/docs/feature_matrix.md
-5. /Users/huzongyao/flutterProjects/tuner_flutter/docs/architecture.md
+5. /Users/huzongyao/flutterProjects/tuner_flutter/docs/decisions.md
 
-在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 6 / 切片 6.1：琴弦侧边栏与弦宽厚度组件 (Strings.kt)】的实现与 Widget/单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
+在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 6 / 切片 6.1：琴弦侧边栏与弦宽厚度组件 (Strings.kt)】的实现与 Widget/单元测试。对标 Kotlin 源码 `/Users/huzongyao/flutterProjects/Tuner/app/src/main/java/de/moekadu/tuner/ui/instruments/Strings.kt`。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
 ```

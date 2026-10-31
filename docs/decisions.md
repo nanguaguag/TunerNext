@@ -106,3 +106,50 @@
   编写纯 Dart `ScalaParser` 与 `ScalaSerializer`，支持纯律分数、纯整数比例（如 `2` 解析为 `2/1`）、浮点小数音分、单/多音阶连续流、BOM 与 CRLF 透明过滤；支持标准 `.kbm` 映射解析与导出；实现 `CustomTemperament` 继承 `Temperament` 闭环接入调音系统。
 - **后果**:
   应用可直接读取全球 5000+ 现成 Scala 音阶库，并在应用内进行无损导入导出。
+
+---
+
+## ADR-10: 纯 Dart 无锁定长环形采样缓冲队列 (AudioRingBuffer) 与重叠时窗提取
+
+- **状态**: 已接受 (Accepted)
+- **上下文**:
+  硬件音频流与内存模拟流以不定大小的 PCM 块（如 256~2048 采样）持续推流，而 DSP 引擎需要固定大小的时窗（如 2048 或 4096 采样），且通常以 50%~75% 的重叠步长（Stride）滑动提取。同时，UI 示波器和未来的 WAV 录音器需要非破坏性地随时抓取最新一段波形快照。
+- **决策**:
+  实现纯 Dart 高性能定长环形队列 `AudioRingBuffer`：
+  1. 读写指针解耦推进，提供块写入 `write(Float32List)` 与零内存分配浮点归一化写入 `writeInt16(Int16List, 1.0 / 32768.0)`；
+  2. 提供 `read(destination, windowSize, stride)` 支持重叠滑动时窗推进，在数据欠载时自动以零拷贝补静音返回，杜绝管线饥饿与数组越界；
+  3. 提供 `getLatestSnapshot(sampleCount)` 非破坏性只读快照方法，自动处理回卷边界与前置平滑零填充，完全不移动 DSP 消费读指针；
+  4. 支持灵活的溢出保护策略（默认覆盖最老采样以维持实时低延迟，或严格拒绝溢出）。
+- **后果**:
+  消除了音频流与多引擎计算之间的内存频繁重分配与 GC 压力，实现稳定低延迟采样衔接。
+
+---
+
+## ADR-11: 独立 Dart Isolate 后台计算与双向强类型消息总线
+
+- **状态**: 已接受 (Accepted)
+- **上下文**:
+  实时音高检测管线（包含加窗、自相关、实数 FFT、MPM 峰值搜索、TWM 谐波失配匹配与离群值中值平滑）在 44.1kHz 下每秒计算 20~40 次，单次耗时可达数毫秒至十余毫秒。若直接在 UI 主线程执行，会严重阻塞手势交互与 60/120 FPS 渲染。
+- **决策**:
+  基于 Dart 原生 `Isolate.spawn` 搭建独立的后台音频处理工作线程 `AudioProcessingIsolate`：
+  1. 建立完全类型化的双向通信协议（UI $\to$ Worker: `AudioDataMessage`, `ConfigureDspMessage`, `ResetDspMessage`, `DisposeWorkerMessage`；Worker $\to$ UI: `WorkerReadyMessage`, `AudioAnalysisResult`, `WorkerErrorMessage`）；
+  2. 支持在不重启 Worker 的情况下实时热更测频算法（Classic / MPM / TWM / Hybrid）、窗函数、声学计权与时窗大小；
+  3. 主线程分发端口集成高精度基于微秒时间戳的 UI 节流器（`setThrottleFps`，默认 60 FPS），平抑重绘压力的同时提供直通全速流（`unthrottledResultStream`）以满足高精单测与专业示波需求。
+- **后果**:
+  UI 主线程 CPU 占用降至最低，即使复杂弦乐算法持续运算，界面依然丝滑满帧运行。
+
+---
+
+## ADR-12: 真实麦克风硬件驱动 (MicrophoneAudioSource) 乐器声学优化与生命周期绑定
+
+- **状态**: 已接受 (Accepted)
+- **上下文**:
+  智能手机与桌面操作系统内置的麦克风驱动默认启用人声自动增益（AGC）、回声消除（AEC）与环境降噪（ANS）。这些算法专门针对人声语音通话设计，会严重抑制微弱的乐器谐波泛音，甚至将低音或弱延音判定为“持续背景噪音”而强制消噪切除；此外，麦克风硬件需要在应用切到后台或锁屏时主动释放，防止隐私指示灯长亮与无谓耗电。
+- **决策**:
+  1. 封装 `MicrophoneDriver` 抽象驱动门面，基于 `record: ^7.1.2` 实现低延迟 44.1kHz 单声道 16-bit PCM 采集；
+  2. 在 `RecordConfig` 中显式设置 `autoGain: false, echoCancel: false, noiseSuppress: false`，获取最原始、无声学污染的纯净乐器振动信号；
+  3. 实现容错转换器 `pcm16BytesToFloat32`，处理非字节对齐偏移（`offsetInBytes % 2 != 0`）与奇数字节截断；
+  4. 混入 `WidgetsBindingObserver` 监听应用生命周期：切入后台或锁屏时自动暂停硬件流并释放通道，回到前台无感自动唤醒；
+  5. 状态机在进入暂停/停止前立即同步变更状态，消灭异步等待间隙的状态竞态。
+- **后果**:
+  保证了高保真乐器泛音输入与系统级隐私、能耗规范的完全遵从。
