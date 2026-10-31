@@ -1,7 +1,7 @@
 # 会话交接备忘录 (Session Handoff & Context Continuity)
 
 > **交接时间**: 2026-10-31  
-> **会话状态**: 【阶段 4 / 切片 4.4：延展调音曲线 (Stretch Tuning)】已 100% 完成并验证，全量 131 项自动化测试全部通过，工作区纯净。下一切片为【阶段 4 / 切片 4.5：Scala 文件解析器 (.scl & .kbm)】。
+> **会话状态**: 【阶段 4 / 切片 4.5：Scala 音阶与键盘映射解析与导出 (.scl & .kbm)】已 100% 完成并验证，全量 148 项自动化测试全部通过，工作区纯净。下一切片为【阶段 4 / 切片 4.6：乐器预设与琴弦音高模型体系 (Instrument Tunings)】。
 
 ---
 
@@ -122,28 +122,39 @@ tuner_flutter/
 
 ---
 
-### 2. 下一步规划：阶段 4 Scala 文件解析器 (.scl & .kbm)
+- **切片 4.5: Scala 音阶与键盘映射解析与导出 (.scl & .kbm)** (`VERIFIED`):
+  - 文件: `lib/domain/scala/scala_scale.dart`, `lib/domain/scala/keyboard_mapping.dart`, `lib/domain/scala/scala_note_helper.dart`, `lib/domain/scala/scala_parser.dart`, `lib/domain/scala/scala_serializer.dart`, `lib/domain/temperaments/custom_temperament.dart`
+  - 测试: `test/domain/scala_parser_test.dart` (17 组测试全部通过)
+  - 核心突破:
+    1. Huygens-Fokker 标准 Scala (.scl) 纯 Dart 高鲁棒解析与导出：支持纯律分数比率（`9/8`, `5/4`）、纯整数比例（如 `2` 自动解析为 `2/1`）、浮点小数音分（`100.0`）、单/多音阶连续流，以及 UTF-8 BOM 和 Windows CRLF 透明剥离。
+    2. 元数据与音符名称深度解析：提取 `! version=...`, `! abbreviation=...`, `! description=...`，支持行内 `note=D`, `note=C#`, `note=F#/Gb`, `note=D+1` 等复杂变音与等音异名标注。
+    3. Huygens-Fokker 键盘映射 (.kbm) 解析与导出：支持物理键数、参考音 MIDI、参考频率、中音键以及跳键 `'x'`。
+    4. 双向往返序列化一致性：`ScalaSerializer.serializeScl` 导出的文件重新解析后与源数据结构 100% 吻合。
+    5. `CustomTemperament` 领域实体多态支持：继承抽象基类 `Temperament`，直接承接 ScalaScale，支持动态切换根音，并与 `MusicalScaleFrequencies` 闭环集成。
 
-在下一任务中，推进【切片 4.5】：
+---
 
-- **切片 4.5: Scala 文件解析器与导出器 (.scl & .kbm)**:
-  - 对应 Kotlin: `temperaments/ScalaParser.kt`
-  - 支持解析 Huygens-Fokker 标准 Scala 律制定义文本（纯律分数 `m/n` 与浮点 cents）。
-  - 支持生成与导出合法的 `.scl` 格式。
-  - 测试: 编写 `test/domain/scala_parser_test.dart`。
+### 2. 下一步规划：阶段 4 乐器预设与琴弦音高模型体系 (Instrument Tunings)
+
+在下一任务中，推进【切片 4.6】：
+
 - **切片 4.6: 乐器预设与琴弦音高模型体系 (Instrument Tunings)**:
-  - 定义吉他、贝斯、小提琴、中提琴、大提琴、尤克里里标准定弦与常用变格降调。
+  - 对应 Kotlin: `instruments/Instrument.kt`, `instruments/PredefinedInstruments.kt`
+  - 定义乐器琴弦实体 `Instrument`、`InstrumentTuning` 与 `InstrumentString`。
+  - 完整录入原版吉他全系列（标准 EADGBE, Drop D, DADGAD, Open D/G 等）、贝斯系列（4/5/6弦）、弓弦乐器家族（小提琴、中提琴、大提琴、低音提琴）以及尤克里里预设。
+  - 支持琴弦目标频率与当前检测音高的智能映射与匹配。
+  - 测试: 编写 `test/domain/instrument_tuning_test.dart`。
 
 ---
 
 ## 四、新会话启动提示词 (Prompt for Next Session)
 
-在新会话启动时，请直接发送以下提示词，即可无缝承接当前进度并安全启动切片 4.5 开发：
+在新会话启动时，请直接发送以下提示词，即可无缝承接当前进度并安全启动切片 4.6 开发：
 
 ```text
 你好！我们正在进行将开源 Android Kotlin 调音器（/Users/huzongyao/flutterProjects/Tuner，分支 feature/advanced-pitch-algorithms）渐进式重构为 Flutter 应用（/Users/huzongyao/flutterProjects/tuner_flutter，分支 feature/rollback）的项目。
 
-在上一会话中，我们已经顺利完成了【阶段 4 / 切片 4.4：延展调音曲线 (Stretch Tuning & Railsback Curve)】的实现与验证，全量 131 项自动化测试 100% 通过，工作区纯净。
+在上一会话中，我们已经顺利完成了【阶段 4 / 切片 4.5：Scala 音阶与键盘映射解析与导出 (.scl & .kbm)】的实现与验证，全量 148 项自动化测试 100% 通过，工作区纯净。
 
 请首先阅读以下关键文档建立上下文：
 1. /Users/huzongyao/flutterProjects/tuner_flutter/AGENTS.md
@@ -152,5 +163,5 @@ tuner_flutter/
 4. /Users/huzongyao/flutterProjects/tuner_flutter/docs/feature_matrix.md
 5. /Users/huzongyao/flutterProjects/tuner_flutter/docs/algorithm_specification.md
 
-在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 4 / 切片 4.5：Scala 文件解析器 (.scl & .kbm)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
+在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 4 / 切片 4.6：乐器预设与琴弦音高模型体系 (Instrument Tunings)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
 ```
