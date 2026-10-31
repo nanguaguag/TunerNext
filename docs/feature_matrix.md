@@ -125,11 +125,11 @@
 
 | ID | 功能名称 | Kotlin 源码位置及行为 | Flutter 对应文件/方法 | 实现度 | 依赖项 | 测试文件/用例 | 测试结果 | 尚未完成工作 | 最终验收标准 | 当前状态 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **INST-01** | 吉他系列预设 | 标准 EADGBE, Drop D, DADGAD, Open G, Open D 等 10+ 种调弦。 | 无 | 0% | THEORY-01 | 无 | 未测试 | 建立乐器预设数据库。 | 琴弦音高与名称严格符合乐理标准。 | `NOT_STARTED` |
-| **INST-02** | 贝斯系列预设 | 4弦标准 (EADG), 5弦标准 (BEADG), 6弦标准。 | 无 | 0% | THEORY-01 | 无 | 未测试 | 录入贝斯低音音符模型。 | 正确映射至低八度目标频率。 | `NOT_STARTED` |
-| **INST-03** | 提琴家族预设 | 小提琴 (GDAE), 中提琴 (CGDA), 大提琴, 低音提琴。 | 无 | 0% | THEORY-01 | 无 | 未测试 | 录入提琴纯五度传统调弦。 | 准确覆盖弓弦乐器全系调弦。 | `NOT_STARTED` |
-| **INST-04** | 尤克里里预设 | 标准高音 GCEA 与低音 Baritone DGBE。 | 无 | 0% | THEORY-01 | 无 | 未测试 | 录入尤克里里预设。 | 正确支持高四弦重返调音（Re-entrant）。 | `NOT_STARTED` |
-| **INST-05** | 自定义乐器创建与增删改 | `ui/instruments/InstrumentEditor.kt`: 自定义琴弦数量、指定任意音符与选择图标。 | 无 | 0% | INST-01, DATA-01 | 无 | 未测试 | 乐器编辑表单组件与本地 SQLite/JSON 持久化。 | 新增乐器即时可用，支持重命名与删除。 | `NOT_STARTED` |
+| **INST-01** | 吉他系列预设 | 标准 EADGBE, Drop D, DADGAD, Open G, Open D 等调弦。 | `lib/domain/instruments/predefined_instruments.dart` | 100% | THEORY-01 | `test/domain/instrument_tuning_test.dart` | 全部通过 | 无 (已实现吉他标准与变格定弦实体及琴弦频率映射) | 琴弦音高与名称严格符合乐理标准。 | `VERIFIED` |
+| **INST-02** | 贝斯系列预设 | 4弦标准 (EADG), 5弦标准 (BEADG), 6弦标准。 | `lib/domain/instruments/predefined_instruments.dart` | 100% | THEORY-01 | `test/domain/instrument_tuning_test.dart` | 全部通过 | 无 (已实现低音贝斯全系模型) | 正确映射至低八度目标频率。 | `VERIFIED` |
+| **INST-03** | 提琴家族预设 | 小提琴 (GDAE), 中提琴 (CGDA), 大提琴, 低音提琴。 | `lib/domain/instruments/predefined_instruments.dart` | 100% | THEORY-01 | `test/domain/instrument_tuning_test.dart` | 全部通过 | 无 (已录入提琴家族纯五度与四度传统定弦) | 准确覆盖弓弦乐器全系调弦。 | `VERIFIED` |
+| **INST-04** | 尤克里里预设 | 标准高音 GCEA (Re-entrant) 与低音 Baritone DGBE。 | `lib/domain/instruments/predefined_instruments.dart` | 100% | THEORY-01 | `test/domain/instrument_tuning_test.dart` | 全部通过 | 无 (已实现高四弦重返调音与次中音调弦) | 正确支持高四弦重返调音（Re-entrant）。 | `VERIFIED` |
+| **INST-05** | 自定义乐器创建与增删改 | `ui/instruments/InstrumentEditor.kt`: 自定义琴弦数量、指定任意音符与选择图标。 | `lib/domain/instruments/instrument.dart`, `instrument_io.dart` | 70% | INST-01, DATA-01 | `test/domain/instrument_tuning_test.dart` | 序列化与数据模型通过 | UI 表单编辑视图与本地数据库持久化待接入。 | 新增乐器即时可用，支持重命名与删除。 | `IMPLEMENTED` |
 
 ---
 

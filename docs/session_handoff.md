@@ -1,7 +1,7 @@
 # 会话交接备忘录 (Session Handoff & Context Continuity)
 
 > **交接时间**: 2026-10-31  
-> **会话状态**: 【阶段 4 / 切片 4.5：Scala 音阶与键盘映射解析与导出 (.scl & .kbm)】已 100% 完成并验证，全量 148 项自动化测试全部通过，工作区纯净。下一切片为【阶段 4 / 切片 4.6：乐器预设与琴弦音高模型体系 (Instrument Tunings)】。
+> **会话状态**: 【阶段 4：乐理模型、19种律制、延展调音、Scala 与乐器体系 (Slices 4.1 ~ 4.6)】已 100% 全部完成并验证，全量 166 项自动化测试全部通过，工作区纯净。下一任务为启动【阶段 5：平台音频流采集与 Isolate 并发管道】（切片 5.1：音频输入源抽象与平台通道驱动）。
 
 ---
 
@@ -134,34 +134,48 @@ tuner_flutter/
 
 ---
 
-### 2. 下一步规划：阶段 4 乐器预设与琴弦音高模型体系 (Instrument Tunings)
+- **切片 4.6: 预设乐器体系与琴弦音高模型 (Instrument Tunings)** (`VERIFIED`):
+  - 文件: `lib/domain/instruments/instrument.dart`, `lib/domain/instruments/instrument_icon.dart`, `lib/domain/instruments/predefined_instruments.dart`, `lib/domain/instruments/sorted_and_distinct_instrument_strings.dart`, `lib/domain/instruments/target_note_auto_detection.dart`, `lib/domain/instruments/instrument_io.dart`
+  - 测试: `test/domain/instrument_tuning_test.dart` (18 组测试全部通过)
+  - 核心突破:
+    1. 15 种标准乐器与变格定弦预设全量收录：覆盖吉他（标准 EADGBE, Drop D, DADGAD, Open D, Open G）、贝斯（4/5/6 弦）、提琴四重奏家族纯五度（小提琴、中提琴、大提琴、低音提琴）、尤克里里（高四弦重返调弦与次中音调弦）及自由半音模式。
+    2. `SortedAndDistinctInstrumentStrings`: 提取琴弦在调音音阶内的离散音符索引，自动排序去重，非音阶音符折叠至末尾哨兵，提供毫秒级琴弦判定。
+    3. `TargetNoteAutoDetection`: 带有智能迟滞（Hysteresis Band）的物理频率自动匹配状态机。相邻琴弦间 60% 迟滞带有效抑制临界点指针高频跳抖，极值琴弦向外保持无限无界覆盖，支持单弦乐器与 Chromatic 模式无缝调度。
+    4. `InstrumentIO`: 兼容 Android Tuner 文本规范的乐器列表序列化与反序列化工具，支持特殊字符、换行符与未知音名的防御性解析。
 
-在下一任务中，推进【切片 4.6】：
+---
 
-- **切片 4.6: 乐器预设与琴弦音高模型体系 (Instrument Tunings)**:
-  - 对应 Kotlin: `instruments/Instrument.kt`, `instruments/PredefinedInstruments.kt`
-  - 定义乐器琴弦实体 `Instrument`、`InstrumentTuning` 与 `InstrumentString`。
-  - 完整录入原版吉他全系列（标准 EADGBE, Drop D, DADGAD, Open D/G 等）、贝斯系列（4/5/6弦）、弓弦乐器家族（小提琴、中提琴、大提琴、低音提琴）以及尤克里里预设。
-  - 支持琴弦目标频率与当前检测音高的智能映射与匹配。
-  - 测试: 编写 `test/domain/instrument_tuning_test.dart`。
+### 2. 下一步规划：阶段 5 平台音频流采集与 Isolate 并发管道
+
+乐理与算法层（阶段 3 与阶段 4 全部 13 个功能切片）已全部固化并闭环验证。接下来启动【阶段 5：平台音频采集与多线程管道】：
+
+- **切片 5.1: 音频输入源抽象与模拟流发生器 (AudioSource & MockAudioSource)**:
+  - 完善 `lib/audio/audio_source_interface.dart`。
+  - 实现纯 Dart 内存正弦波与复合谐波模拟音频源，用于无麦克风环境下的自动化声学集成测试。
+- **切片 5.2: 无锁环形缓冲区与音频流消费提取 (RingBuffer)**:
+  - 实现定长 Float32 无锁环形缓冲区，支持高吞吐音频帧推入与指定窗口/重叠率提取。
+- **切片 5.3: Isolate 后台计算并发隔离与消息总线 (AudioProcessingIsolate)**:
+  - 将 `TunerDspPipeline`、`FrequencyToNoteConverter` 与音频帧消费完全移至后台独立 Isolate，保证 UI 线程 60/120 FPS 绝对流畅。
+- **切片 5.4: 平台真实麦克风驱动集成 (MicrophoneAudioSource)**:
+  - 集成跨平台实时 PCM 音频采集驱动与动态权限生命周期。
 
 ---
 
 ## 四、新会话启动提示词 (Prompt for Next Session)
 
-在新会话启动时，请直接发送以下提示词，即可无缝承接当前进度并安全启动切片 4.6 开发：
+在新会话启动时，请直接发送以下提示词，即可无缝承接当前进度并安全启动阶段 5 开发：
 
 ```text
 你好！我们正在进行将开源 Android Kotlin 调音器（/Users/huzongyao/flutterProjects/Tuner，分支 feature/advanced-pitch-algorithms）渐进式重构为 Flutter 应用（/Users/huzongyao/flutterProjects/tuner_flutter，分支 feature/rollback）的项目。
 
-在上一会话中，我们已经顺利完成了【阶段 4 / 切片 4.5：Scala 音阶与键盘映射解析与导出 (.scl & .kbm)】的实现与验证，全量 148 项自动化测试 100% 通过，工作区纯净。
+在上一会话中，我们已经顺利完成了【阶段 4：乐理模型、19种律制与乐器体系 (Slices 4.1 ~ 4.6)】的全部开发与验证，全量 166 项自动化测试 100% 通过，工作区纯净。
 
 请首先阅读以下关键文档建立上下文：
 1. /Users/huzongyao/flutterProjects/tuner_flutter/AGENTS.md
 2. /Users/huzongyao/flutterProjects/tuner_flutter/docs/session_handoff.md
 3. /Users/huzongyao/flutterProjects/tuner_flutter/docs/migration_status.md
 4. /Users/huzongyao/flutterProjects/tuner_flutter/docs/feature_matrix.md
-5. /Users/huzongyao/flutterProjects/tuner_flutter/docs/algorithm_specification.md
+5. /Users/huzongyao/flutterProjects/tuner_flutter/docs/architecture.md
 
-在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 4 / 切片 4.6：乐器预设与琴弦音高模型体系 (Instrument Tunings)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
+在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 5 / 切片 5.1：音频输入源抽象与模拟流发生器 (AudioSource & MockAudioSource)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
 ```

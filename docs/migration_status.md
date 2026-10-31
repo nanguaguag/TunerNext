@@ -14,7 +14,7 @@
 | **阶段 1** | 全面代码审计与迁移设计方案 | 已完成 | 审计白皮书完备 | 189 项 Kotlin 单测验证通过 | **VERIFIED** |
 | **阶段 2** | Flutter 独立工程脚手架与 M3 主题 | 已完成 | `e58c406` 提交 | M3 主题与 Note 模型单测通过 | **VERIFIED** |
 | **阶段 3** | 纯 Dart DSP 算法引擎与基准测试 | 已完成 | `7a01bea` 提交 | 全量 78 项测试通过 | **VERIFIED** |
-| **阶段 4** | 乐理模型、19种律制与 Scala IO | 进行中 | 切片 4.5 已完成 | 148 项单测全部通过 | **IN_PROGRESS** |
+| **阶段 4** | 乐理模型、19种律制与 Scala IO | 已完成 | 全切片 4.1~4.6 完成 | 166 项单测全部通过 | **VERIFIED** |
 | **阶段 5** | 平台音频流采集与 Isolate 并发管道 | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 6** | 乐器调音主界面 (琴弦/表盘/历史图) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 7** | 科学调音界面 (示波器/FFT谱/波形) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
@@ -142,13 +142,16 @@
    - 完整支持 Huygens-Fokker 键盘映射 (.kbm) 解析与导出，包含基准物理键、参考频率、中音键与非连续跳键（'x'）映射。
    - 实现 `CustomTemperament` 领域实体并接入抽象基类 `Temperament`，提供音阶频率与八度倍频计算，完全闭环接入调音评估管线。
    - 测试: `test/domain/scala_parser_test.dart` 17 组测试全部通过。
-13. **阶段 4 / 切片 4.6: 乐器预设与琴弦音高模型体系 (Instrument Tunings)** (下一任务):
-   - 移植标准定弦与变格调弦库（吉他、贝斯、小提琴、中提琴、大提琴、尤克里里等）。
-   - 测试: 编写 `test/domain/instrument_tuning_test.dart`。
+13. **阶段 4 / 切片 4.6: 预设乐器体系与琴弦音高模型 (Instrument Tunings)**:
+    - 文件: `lib/domain/instruments/instrument.dart`, `lib/domain/instruments/instrument_icon.dart`, `lib/domain/instruments/predefined_instruments.dart`, `lib/domain/instruments/sorted_and_distinct_instrument_strings.dart`, `lib/domain/instruments/target_note_auto_detection.dart`, `lib/domain/instruments/instrument_io.dart`
+    - 完整收录 15 种标准乐器与变格定弦预设库（半音模式、吉他标准/Drop D/DADGAD/Open D/Open G、贝斯 4/5/6 弦、提琴四重奏家族纯五度、尤克里里高四弦重返调弦与次中音调弦）。
+    - 实现 `SortedAndDistinctInstrumentStrings`（琴弦去重排序与非音阶哨兵拦截）与 `TargetNoteAutoDetection`（双向迟滞门限防跳抖、极值弦向外无界判定与单弦乐器匹配）。
+    - 实现与 Android Tuner 文本格式 100% 兼容的 `InstrumentIO` 序列化与反序列化工具。
+    - 测试: `test/domain/instrument_tuning_test.dart` 18 组测试全部通过。
 
 ---
 
 ## 四、当前阻塞条件与后续准入
 
-- **当前任务**: 阶段 4 / 切片 4.5 开发与验证已完成，全量 148 项自动化测试 100% 通过。
-- **下一步准入要求**: 等待用户代码审查确认后，方可启动【切片 4.6：乐器预设与琴弦音高模型体系 (Instrument Tunings)】。
+- **当前任务**: 阶段 4 全部 6 个切片（4.1~4.6）开发与验证已全部完成，全量 166 项自动化测试 100% 通过。
+- **下一步准入要求**: 等待用户代码审查确认后，方可启动【阶段 5：平台音频流采集与 Isolate 并发管道】（切片 5.1：音频输入源抽象与平台通道桥接）。
