@@ -15,8 +15,8 @@
 2. **Flutter 重构工程 (重构目标仓库)**:
    - 路径: `/Users/huzongyao/flutterProjects/tuner_flutter`
    - 当前分支: `feature/rollback`
-   - 当前最新检出 Commit: `7a01bea` ("feat(dsp): implement temporal filters, outlier-removing smoother and DSP pipeline facade (slice 3.7)")
-   - 工作区状态: 零未提交改动 (`working tree clean`)，静态分析 `flutter analyze` 零告警 (0 issues)，自动化测试 **78 项用例 100% 全部通过**。
+   - 当前最新检出 Commit: `1b58c05` ("feat(theory): implement instrument models, presets, target note auto-detection, and InstrumentIO (slice 4.6)")
+   - 工作区状态: 零未提交改动 (`working tree clean`)，静态分析 `flutter analyze` 零告警 (0 issues)，自动化测试 **166 项用例 100% 全部通过**。
    - 历史探索分支: `main`（保留历史记录供查阅，禁止盲目复用）。
 
 ---
@@ -39,13 +39,21 @@ tuner_flutter/
 │   └── session_handoff.md             # 本会话交接备忘录
 ├── test/
 │   ├── unit/                          # 单元测试目录 (纯数学、DSP、滤波器与管线单测)
+│   ├── domain/                        # 乐理测试 (音符、律制、延展调音、Scala、乐器单测)
 │   ├── widget/                        # 组件与视图渲染测试 (M3 主题及烟雾测试)
 │   ├── integration/                   # 端到端测试
 │   └── regression/                    # 回归测试
 └── lib/
     ├── core/                          # 基础常量、主题扩展、语义颜色
-    ├── domain/                        # 乐理模型、律制与调音实体
-    └── dsp/                           # 纯 Dart DSP 多引擎架构 (已全量实现)
+    ├── audio/                         # 音频接口层 (AudioSource)
+    ├── domain/                        # 纯 Dart 乐理模型、律制与调音实体 (全量完成)
+    │   ├── models/                    # MusicalNote, TuningState, TuningTarget
+    │   ├── tuning/                    # TuningMath, MusicalScaleFrequencies, FrequencyToNoteConverter
+    │   ├── temperaments/              # RationalNumber, 12-EDO, 19种历史良律, CustomTemperament
+    │   ├── stretch_tuning/            # StretchTuning, Railsback 32散点钢琴曲线
+    │   ├── scala/                     # ScalaParser, ScalaSerializer (.scl & .kbm), KeyboardMapping
+    │   └── instruments/               # 15种预设乐器, TargetNoteAutoDetection, InstrumentIO
+    └── dsp/                           # 纯 Dart DSP 多引擎架构 (全量完成)
         ├── fft/                       # Radix-2 FFT/IFFT 与 FrequencySpectrum
         ├── windowing/                 # Tophat / Hanning / Hamming 窗函数与能量补偿
         ├── correlation/               # 维纳-辛钦频域零填充自相关与数据缓冲
@@ -110,6 +118,17 @@ tuner_flutter/
 
 ---
 
+- **切片 4.3: 纯律与 19 种历史古典律制 (Just Intonation & Historical Temperaments)** (`VERIFIED`):
+  - 文件: `lib/domain/temperaments/chain_of_fifths.dart`, `lib/domain/temperaments/chain_of_fifths_temperament.dart`, `lib/domain/temperaments/rational_temperament.dart`, `lib/domain/temperaments/predefined_temperament.dart`
+  - 测试: `test/domain/historical_temperament_test.dart` (15 组测试全部通过)
+  - 核心突破:
+    1. 沿五度链折叠算法 `ChainOfFifths`：支持正向向上与逆向向下双向相生，并自动八度折叠归一化至 `[1.0, 2.0)`，实现闭合五度圈校正。
+    2. 纯分数有理数律制 `RationalTemperament`：精确承载纯律 (Just Intonation, 5/4 大三度、3/2 纯五度) 与单弦物理弦长比率。
+    3. 全量 19 种历史律制目录 `PredefinedTemperaments`：毕达哥拉斯律 (407.82c 大三度)、纯律 (386.31c 大三度)、中庸律家族 (1/4、15音扩展、1/3、1/5)、魏克迈斯特良律 (III/IV/V/VI)、基恩贝格 (I/II/III)、奈德哈特 (I/II/III)、瓦洛蒂与杨氏第 2 律。
+    4. 动态根音切换：支持以任意主音为基准，实时重构律制频率与音阶。
+
+---
+
 - **切片 4.4: 延展调音曲线 (Stretch Tuning & Railsback Curve)** (`VERIFIED`):
   - 文件: `lib/domain/stretch_tuning/stretch_tuning.dart`, `lib/domain/stretch_tuning/predefined_stretch_tunings.dart`
   - 测试: `test/domain/stretch_tuning_test.dart` (10 组测试全部通过)
@@ -147,17 +166,29 @@ tuner_flutter/
 
 ### 2. 下一步规划：阶段 5 平台音频流采集与 Isolate 并发管道
 
-乐理与算法层（阶段 3 与阶段 4 全部 13 个功能切片）已全部固化并闭环验证。接下来启动【阶段 5：平台音频采集与多线程管道】：
+乐理与算法层（阶段 3 与阶段 4 全部 13 个功能切片，166 项自动化单测）已全部固化并闭环验证。接下来启动【阶段 5：平台音频采集与多线程管道】：
 
 - **切片 5.1: 音频输入源抽象与模拟流发生器 (AudioSource & MockAudioSource)**:
-  - 完善 `lib/audio/audio_source_interface.dart`。
-  - 实现纯 Dart 内存正弦波与复合谐波模拟音频源，用于无麦克风环境下的自动化声学集成测试。
-- **切片 5.2: 无锁环形缓冲区与音频流消费提取 (RingBuffer)**:
-  - 实现定长 Float32 无锁环形缓冲区，支持高吞吐音频帧推入与指定窗口/重叠率提取。
-- **切片 5.3: Isolate 后台计算并发隔离与消息总线 (AudioProcessingIsolate)**:
-  - 将 `TunerDspPipeline`、`FrequencyToNoteConverter` 与音频帧消费完全移至后台独立 Isolate，保证 UI 线程 60/120 FPS 绝对流畅。
-- **切片 5.4: 平台真实麦克风驱动集成 (MicrophoneAudioSource)**:
-  - 集成跨平台实时 PCM 音频采集驱动与动态权限生命周期。
+  - 文件: `lib/audio/audio_source_interface.dart`, `lib/audio/mock_audio_source.dart`
+  - 完善 `AudioSource` 统一抽象（生命周期状态、采样率、声道数、`Stream<Float32List>` 样本流、start/stop/pause/resume/dispose）。
+  - 实现纯 Dart 内存声学模拟发生器 `MockAudioSource`（支持生成纯正弦波、指定泛音衰减比例的复合谐波、弦乐刚度系数 $B$ 色散波形、白噪声与静音，且可配置推流帧率与采样点大小）。
+  - 测试: 编写 `test/unit/audio_source_test.dart`（验证模拟流的时域连续性、振幅归一化与周期时间精度）。
+- **切片 5.2: 无锁环形缓冲区与音频流消费提取 (AudioRingBuffer)**:
+  - 文件: `lib/audio/ring_buffer.dart`
+  - 纯 Dart 高性能定长环形队列（支持 Float32 连续写入、按时窗长度 $N$ 与步长 $L$ 提取重叠帧、多线程/异步消费安全、溢出与欠载统计、最新波形快照提取）。
+  - 测试: 编写 `test/unit/ring_buffer_test.dart`（并发写入读取、回卷覆盖、重叠步长提取与快照完整性）。
+- **切片 5.3: Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)**:
+  - 文件: `lib/audio/audio_processing_isolate.dart`, `lib/audio/audio_messages.dart`
+  - 基于 Dart `Isolate.spawn` 搭建独立的后台音频与 DSP 运算线程；
+  - 建立强类型双向通信消息总线（主线程发送参数配置变更、音频数据帧；Isolate 计算完成后回传轻量级 `PitchAssessment`、自相关波形快照与 FFT 功率谱数据）；
+  - 主线程设置 UI 节流器（30~60 FPS 刷新上限），保证 UI 绝对零卡顿。
+  - 测试: 编写 `test/unit/audio_isolate_test.dart`。
+- **切片 5.4: 平台真实麦克风硬件驱动集成 (MicrophoneAudioSource)**:
+  - 文件: `lib/audio/microphone_audio_source.dart`
+  - 集成 `record` 插件，实现低延迟 16-bit PCM 持续录音流与浮点归一化转换；
+  - 处理动态权限申请、被拒降级与提示引导；
+  - 结合 `WidgetsBindingObserver` 监听应用生命周期（前台恢复唤醒、退火锁屏休眠释放麦克风）。
+  - 测试: 编写 `test/unit/microphone_audio_source_test.dart`。
 
 ---
 
