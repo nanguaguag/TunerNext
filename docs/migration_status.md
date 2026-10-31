@@ -14,7 +14,7 @@
 | **阶段 1** | 全面代码审计与迁移设计方案 | 已完成 | 审计白皮书完备 | 189 项 Kotlin 单测验证通过 | **VERIFIED** |
 | **阶段 2** | Flutter 独立工程脚手架与 M3 主题 | 已完成 | `e58c406` 提交 | M3 主题与 Note 模型单测通过 | **VERIFIED** |
 | **阶段 3** | 纯 Dart DSP 算法引擎与基准测试 | 已完成 | `7a01bea` 提交 | 全量 78 项测试通过 | **VERIFIED** |
-| **阶段 4** | 乐理模型、19种律制与 Scala IO | 进行中 | 切片 4.2 已完成 | 106 项单测全部通过 | **IN_PROGRESS** |
+| **阶段 4** | 乐理模型、19种律制与 Scala IO | 进行中 | 切片 4.3 已完成 | 121 项单测全部通过 | **IN_PROGRESS** |
 | **阶段 5** | 平台音频流采集与 Isolate 并发管道 | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 6** | 乐器调音主界面 (琴弦/表盘/历史图) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 7** | 科学调音界面 (示波器/FFT谱/波形) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
@@ -126,13 +126,18 @@
    - 建立高精度有理数分数运算体系 (`RationalNumber`)、微音差修正项 (`FifthModification`) 与五度相生圈模型。
    - 封装抽象律制基类 `Temperament`，实现十二平均律 (`EqualTemperament.edo12`) 与通用任意等分微分音音阶 ($N$-EDO，如 19/24/31-EDO)。
    - 测试: `test/domain/equal_temperament_test.dart` 15 组测试全部通过。
-10. **阶段 4 / 切片 4.3: 纯律与历史律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)** (下一任务):
-   - 移植 19 种古典欧洲历史律制（纯律、毕达哥拉斯律、1/4逗音中庸律、Werckmeister III、Kirnberger III 等），实现基准根音任意切换。
-   - 测试: 编写 `test/domain/historical_temperament_test.dart`。
+10. **阶段 4 / 切片 4.3: 纯律与历史古典律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)** (`VERIFIED`):
+   - 文件: `lib/domain/temperaments/chain_of_fifths.dart`, `lib/domain/temperaments/chain_of_fifths_temperament.dart`, `lib/domain/temperaments/rational_temperament.dart`, `lib/domain/temperaments/predefined_temperament.dart`
+   - 完整移植原版全部 19 种历史律制目录（纯律、毕达哥拉斯律、1/4 逗音、扩展 1/4 逗音 15 音阶、1/3 逗音、1/5 逗音、Werckmeister III/IV/V/VI、Kirnberger I/II/III、Neidhardt I/II/III、Vallotti、Young II）。
+   - 实现沿五度链折叠算法（`ChainOfFifths`）与纯有理数比率（`RationalTemperament`），严格支持任意根音（Root Note）动态切换。
+   - 测试: `test/domain/historical_temperament_test.dart` 15 组测试全部通过。
+11. **阶段 4 / 切片 4.4: 延展调音曲线 (Stretch Tuning)** (下一任务):
+   - 移植 Railsback 钢琴延展调音经验曲线与琴弦刚度非谐性微调模型。
+   - 测试: 编写 `test/domain/stretch_tuning_test.dart`。
 
 ---
 
 ## 四、当前阻塞条件与后续准入
 
-- **当前任务**: 阶段 4 / 切片 4.2 开发与验证已完成，工作区通过全部三道质量门禁。
-- **下一步准入要求**: 等待用户代码审查确认后，方可启动【切片 4.3：纯律与历史律制】。
+- **当前任务**: 阶段 4 / 切片 4.3 开发与验证已完成，工作区通过全部三道质量门禁。
+- **下一步准入要求**: 等待用户代码审查确认后，方可启动【切片 4.4：延展调音曲线 (Stretch Tuning)】。

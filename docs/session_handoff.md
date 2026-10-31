@@ -1,7 +1,7 @@
 # 会话交接备忘录 (Session Handoff & Context Continuity)
 
 > **交接时间**: 2026-10-31  
-> **会话状态**: 【阶段 4 / 切片 4.2：律制体系架构与十二平均律 (12-EDO)】已 100% 完成并验证，全量 106 项自动化测试全部通过，工作区纯净。下一切片为【阶段 4 / 切片 4.3：纯律与历史律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)】。
+> **会话状态**: 【阶段 4 / 切片 4.3：纯律与历史古典律制】已 100% 完成并验证，全量 121 项自动化测试全部通过，工作区纯净。下一切片为【阶段 4 / 切片 4.4：延展调音曲线 (Stretch Tuning)】。
 
 ---
 
@@ -110,16 +110,25 @@ tuner_flutter/
 
 ---
 
-### 2. 下一步规划：阶段 4 纯律与历史古典律制 (Slice 4.3)
+- **切片 4.3: 纯律与历史古典律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)** (`VERIFIED`):
+  - 文件: `lib/domain/temperaments/chain_of_fifths.dart`, `lib/domain/temperaments/chain_of_fifths_temperament.dart`, `lib/domain/temperaments/rational_temperament.dart`, `lib/domain/temperaments/predefined_temperament.dart`
+  - 测试: `test/domain/historical_temperament_test.dart` (15 组测试全部通过)
+  - 核心突破:
+    1. 沿五度链折叠算法 `ChainOfFifths`：向上向下双向相生并自动归一化折叠至 `[1.0, 2.0)`，实现闭合五度圈校正。
+    2. 纯分数有理数律制 `RationalTemperament`：精确承载纯律 (Just Intonation) 与 Werckmeister VI 单弦物理弦长比率。
+    3. 全量 19 种历史律制目录 `PredefinedTemperaments`：毕达哥拉斯律 (407.82c 大三度)、纯律 (386.31c 大三度)、中庸律家族 (1/4、15音扩展、1/3、1/5)、魏克迈斯特良律 (III/IV/V/VI)、基恩贝格 (I/II/III)、奈德哈特 (I/II/III)、瓦洛蒂与杨氏第 2 律。
+    4. 动态根音切换：支持以任意主音为基准，实时重构律制频率与音阶。
 
-在下一任务中，推进【切片 4.3】：
+---
 
-- **切片 4.3: 纯律与历史古典律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)**:
-  - 对应 Kotlin: `temperaments/PredefinedTemperaments.kt`, `temperaments/TemperamentCircleOfFifths.kt`, `temperaments/TemperamentRationalNumbers.kt`
-  - 移植 19 种古典历史律制音分偏置表，实现基准主音（Root Note）任意切换与五度相生圈对应。
-  - 测试: 编写 `test/domain/historical_temperament_test.dart`。
-- **切片 4.3: 纯律与历史律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)**:
-  - 移植 19 种古典历史律制音分偏置表，实现基准根音切换。
+### 2. 下一步规划：阶段 4 延展调音曲线 (Stretch Tuning)
+
+在下一任务中，推进【切片 4.4】：
+
+- **切片 4.4: 延展调音曲线 (Stretch Tuning)**:
+  - 对应 Kotlin: `stretchtuning/StretchTuning.kt`, `stretchtuning/Railsback.kt`
+  - 移植 Railsback 经验曲线模型与非谐性多项式微调模型。
+  - 测试: 编写 `test/domain/stretch_tuning_test.dart`。
 - **切片 4.4: 延展调音曲线 (Stretch Tuning)**:
   - 移植 Railsback 曲线与刚度系数 $B$ 对高低频琴键的微调偏移。
 - **切片 4.5: Scala 文件解析器 (.scl & .kbm)**:
@@ -136,7 +145,7 @@ tuner_flutter/
 ```text
 你好！我们正在进行将开源 Android Kotlin 调音器（/Users/huzongyao/flutterProjects/Tuner，分支 feature/advanced-pitch-algorithms）渐进式重构为 Flutter 应用（/Users/huzongyao/flutterProjects/tuner_flutter，分支 feature/rollback）的项目。
 
-在上一会话中，我们已经顺利完成了【阶段 4 / 切片 4.2：律制体系架构与十二平均律 (12-EDO)】的实现与验证，全量 106 项自动化测试 100% 通过，工作区纯净。
+在上一会话中，我们已经顺利完成了【阶段 4 / 切片 4.3：纯律与历史古典律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)】的实现与验证，全量 121 项自动化测试 100% 通过，工作区纯净。
 
 请首先阅读以下关键文档建立上下文：
 1. /Users/huzongyao/flutterProjects/tuner_flutter/AGENTS.md
@@ -145,5 +154,5 @@ tuner_flutter/
 4. /Users/huzongyao/flutterProjects/tuner_flutter/docs/feature_matrix.md
 5. /Users/huzongyao/flutterProjects/tuner_flutter/docs/algorithm_specification.md
 
-在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 4 / 切片 4.3：纯律与历史古典律制 (Just Intonation, Pythagorean, Meantone, Werckmeister)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
+在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 4 / 切片 4.4：延展调音曲线 (Stretch Tuning)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
 ```
