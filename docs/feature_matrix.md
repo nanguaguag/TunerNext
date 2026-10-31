@@ -79,6 +79,7 @@
 | **AUDIO-05** | 音频外设插拔与硬件重连 | 蓝牙耳机、有线耳机插拔广播监听及采样重置。 | 无 | 0% | AUDIO-02 | 无 | 未测试 | 监听路由切换事件并平滑重启音频源。 | 外设切换时无死锁且自动恢复调音。 | `NOT_STARTED` |
 | **AUDIO-06** | 浮点归一化与直流偏置消除 | 将 16-bit PCM 转换为 $[-1.0, 1.0]$ 并减去直流分量均值。 | 无 | 0% | AUDIO-02 | 无 | 未测试 | 向量化时域样本预处理。 | 消除零漂移，振幅保持线性。 | `NOT_STARTED` |
 | **AUDIO-07** | 科学波形快照缓冲 | 保持最新的 4096 采样供时域波形图与 WAV 写入共享。 | `lib/audio/audio_ring_buffer.dart` (`getLatestSnapshot`) | 100% | AUDIO-03 | `test/unit/ring_buffer_test.dart` | 23组测试全部通过 | 无 (已实现非破坏性最新采样克隆与边界解包，不影响消费读指针) | UI 获取最新波形不阻断音频流。 | `VERIFIED` |
+| **AUDIO-08** | Isolate 后台并发隔离与通信总线 | `SoundSource.kt` 协程管道并发运算。 | `lib/audio/audio_processing_isolate.dart`, `audio_messages.dart` | 100% | AUDIO-03, DSP-16 | `test/unit/audio_isolate_test.dart` | 7组测试全部通过 | 无 (已实现强类型双向通信消息总线、握手生命周期、动态参数热更与 UI 节流) | DSP 密集计算 100% 移出主 UI 线程，UI 保持 60 FPS 零卡顿。 | `VERIFIED` |
 
 ---
 

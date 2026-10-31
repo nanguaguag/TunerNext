@@ -1,7 +1,7 @@
 # 会话交接备忘录 (Session Handoff & Context Continuity)
 
 > **交接时间**: 2026-10-31  
-> **会话状态**: 【阶段 5 / 切片 5.2：无锁环形采样缓冲队列 (AudioRingBuffer)】已 100% 全部完成并验证，全量 208 项自动化测试全部通过，工作区纯净。下一任务为启动【阶段 5 / 切片 5.3：Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)】。
+> **会话状态**: 【阶段 5 / 切片 5.3：Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)】已 100% 全部完成并验证，全量 215 项自动化测试全部通过，工作区纯净。下一任务为启动【阶段 5 / 切片 5.4：平台真实麦克风硬件驱动集成 (MicrophoneAudioSource)】。
 
 ---
 
@@ -15,8 +15,8 @@
 2. **Flutter 重构工程 (重构目标仓库)**:
    - 路径: `/Users/huzongyao/flutterProjects/tuner_flutter`
    - 当前分支: `feature/rollback`
-   - 当前最新检出 Commit: `974a4b2` ("feat(audio): implement AudioSource abstraction and MockAudioSource signal generator (slice 5.1)")
-   - 工作区状态: 静态分析 `flutter analyze` 零告警 (0 issues)，自动化测试 **208 项用例 100% 全部通过**。
+   - 当前最新检出 Commit: `2b2a6cc` ("feat(audio): implement AudioRingBuffer circular queue and sliding window extractor (slice 5.2)")
+   - 工作区状态: 静态分析 `flutter analyze` 零告警 (0 issues)，自动化测试 **215 项用例 100% 全部通过**。
    - 历史探索分支: `main`（保留历史记录供查阅，禁止盲目复用）。
 
 ---
@@ -183,12 +183,14 @@ tuner_flutter/
     2. 完整支持重叠滑动分析时窗提取（`read(destination, windowSize, stride)`），支持任意重叠率步长推进与欠载零拷贝防护。
     3. 提供非破坏性最新波形快照提取（`getLatestSnapshot`），自动跨越回卷边界并以前置静音平滑补齐，供 UI 示波器与 WAV 录音器安全共享，绝不阻断 DSP 消费读指针。
     4. 支持灵活的溢出保护策略（默认覆盖最老采样保证实时低延迟，或拒绝溢出）与丢包、溢出次数完整诊断统计。
-- **切片 5.3: Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)**:
+- **切片 5.3: Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)** (`VERIFIED`):
   - 文件: `lib/audio/audio_processing_isolate.dart`, `lib/audio/audio_messages.dart`
-  - 基于 Dart `Isolate.spawn` 搭建独立的后台音频与 DSP 运算线程；
-  - 建立强类型双向通信消息总线（主线程发送参数配置变更、音频数据帧；Isolate 计算完成后回传轻量级 `PitchAssessment`、自相关波形快照与 FFT 功率谱数据）；
-  - 主线程设置 UI 节流器（30~60 FPS 刷新上限），保证 UI 绝对零卡顿。
-  - 测试: 编写 `test/unit/audio_isolate_test.dart`。
+  - 测试: `test/unit/audio_isolate_test.dart` (7 组测试全部通过)
+  - 核心突破:
+    1. 基于 Dart `Isolate.spawn` 搭建独立的后台音频与 DSP 运算线程，将加窗、自相关、FFT、MPM/TWM 多引擎计算及平滑滤波 100% 移出 UI 主线程。
+    2. 建立强类型双向通信消息总线（`AudioDataMessage`, `ConfigureDspMessage`, `ResetDspMessage`, `DisposeWorkerMessage` $\leftrightarrow$ `WorkerReadyMessage`, `AudioAnalysisResult`, `WorkerErrorMessage`），支持实时动态热更测频算法、声学计权与时窗参数。
+    3. 主线程集成高精度零延迟时间戳 UI 节流器（`setThrottleFps`，默认 60 FPS），有效平抑高频重绘负载，彻底杜绝 UI 掉帧卡顿；同时保留直通全速流（`unthrottledResultStream`）以保障科学示波与单测精度。
+    4. 后台 Worker 集成实时 FFT 频域幅值谱计算，为后续科学示波界面提供开箱即用的高精数据。
 - **切片 5.4: 平台真实麦克风硬件驱动集成 (MicrophoneAudioSource)**:
   - 文件: `lib/audio/microphone_audio_source.dart`
   - 集成 `record` 插件，实现低延迟 16-bit PCM 持续录音流与浮点归一化转换；
@@ -205,7 +207,7 @@ tuner_flutter/
 ```text
 你好！我们正在进行将开源 Android Kotlin 调音器（/Users/huzongyao/flutterProjects/Tuner，分支 feature/advanced-pitch-algorithms）渐进式重构为 Flutter 应用（/Users/huzongyao/flutterProjects/tuner_flutter，分支 feature/rollback）的项目。
 
-在上一会话中，我们已经顺利完成了【阶段 5 / 切片 5.2：无锁环形采样缓冲队列 (AudioRingBuffer)】的全部开发与验证，全量 208 项自动化测试 100% 通过，工作区纯净。
+在上一会话中，我们已经顺利完成了【阶段 5 / 切片 5.3：Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)】的全部开发与验证，全量 215 项自动化测试 100% 通过，工作区纯净。
 
 请首先阅读以下关键文档建立上下文：
 1. /Users/huzongyao/flutterProjects/tuner_flutter/AGENTS.md
@@ -214,5 +216,5 @@ tuner_flutter/
 4. /Users/huzongyao/flutterProjects/tuner_flutter/docs/feature_matrix.md
 5. /Users/huzongyao/flutterProjects/tuner_flutter/docs/architecture.md
 
-在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 5 / 切片 5.3：Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
+在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 5 / 切片 5.4：平台真实麦克风硬件驱动集成 (MicrophoneAudioSource)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
 ```
