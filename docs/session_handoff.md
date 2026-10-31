@@ -1,7 +1,7 @@
 # 会话交接备忘录 (Session Handoff & Context Continuity)
 
 > **交接时间**: 2026-10-31  
-> **会话状态**: 【阶段 4：乐理模型、19种律制、延展调音、Scala 与乐器体系 (Slices 4.1 ~ 4.6)】已 100% 全部完成并验证，全量 166 项自动化测试全部通过，工作区纯净。下一任务为启动【阶段 5：平台音频流采集与 Isolate 并发管道】（切片 5.1：音频输入源抽象与平台通道驱动）。
+> **会话状态**: 【阶段 5 / 切片 5.1：音频输入源抽象与模拟流发生器 (AudioSource & MockAudioSource)】已 100% 全部完成并验证，全量 185 项自动化测试全部通过，工作区纯净。下一任务为启动【阶段 5 / 切片 5.2：无锁环形采样缓冲队列 (AudioRingBuffer)】。
 
 ---
 
@@ -15,8 +15,8 @@
 2. **Flutter 重构工程 (重构目标仓库)**:
    - 路径: `/Users/huzongyao/flutterProjects/tuner_flutter`
    - 当前分支: `feature/rollback`
-   - 当前最新检出 Commit: `1b58c05` ("feat(theory): implement instrument models, presets, target note auto-detection, and InstrumentIO (slice 4.6)")
-   - 工作区状态: 零未提交改动 (`working tree clean`)，静态分析 `flutter analyze` 零告警 (0 issues)，自动化测试 **166 项用例 100% 全部通过**。
+   - 当前最新检出 Commit: `1b58c05`
+   - 工作区状态: 静态分析 `flutter analyze` 零告警 (0 issues)，自动化测试 **185 项用例 100% 全部通过**。
    - 历史探索分支: `main`（保留历史记录供查阅，禁止盲目复用）。
 
 ---
@@ -168,11 +168,13 @@ tuner_flutter/
 
 乐理与算法层（阶段 3 与阶段 4 全部 13 个功能切片，166 项自动化单测）已全部固化并闭环验证。接下来启动【阶段 5：平台音频采集与多线程管道】：
 
-- **切片 5.1: 音频输入源抽象与模拟流发生器 (AudioSource & MockAudioSource)**:
+- **切片 5.1: 音频输入源抽象与模拟流发生器 (AudioSource & MockAudioSource)** (`VERIFIED`):
   - 文件: `lib/audio/audio_source_interface.dart`, `lib/audio/mock_audio_source.dart`
-  - 完善 `AudioSource` 统一抽象（生命周期状态、采样率、声道数、`Stream<Float32List>` 样本流、start/stop/pause/resume/dispose）。
-  - 实现纯 Dart 内存声学模拟发生器 `MockAudioSource`（支持生成纯正弦波、指定泛音衰减比例的复合谐波、弦乐刚度系数 $B$ 色散波形、白噪声与静音，且可配置推流帧率与采样点大小）。
-  - 测试: 编写 `test/unit/audio_source_test.dart`（验证模拟流的时域连续性、振幅归一化与周期时间精度）。
+  - 测试: `test/unit/audio_source_test.dart` (19 组测试全部通过)
+  - 核心突破:
+    1. 完善 `AudioSource` 统一抽象（生命周期状态 `idle`, `recording`, `paused`, `error`, `disposed`、单声道 44.1kHz、`Stream<Float32List>` 采样流、`Stream<AudioSourceState>` 状态响应流、强类型硬件异常分级）。
+    2. 实现纯 Dart 内存声学模拟发生器 `MockAudioSource`（支持生成纯正弦波、指定泛音衰减比例的复合谐波、弦乐刚度系数 $B$ 色散波形、白噪声、扫频波 Chirp、自定义 TestFunction 与静音，支持可配置帧率与推流大小）。
+    3. 严格保证跨帧连续时间步进与跨 `pause()`/`resume()` 相位连续性（Phase Continuity），杜绝接缝截断咔哒声，支持实时定时推流与单元测试确定性手动推流。
 - **切片 5.2: 无锁环形缓冲区与音频流消费提取 (AudioRingBuffer)**:
   - 文件: `lib/audio/ring_buffer.dart`
   - 纯 Dart 高性能定长环形队列（支持 Float32 连续写入、按时窗长度 $N$ 与步长 $L$ 提取重叠帧、多线程/异步消费安全、溢出与欠载统计、最新波形快照提取）。
@@ -199,7 +201,7 @@ tuner_flutter/
 ```text
 你好！我们正在进行将开源 Android Kotlin 调音器（/Users/huzongyao/flutterProjects/Tuner，分支 feature/advanced-pitch-algorithms）渐进式重构为 Flutter 应用（/Users/huzongyao/flutterProjects/tuner_flutter，分支 feature/rollback）的项目。
 
-在上一会话中，我们已经顺利完成了【阶段 4：乐理模型、19种律制与乐器体系 (Slices 4.1 ~ 4.6)】的全部开发与验证，全量 166 项自动化测试 100% 通过，工作区纯净。
+在上一会话中，我们已经顺利完成了【阶段 5 / 切片 5.1：音频输入源抽象与模拟流发生器 (AudioSource & MockAudioSource)】的全部开发与验证，全量 185 项自动化测试 100% 通过，工作区纯净。
 
 请首先阅读以下关键文档建立上下文：
 1. /Users/huzongyao/flutterProjects/tuner_flutter/AGENTS.md
@@ -208,5 +210,5 @@ tuner_flutter/
 4. /Users/huzongyao/flutterProjects/tuner_flutter/docs/feature_matrix.md
 5. /Users/huzongyao/flutterProjects/tuner_flutter/docs/architecture.md
 
-在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 5 / 切片 5.1：音频输入源抽象与模拟流发生器 (AudioSource & MockAudioSource)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
+在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 5 / 切片 5.2：无锁环形采样缓冲队列 (AudioRingBuffer)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
 ```

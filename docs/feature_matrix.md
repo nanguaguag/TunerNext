@@ -73,7 +73,7 @@
 | ID | 功能名称 | Kotlin 源码位置及行为 | Flutter 对应文件/方法 | 实现度 | 依赖项 | 测试文件/用例 | 测试结果 | 尚未完成工作 | 最终验收标准 | 当前状态 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **AUDIO-01** | 麦克风动态权限与拒绝处理 | `TunerApplication.kt`, `MainActivity.kt`: 请求 `RECORD_AUDIO`，被拒提示并引导打开设置。 | 无 | 0% | `permission_handler` | 无 | 未测试 | 编写权限处理状态机与引导对话框。 | 拒绝权限时提示友好且不崩溃。 | `NOT_STARTED` |
-| **AUDIO-02** | 硬件音频流采集 (PCM 16-bit) | `AudioRecord` 初始化为 44100Hz 单声道低延迟流。 | `lib/audio/audio_source_interface.dart` (接口定义) | 10% | 平台音频驱动 | 无 | 未测试 | 采用 `record` 插件流式读取原始字节或编写平台通道。 | 音频稳定以 44.1kHz 持续推入。 | `NOT_STARTED` |
+| **AUDIO-02** | 音频输入源抽象与模拟流发生器 | `AudioRecord` 初始化为 44100Hz 单声道低延迟流。 | `lib/audio/audio_source_interface.dart`, `mock_audio_source.dart` | 50% | 无 | `test/unit/audio_source_test.dart` | 19组测试全部通过 | 硬件真机麦克风插件集成 (切片 5.4)。 | 统一抽象生命周期、模拟声学发生器高精推流无相位断裂。 | `IN_PROGRESS` |
 | **AUDIO-03** | 无锁环形缓冲区 | 生产者推入音频流，消费者按窗口大小提取帧。 | 无 | 0% | AUDIO-02 | 无 | 未测试 | 纯 Dart 实现定长环形 Float32 队列。 | 高负载下不发生内存分配与卡顿。 | `NOT_STARTED` |
 | **AUDIO-04** | 应用生命周期休眠与唤醒 | App 退火至后台或锁屏时暂停 AudioRecord，返回前台恢复。 | 无 | 0% | `WidgetsBindingObserver` | 无 | 未测试 | 绑定 AppLifecycleState 控制采集启停。 | 后台运行时麦克风占用指示灯熄灭。 | `NOT_STARTED` |
 | **AUDIO-05** | 音频外设插拔与硬件重连 | 蓝牙耳机、有线耳机插拔广播监听及采样重置。 | 无 | 0% | AUDIO-02 | 无 | 未测试 | 监听路由切换事件并平滑重启音频源。 | 外设切换时无死锁且自动恢复调音。 | `NOT_STARTED` |
