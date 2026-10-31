@@ -1,9 +1,9 @@
 # 迁移基线与阶段开发状态 (Migration Status)
 
 > **更新时间**: 2026-10-31  
-> **当前可信 Git 基线**: `1b58c05` (分支: `feature/rollback`)  
+> **当前可信 Git 基线**: `974a4b2` (分支: `feature/rollback`)  
 > **归档参考分支**: `main` (包含历史探索代码，供查阅设计教训，不可直接盲信)  
-> **工作区状态**: 纯净无改动 (`working tree clean`)，`flutter analyze` 零告警，自动化测试 100% 通过 (185/185 项)。
+> **工作区状态**: 纯净无改动 (`working tree clean`)，`flutter analyze` 零告警，自动化测试 100% 通过 (208/208 项)。
 
 ---
 
@@ -15,7 +15,7 @@
 | **阶段 2** | Flutter 独立工程脚手架与 M3 主题 | 已完成 | `e58c406` 提交 | M3 主题与 Note 模型单测通过 | **VERIFIED** |
 | **阶段 3** | 纯 Dart DSP 算法引擎与基准测试 | 已完成 | `7a01bea` 提交 | 全量 78 项测试通过 | **VERIFIED** |
 | **阶段 4** | 乐理模型、19种律制与 Scala IO | 已完成 | 全切片 4.1~4.6 完成 | 166 项单测全部通过 | **VERIFIED** |
-| **阶段 5** | 平台音频流采集与 Isolate 并发管道 | 进行中 | 切片 5.1 已完成 | 19 项音频单测全部通过 | **IN_PROGRESS** |
+| **阶段 5** | 平台音频流采集与 Isolate 并发管道 | 进行中 | 切片 5.1~5.2 已完成 | 42 项音频单测全部通过 | **IN_PROGRESS** |
 | **阶段 6** | 乐器调音主界面 (琴弦/表盘/历史图) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 7** | 科学调音界面 (示波器/FFT谱/波形) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 8** | 偏好设置、16语种国际化与状态持久化 | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
@@ -155,10 +155,17 @@
     - 纯 Dart 实现高保真声学模拟发生器 `MockAudioSource` 与多波形体系（`MockSilenceSignal`, `MockSineWaveSignal`, `MockHarmonicSignal`, `MockWhiteNoiseSignal`, `MockFrequencySweepSignal`, `MockCustomSignal`），支持钢琴/弦乐刚度非谐性系数 $B$ 色散计算与 Nyquist 防镜像保护。
     - 严格保证跨帧连续时间步进与跨 `pause()`/`resume()` 相位连续性（Phase Continuity），杜绝接缝截断咔哒声，支持实时定时推流与单元测试确定性手动推流。
     - 测试: `test/unit/audio_source_test.dart` 19 组测试全部通过。
+15. **阶段 5 / 切片 5.2: 无锁环形采样缓冲队列 (AudioRingBuffer)** (`VERIFIED`):
+    - 文件: `lib/audio/audio_ring_buffer.dart`, `lib/audio/ring_buffer.dart`
+    - 纯 Dart 高性能定长环形队列，支持 `Float32List` 底层块写入与 `Int16List` 零内存分配浮点归一化写入（`1.0 / 32768.0`）。
+    - 完整支持重叠滑动分析时窗提取（`read(destination, windowSize, stride)`），支持任意重叠率步长推进与欠载零拷贝防护。
+    - 提供非破坏性最新波形快照提取（`getLatestSnapshot`），自动跨越回卷边界并以前置静音平滑补齐，供 UI 示波器与 WAV 录音器安全共享，绝不阻断 DSP 消费读指针。
+    - 支持灵活的溢出保护策略（默认覆盖最老采样保证实时低延迟，或拒绝溢出）与丢包、溢出次数完整诊断统计。
+    - 测试: `test/unit/ring_buffer_test.dart` 23 组测试全部通过。
 
 ---
 
 ## 四、当前阻塞条件与后续准入
 
-- **当前任务**: 阶段 5 / 切片 5.1（音频输入源抽象与模拟流发生器）开发与验证已全部完成，全量 185 项自动化测试 100% 通过。
-- **下一步准入要求**: 等待用户代码审查确认后，方可启动【阶段 5 / 切片 5.2：无锁环形采样缓冲队列 (AudioRingBuffer)】。
+- **当前任务**: 阶段 5 / 切片 5.2（无锁环形采样缓冲队列）开发与验证已全部完成，全量 208 项自动化测试 100% 通过。
+- **下一步准入要求**: 等待用户代码审查确认后，方可启动【阶段 5 / 切片 5.3：Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)】。

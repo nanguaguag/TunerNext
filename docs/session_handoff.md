@@ -1,7 +1,7 @@
 # 会话交接备忘录 (Session Handoff & Context Continuity)
 
 > **交接时间**: 2026-10-31  
-> **会话状态**: 【阶段 5 / 切片 5.1：音频输入源抽象与模拟流发生器 (AudioSource & MockAudioSource)】已 100% 全部完成并验证，全量 185 项自动化测试全部通过，工作区纯净。下一任务为启动【阶段 5 / 切片 5.2：无锁环形采样缓冲队列 (AudioRingBuffer)】。
+> **会话状态**: 【阶段 5 / 切片 5.2：无锁环形采样缓冲队列 (AudioRingBuffer)】已 100% 全部完成并验证，全量 208 项自动化测试全部通过，工作区纯净。下一任务为启动【阶段 5 / 切片 5.3：Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)】。
 
 ---
 
@@ -15,8 +15,8 @@
 2. **Flutter 重构工程 (重构目标仓库)**:
    - 路径: `/Users/huzongyao/flutterProjects/tuner_flutter`
    - 当前分支: `feature/rollback`
-   - 当前最新检出 Commit: `1b58c05`
-   - 工作区状态: 静态分析 `flutter analyze` 零告警 (0 issues)，自动化测试 **185 项用例 100% 全部通过**。
+   - 当前最新检出 Commit: `974a4b2` ("feat(audio): implement AudioSource abstraction and MockAudioSource signal generator (slice 5.1)")
+   - 工作区状态: 静态分析 `flutter analyze` 零告警 (0 issues)，自动化测试 **208 项用例 100% 全部通过**。
    - 历史探索分支: `main`（保留历史记录供查阅，禁止盲目复用）。
 
 ---
@@ -175,10 +175,14 @@ tuner_flutter/
     1. 完善 `AudioSource` 统一抽象（生命周期状态 `idle`, `recording`, `paused`, `error`, `disposed`、单声道 44.1kHz、`Stream<Float32List>` 采样流、`Stream<AudioSourceState>` 状态响应流、强类型硬件异常分级）。
     2. 实现纯 Dart 内存声学模拟发生器 `MockAudioSource`（支持生成纯正弦波、指定泛音衰减比例的复合谐波、弦乐刚度系数 $B$ 色散波形、白噪声、扫频波 Chirp、自定义 TestFunction 与静音，支持可配置帧率与推流大小）。
     3. 严格保证跨帧连续时间步进与跨 `pause()`/`resume()` 相位连续性（Phase Continuity），杜绝接缝截断咔哒声，支持实时定时推流与单元测试确定性手动推流。
-- **切片 5.2: 无锁环形缓冲区与音频流消费提取 (AudioRingBuffer)**:
-  - 文件: `lib/audio/ring_buffer.dart`
-  - 纯 Dart 高性能定长环形队列（支持 Float32 连续写入、按时窗长度 $N$ 与步长 $L$ 提取重叠帧、多线程/异步消费安全、溢出与欠载统计、最新波形快照提取）。
-  - 测试: 编写 `test/unit/ring_buffer_test.dart`（并发写入读取、回卷覆盖、重叠步长提取与快照完整性）。
+- **切片 5.2: 无锁环形采样缓冲队列 (AudioRingBuffer)** (`VERIFIED`):
+  - 文件: `lib/audio/audio_ring_buffer.dart`, `lib/audio/ring_buffer.dart`
+  - 测试: `test/unit/ring_buffer_test.dart` (23 组测试全部通过)
+  - 核心突破:
+    1. 纯 Dart 高性能定长环形队列，支持 `Float32List` 底层块写入与 `Int16List` 零内存分配浮点归一化写入（`1.0 / 32768.0`）。
+    2. 完整支持重叠滑动分析时窗提取（`read(destination, windowSize, stride)`），支持任意重叠率步长推进与欠载零拷贝防护。
+    3. 提供非破坏性最新波形快照提取（`getLatestSnapshot`），自动跨越回卷边界并以前置静音平滑补齐，供 UI 示波器与 WAV 录音器安全共享，绝不阻断 DSP 消费读指针。
+    4. 支持灵活的溢出保护策略（默认覆盖最老采样保证实时低延迟，或拒绝溢出）与丢包、溢出次数完整诊断统计。
 - **切片 5.3: Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)**:
   - 文件: `lib/audio/audio_processing_isolate.dart`, `lib/audio/audio_messages.dart`
   - 基于 Dart `Isolate.spawn` 搭建独立的后台音频与 DSP 运算线程；
@@ -201,7 +205,7 @@ tuner_flutter/
 ```text
 你好！我们正在进行将开源 Android Kotlin 调音器（/Users/huzongyao/flutterProjects/Tuner，分支 feature/advanced-pitch-algorithms）渐进式重构为 Flutter 应用（/Users/huzongyao/flutterProjects/tuner_flutter，分支 feature/rollback）的项目。
 
-在上一会话中，我们已经顺利完成了【阶段 5 / 切片 5.1：音频输入源抽象与模拟流发生器 (AudioSource & MockAudioSource)】的全部开发与验证，全量 185 项自动化测试 100% 通过，工作区纯净。
+在上一会话中，我们已经顺利完成了【阶段 5 / 切片 5.2：无锁环形采样缓冲队列 (AudioRingBuffer)】的全部开发与验证，全量 208 项自动化测试 100% 通过，工作区纯净。
 
 请首先阅读以下关键文档建立上下文：
 1. /Users/huzongyao/flutterProjects/tuner_flutter/AGENTS.md
@@ -210,5 +214,5 @@ tuner_flutter/
 4. /Users/huzongyao/flutterProjects/tuner_flutter/docs/feature_matrix.md
 5. /Users/huzongyao/flutterProjects/tuner_flutter/docs/architecture.md
 
-在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 5 / 切片 5.2：无锁环形采样缓冲队列 (AudioRingBuffer)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
+在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 5 / 切片 5.3：Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
 ```

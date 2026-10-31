@@ -74,11 +74,11 @@
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **AUDIO-01** | 麦克风动态权限与拒绝处理 | `TunerApplication.kt`, `MainActivity.kt`: 请求 `RECORD_AUDIO`，被拒提示并引导打开设置。 | 无 | 0% | `permission_handler` | 无 | 未测试 | 编写权限处理状态机与引导对话框。 | 拒绝权限时提示友好且不崩溃。 | `NOT_STARTED` |
 | **AUDIO-02** | 音频输入源抽象与模拟流发生器 | `AudioRecord` 初始化为 44100Hz 单声道低延迟流。 | `lib/audio/audio_source_interface.dart`, `mock_audio_source.dart` | 50% | 无 | `test/unit/audio_source_test.dart` | 19组测试全部通过 | 硬件真机麦克风插件集成 (切片 5.4)。 | 统一抽象生命周期、模拟声学发生器高精推流无相位断裂。 | `IN_PROGRESS` |
-| **AUDIO-03** | 无锁环形缓冲区 | 生产者推入音频流，消费者按窗口大小提取帧。 | 无 | 0% | AUDIO-02 | 无 | 未测试 | 纯 Dart 实现定长环形 Float32 队列。 | 高负载下不发生内存分配与卡顿。 | `NOT_STARTED` |
+| **AUDIO-03** | 无锁环形采样缓冲队列 | 生产者推入音频流，消费者按窗口大小提取帧。 | `lib/audio/audio_ring_buffer.dart`, `ring_buffer.dart` | 100% | AUDIO-02 | `test/unit/ring_buffer_test.dart` | 23组测试全部通过 | 无 (已支持回卷拷贝、滑动重叠步长提取、Int16快速归一化与溢出策略) | 高负载下零内存分配，重叠窗口提取精准无丢帧。 | `VERIFIED` |
 | **AUDIO-04** | 应用生命周期休眠与唤醒 | App 退火至后台或锁屏时暂停 AudioRecord，返回前台恢复。 | 无 | 0% | `WidgetsBindingObserver` | 无 | 未测试 | 绑定 AppLifecycleState 控制采集启停。 | 后台运行时麦克风占用指示灯熄灭。 | `NOT_STARTED` |
 | **AUDIO-05** | 音频外设插拔与硬件重连 | 蓝牙耳机、有线耳机插拔广播监听及采样重置。 | 无 | 0% | AUDIO-02 | 无 | 未测试 | 监听路由切换事件并平滑重启音频源。 | 外设切换时无死锁且自动恢复调音。 | `NOT_STARTED` |
 | **AUDIO-06** | 浮点归一化与直流偏置消除 | 将 16-bit PCM 转换为 $[-1.0, 1.0]$ 并减去直流分量均值。 | 无 | 0% | AUDIO-02 | 无 | 未测试 | 向量化时域样本预处理。 | 消除零漂移，振幅保持线性。 | `NOT_STARTED` |
-| **AUDIO-07** | 科学波形快照缓冲 | 保持最新的 4096 采样供时域波形图与 WAV 写入共享。 | 无 | 0% | AUDIO-03 | 无 | 未测试 | 线程安全快照克隆。 | UI 获取最新波形不阻断音频流。 | `NOT_STARTED` |
+| **AUDIO-07** | 科学波形快照缓冲 | 保持最新的 4096 采样供时域波形图与 WAV 写入共享。 | `lib/audio/audio_ring_buffer.dart` (`getLatestSnapshot`) | 100% | AUDIO-03 | `test/unit/ring_buffer_test.dart` | 23组测试全部通过 | 无 (已实现非破坏性最新采样克隆与边界解包，不影响消费读指针) | UI 获取最新波形不阻断音频流。 | `VERIFIED` |
 
 ---
 
