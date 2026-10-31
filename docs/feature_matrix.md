@@ -72,12 +72,12 @@
 
 | ID | 功能名称 | Kotlin 源码位置及行为 | Flutter 对应文件/方法 | 实现度 | 依赖项 | 测试文件/用例 | 测试结果 | 尚未完成工作 | 最终验收标准 | 当前状态 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **AUDIO-01** | 麦克风动态权限与拒绝处理 | `TunerApplication.kt`, `MainActivity.kt`: 请求 `RECORD_AUDIO`，被拒提示并引导打开设置。 | 无 | 0% | `permission_handler` | 无 | 未测试 | 编写权限处理状态机与引导对话框。 | 拒绝权限时提示友好且不崩溃。 | `NOT_STARTED` |
-| **AUDIO-02** | 音频输入源抽象与模拟流发生器 | `AudioRecord` 初始化为 44100Hz 单声道低延迟流。 | `lib/audio/audio_source_interface.dart`, `mock_audio_source.dart` | 50% | 无 | `test/unit/audio_source_test.dart` | 19组测试全部通过 | 硬件真机麦克风插件集成 (切片 5.4)。 | 统一抽象生命周期、模拟声学发生器高精推流无相位断裂。 | `IN_PROGRESS` |
+| **AUDIO-01** | 麦克风动态权限与拒绝处理 | `TunerApplication.kt`, `MainActivity.kt`: 请求 `RECORD_AUDIO`，被拒提示并引导打开设置。 | `lib/audio/microphone_audio_source.dart` | 100% | `permission_handler` | `test/unit/microphone_audio_source_test.dart` | 全部通过 | 无 (已实现权限状态机检查、拒绝降级与结构化异常分发) | 拒绝权限时提示友好且不崩溃。 | `VERIFIED` |
+| **AUDIO-02** | 硬件音频流采集与抽象发生器 | `AudioRecord` 初始化为 44100Hz 单声道低延迟流。 | `lib/audio/audio_source_interface.dart`, `mock_audio_source.dart`, `microphone_audio_source.dart` | 100% | 平台音频驱动 | `test/unit/audio_source_test.dart`, `microphone_audio_source_test.dart` | 31组测试全部通过 | 无 (已支持模拟发生器与基于 record 插件的真实麦克风硬件驱动) | 音频稳定以 44.1kHz 持续推入，各端抽象统一。 | `VERIFIED` |
 | **AUDIO-03** | 无锁环形采样缓冲队列 | 生产者推入音频流，消费者按窗口大小提取帧。 | `lib/audio/audio_ring_buffer.dart`, `ring_buffer.dart` | 100% | AUDIO-02 | `test/unit/ring_buffer_test.dart` | 23组测试全部通过 | 无 (已支持回卷拷贝、滑动重叠步长提取、Int16快速归一化与溢出策略) | 高负载下零内存分配，重叠窗口提取精准无丢帧。 | `VERIFIED` |
-| **AUDIO-04** | 应用生命周期休眠与唤醒 | App 退火至后台或锁屏时暂停 AudioRecord，返回前台恢复。 | 无 | 0% | `WidgetsBindingObserver` | 无 | 未测试 | 绑定 AppLifecycleState 控制采集启停。 | 后台运行时麦克风占用指示灯熄灭。 | `NOT_STARTED` |
+| **AUDIO-04** | 应用生命周期休眠与唤醒 | App 退火至后台或锁屏时暂停 AudioRecord，返回前台恢复。 | `lib/audio/microphone_audio_source.dart` (`WidgetsBindingObserver`) | 100% | `WidgetsBindingObserver` | `test/unit/microphone_audio_source_test.dart` | 全部通过 | 无 (绑定 AppLifecycleState，后台切入自动暂停麦克风，回到前台自动恢复) | 后台运行时麦克风占用指示灯熄灭，前台无感唤醒。 | `VERIFIED` |
 | **AUDIO-05** | 音频外设插拔与硬件重连 | 蓝牙耳机、有线耳机插拔广播监听及采样重置。 | 无 | 0% | AUDIO-02 | 无 | 未测试 | 监听路由切换事件并平滑重启音频源。 | 外设切换时无死锁且自动恢复调音。 | `NOT_STARTED` |
-| **AUDIO-06** | 浮点归一化与直流偏置消除 | 将 16-bit PCM 转换为 $[-1.0, 1.0]$ 并减去直流分量均值。 | 无 | 0% | AUDIO-02 | 无 | 未测试 | 向量化时域样本预处理。 | 消除零漂移，振幅保持线性。 | `NOT_STARTED` |
+| **AUDIO-06** | 浮点归一化与直流偏置消除 | 将 16-bit PCM 转换为 $[-1.0, 1.0]$ 并减去直流分量均值。 | `lib/audio/microphone_audio_source.dart` (`pcm16BytesToFloat32`) | 100% | AUDIO-02 | `test/unit/microphone_audio_source_test.dart` | 全部通过 | 无 (已实现对齐与非对齐容错的 16-bit PCM 字节线性浮点归一化转换) | 消除零漂移，振幅严格映射至 [-1.0, 1.0]。 | `VERIFIED` |
 | **AUDIO-07** | 科学波形快照缓冲 | 保持最新的 4096 采样供时域波形图与 WAV 写入共享。 | `lib/audio/audio_ring_buffer.dart` (`getLatestSnapshot`) | 100% | AUDIO-03 | `test/unit/ring_buffer_test.dart` | 23组测试全部通过 | 无 (已实现非破坏性最新采样克隆与边界解包，不影响消费读指针) | UI 获取最新波形不阻断音频流。 | `VERIFIED` |
 | **AUDIO-08** | Isolate 后台并发隔离与通信总线 | `SoundSource.kt` 协程管道并发运算。 | `lib/audio/audio_processing_isolate.dart`, `audio_messages.dart` | 100% | AUDIO-03, DSP-16 | `test/unit/audio_isolate_test.dart` | 7组测试全部通过 | 无 (已实现强类型双向通信消息总线、握手生命周期、动态参数热更与 UI 节流) | DSP 密集计算 100% 移出主 UI 线程，UI 保持 60 FPS 零卡顿。 | `VERIFIED` |
 

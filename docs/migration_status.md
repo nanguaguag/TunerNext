@@ -1,9 +1,9 @@
 # 迁移基线与阶段开发状态 (Migration Status)
 
 > **更新时间**: 2026-10-31  
-> **当前可信 Git 基线**: `2b2a6cc` (分支: `feature/rollback`)  
+> **当前可信 Git 基线**: `fe85053` (分支: `feature/rollback`)  
 > **归档参考分支**: `main` (包含历史探索代码，供查阅设计教训，不可直接盲信)  
-> **工作区状态**: 纯净无改动 (`working tree clean`)，`flutter analyze` 零告警，自动化测试 100% 通过 (215/215 项)。
+> **工作区状态**: 纯净无改动 (`working tree clean`)，`flutter analyze` 零告警，自动化测试 100% 通过 (227/227 项)。
 
 ---
 
@@ -15,7 +15,7 @@
 | **阶段 2** | Flutter 独立工程脚手架与 M3 主题 | 已完成 | `e58c406` 提交 | M3 主题与 Note 模型单测通过 | **VERIFIED** |
 | **阶段 3** | 纯 Dart DSP 算法引擎与基准测试 | 已完成 | `7a01bea` 提交 | 全量 78 项测试通过 | **VERIFIED** |
 | **阶段 4** | 乐理模型、19种律制与 Scala IO | 已完成 | 全切片 4.1~4.6 完成 | 166 项单测全部通过 | **VERIFIED** |
-| **阶段 5** | 平台音频流采集与 Isolate 并发管道 | 进行中 | 切片 5.1~5.3 已完成 | 49 项音频单测全部通过 | **IN_PROGRESS** |
+| **阶段 5** | 平台音频流采集与 Isolate 并发管道 | 已完成 | 全切片 5.1~5.4 完成 | 61 项音频单测全部通过 | **VERIFIED** |
 | **阶段 6** | 乐器调音主界面 (琴弦/表盘/历史图) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 7** | 科学调音界面 (示波器/FFT谱/波形) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 8** | 偏好设置、16语种国际化与状态持久化 | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
@@ -169,10 +169,17 @@
     - 主线程集成高精度零延迟时间戳 UI 节流器（`setThrottleFps`，默认 60 FPS），有效平抑高频重绘负载，彻底杜绝 UI 掉帧卡顿；同时保留直通全速流（`unthrottledResultStream`）以保障科学示波与单测精度。
     - 后台 Worker 集成实时 FFT 频域幅值谱计算，为后续科学示波界面提供开箱即用的高精数据。
     - 测试: `test/unit/audio_isolate_test.dart` 7 组测试全部通过。
+17. **阶段 5 / 切片 5.4: 平台真实麦克风硬件驱动集成 (MicrophoneAudioSource)** (`VERIFIED`):
+    - 文件: `lib/audio/microphone_audio_source.dart`
+    - 封装 `MicrophoneDriver` 硬件驱动门面，基于 cross-platform `record` 插件实现 44.1kHz 低延迟单声道 16-bit PCM 采集，显式关闭系统级人声降噪、回声消除与自动增益（AGC/AEC/ANS），完整保留乐器微弱高次泛音。
+    - 实现对齐与非对齐容错的 16-bit PCM 字节到 Float32List 归一化转换器（`pcm16BytesToFloat32`），防御性处理奇数字节偏移与截断。
+    - 集成 `WidgetsBindingObserver` 生命周期管理：后台/锁屏状态下自动暂停释放麦克风硬件并熄灭系统隐私指示灯，回到前台无感自动唤醒恢复。
+    - 完整支持权限拒绝降级（`PermissionDeniedError`）与硬件流异常恢复（`MicrophoneUnavailableError`）。
+    - 测试: `test/unit/microphone_audio_source_test.dart` 12 组测试全部通过。
 
 ---
 
 ## 四、当前阻塞条件与后续准入
 
-- **当前任务**: 阶段 5 / 切片 5.3（Isolate 后台计算并发隔离与消息通信总线）开发与验证已全部完成，全量 215 项自动化测试 100% 通过。
-- **下一步准入要求**: 等待用户代码审查确认后，方可启动【阶段 5 / 切片 5.4：平台真实麦克风硬件驱动集成 (MicrophoneAudioSource)】。
+- **当前任务**: 阶段 5 全部 4 个切片（5.1~5.4）开发与验证已 100% 全部完成，全量 227 项自动化测试全部通过，工作区纯净。
+- **下一步准入要求**: 等待用户代码审查确认后，方可启动【阶段 6：乐器调音主界面 (Instrument Tuner)】（切片 6.1：琴弦侧边栏与弦宽厚度组件 Strings.kt）。

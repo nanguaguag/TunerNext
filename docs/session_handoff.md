@@ -1,7 +1,7 @@
 # 会话交接备忘录 (Session Handoff & Context Continuity)
 
 > **交接时间**: 2026-10-31  
-> **会话状态**: 【阶段 5 / 切片 5.3：Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)】已 100% 全部完成并验证，全量 215 项自动化测试全部通过，工作区纯净。下一任务为启动【阶段 5 / 切片 5.4：平台真实麦克风硬件驱动集成 (MicrophoneAudioSource)】。
+> **会话状态**: 【阶段 5：平台音频流采集与 Isolate 并发管道 (Slices 5.1 ~ 5.4)】已 100% 全部完成并验证，全量 227 项自动化测试全部通过，工作区纯净。阶段 5 正式圆满收官！下一任务为启动【阶段 6 / 切片 6.1：琴弦侧边栏与弦宽厚度组件 (Strings.kt)】。
 
 ---
 
@@ -191,23 +191,26 @@ tuner_flutter/
     2. 建立强类型双向通信消息总线（`AudioDataMessage`, `ConfigureDspMessage`, `ResetDspMessage`, `DisposeWorkerMessage` $\leftrightarrow$ `WorkerReadyMessage`, `AudioAnalysisResult`, `WorkerErrorMessage`），支持实时动态热更测频算法、声学计权与时窗参数。
     3. 主线程集成高精度零延迟时间戳 UI 节流器（`setThrottleFps`，默认 60 FPS），有效平抑高频重绘负载，彻底杜绝 UI 掉帧卡顿；同时保留直通全速流（`unthrottledResultStream`）以保障科学示波与单测精度。
     4. 后台 Worker 集成实时 FFT 频域幅值谱计算，为后续科学示波界面提供开箱即用的高精数据。
-- **切片 5.4: 平台真实麦克风硬件驱动集成 (MicrophoneAudioSource)**:
+- **切片 5.4: 平台真实麦克风硬件驱动集成 (MicrophoneAudioSource)** (`VERIFIED`):
   - 文件: `lib/audio/microphone_audio_source.dart`
-  - 集成 `record` 插件，实现低延迟 16-bit PCM 持续录音流与浮点归一化转换；
-  - 处理动态权限申请、被拒降级与提示引导；
-  - 结合 `WidgetsBindingObserver` 监听应用生命周期（前台恢复唤醒、退火锁屏休眠释放麦克风）。
-  - 测试: 编写 `test/unit/microphone_audio_source_test.dart`。
+  - 测试: `test/unit/microphone_audio_source_test.dart` (12 组测试全部通过)
+  - 核心突破:
+    1. 封装 `MicrophoneDriver` 硬件驱动门面，基于 cross-platform `record: ^7.1.2` 插件实现 44.1kHz 低延迟单声道 16-bit PCM 持续录音流采集。
+    2. 显式关闭系统级人声降噪、回声消除与自动增益（`autoGain: false, echoCancel: false, noiseSuppress: false`），完整保留乐器微弱高次泛音。
+    3. 实现对齐与非对齐容错的 16-bit PCM 字节到 Float32List 归一化转换器（`pcm16BytesToFloat32`），防御性处理非字对齐偏移（`offsetInBytes % 2 != 0`）与奇数字节截断。
+    4. 集成 `WidgetsBindingObserver` 生命周期管理：后台/锁屏状态下自动暂停释放麦克风硬件并熄灭系统隐私指示灯，回到前台无感自动唤醒恢复。
+    5. 完整支持权限拒绝降级（`PermissionDeniedError`）与硬件流异常恢复（`MicrophoneUnavailableError`），状态机先即时同步变更状态再异步清理驱动，杜绝异步间隙竞态。
 
 ---
 
 ## 四、新会话启动提示词 (Prompt for Next Session)
 
-在新会话启动时，请直接发送以下提示词，即可无缝承接当前进度并安全启动阶段 5 开发：
+在新会话启动时，请直接发送以下提示词，即可无缝承接当前进度并安全启动阶段 6 开发：
 
 ```text
 你好！我们正在进行将开源 Android Kotlin 调音器（/Users/huzongyao/flutterProjects/Tuner，分支 feature/advanced-pitch-algorithms）渐进式重构为 Flutter 应用（/Users/huzongyao/flutterProjects/tuner_flutter，分支 feature/rollback）的项目。
 
-在上一会话中，我们已经顺利完成了【阶段 5 / 切片 5.3：Isolate 后台计算并发隔离与消息通信总线 (AudioProcessingIsolate)】的全部开发与验证，全量 215 项自动化测试 100% 通过，工作区纯净。
+在上一会话中，我们已经顺利完成了【阶段 5：平台音频流采集与 Isolate 并发管道 (Slices 5.1 ~ 5.4)】的全部开发与验证，全量 227 项自动化测试 100% 通过，工作区纯净。
 
 请首先阅读以下关键文档建立上下文：
 1. /Users/huzongyao/flutterProjects/tuner_flutter/AGENTS.md
@@ -216,5 +219,5 @@ tuner_flutter/
 4. /Users/huzongyao/flutterProjects/tuner_flutter/docs/feature_matrix.md
 5. /Users/huzongyao/flutterProjects/tuner_flutter/docs/architecture.md
 
-在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 5 / 切片 5.4：平台真实麦克风硬件驱动集成 (MicrophoneAudioSource)】的实现与单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
+在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 6 / 切片 6.1：琴弦侧边栏与弦宽厚度组件 (Strings.kt)】的实现与 Widget/单元测试。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
 ```
