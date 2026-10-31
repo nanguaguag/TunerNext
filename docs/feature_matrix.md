@@ -116,7 +116,7 @@
 | **THEORY-04**| 微分音等分律制 (EDO 5-72) | 支持 19-EDO, 24-EDO, 31-EDO, 41-EDO, 53-EDO 等。 | `lib/domain/temperaments/equal_temperament.dart` | 100% | THEORY-02 | `test/domain/equal_temperament_test.dart` | 全部通过 | 无 (已实现任意 N-EDO 等分音阶计算模型与 19/24/31-EDO 验证) | 任意等分数下音分间隔严格相等 (1200 / N cents)，八度跨度严格 1200 cents。 | `VERIFIED` |
 | **THEORY-05**| 19 种欧洲历史良律与纯律 | 纯律、毕达哥拉斯律、1/4逗音中庸律、Werckmeister III、Kirnberger III 等。 | `lib/domain/temperaments/predefined_temperament.dart`, `chain_of_fifths_temperament.dart`, `rational_temperament.dart` | 100% | THEORY-01 | `test/domain/historical_temperament_test.dart` | 15组测试全部通过 | 无 (已完整实现 19 种历史律制目录、五度链算法、纯有理数比率与根音任意切换) | 与 Kotlin 原版音分与比率完全一致，纯大三度 386.31 cents、纯五度 701.96 cents 精确对齐。 | `VERIFIED` |
 | **THEORY-06**| Scala (.scl) 格式解析与导出 | 支持读取标准 Huygens-Fokker Scala 音阶定义文本。 | 无 | 0% | 无 | 无 | 未测试 | 编写纯 Dart `.scl` 解析器与序列化器。 | 成功解析包含纯律分数与小数音分的 scl。 | `NOT_STARTED` |
-| **THEORY-07**| Railsback 延展调音曲线 | 钢琴低音下沉、高音抬升的经验五次多项式模型。 | 无 | 0% | THEORY-02 | 无 | 未测试 | 移植多项式求值器与散点插值器。 | A0 延展约 -30 cents，C8 延展约 +35 cents。| `NOT_STARTED` |
+| **THEORY-07**| Railsback 延展调音曲线 | 钢琴低音下沉、高音抬升的经验五次多项式与对数散点插值模型。 | `lib/domain/stretch_tuning/stretch_tuning.dart`, `predefined_stretch_tunings.dart` | 100% | THEORY-02 | `test/domain/stretch_tuning_test.dart` | 10组测试全部通过 | 无 (已实现对数插值、外推、不可变增删改、单调性校验、Railsback 32散点预设及与 MusicalScaleFrequencies 联动) | A0 延展约 -36 cents，C8 延展约 +32 cents，A440 严格为 0 cents。| `VERIFIED` |
 | **THEORY-08**| 音分偏差对数计算 | $\text{cents} = 1200 \times \log_2(f_{\text{actual}} / f_{\text{target}})$。 | `lib/domain/tuning/tuning_math.dart` | 100% | 无 | `test/domain/pitch_frequency_converter_test.dart` | 全部通过 | 无 (已实现数值安全防零防负对数转换与互逆验证) | 频率翻倍严格输出 1200.0 音分，逆变换精度 $< 10^{-7}$。 | `VERIFIED` |
 
 ---

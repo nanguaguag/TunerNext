@@ -14,7 +14,7 @@
 | **阶段 1** | 全面代码审计与迁移设计方案 | 已完成 | 审计白皮书完备 | 189 项 Kotlin 单测验证通过 | **VERIFIED** |
 | **阶段 2** | Flutter 独立工程脚手架与 M3 主题 | 已完成 | `e58c406` 提交 | M3 主题与 Note 模型单测通过 | **VERIFIED** |
 | **阶段 3** | 纯 Dart DSP 算法引擎与基准测试 | 已完成 | `7a01bea` 提交 | 全量 78 项测试通过 | **VERIFIED** |
-| **阶段 4** | 乐理模型、19种律制与 Scala IO | 进行中 | 切片 4.3 已完成 | 121 项单测全部通过 | **IN_PROGRESS** |
+| **阶段 4** | 乐理模型、19种律制与 Scala IO | 进行中 | 切片 4.4 已完成 | 131 项单测全部通过 | **IN_PROGRESS** |
 | **阶段 5** | 平台音频流采集与 Isolate 并发管道 | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 6** | 乐器调音主界面 (琴弦/表盘/历史图) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 7** | 科学调音界面 (示波器/FFT谱/波形) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
@@ -131,13 +131,18 @@
    - 完整移植原版全部 19 种历史律制目录（纯律、毕达哥拉斯律、1/4 逗音、扩展 1/4 逗音 15 音阶、1/3 逗音、1/5 逗音、Werckmeister III/IV/V/VI、Kirnberger I/II/III、Neidhardt I/II/III、Vallotti、Young II）。
    - 实现沿五度链折叠算法（`ChainOfFifths`）与纯有理数比率（`RationalTemperament`），严格支持任意根音（Root Note）动态切换。
    - 测试: `test/domain/historical_temperament_test.dart` 15 组测试全部通过。
-11. **阶段 4 / 切片 4.4: 延展调音曲线 (Stretch Tuning)** (下一任务):
-   - 移植 Railsback 钢琴延展调音经验曲线与琴弦刚度非谐性微调模型。
-   - 测试: 编写 `test/domain/stretch_tuning_test.dart`。
+11. **阶段 4 / 切片 4.4: 延展调音曲线 (Stretch Tuning)**:
+   - 文件: `lib/domain/stretch_tuning/stretch_tuning.dart`, `lib/domain/stretch_tuning/predefined_stretch_tunings.dart`
+   - 完整实现 32 散点 Railsback 钢琴延展曲线（A0 约 -35.95 cents，C8 约 +32.07 cents，A440 严格为 0 cents）。
+   - 实现高精度对数线性插值、几何外推、不可变增删改控制点与单调性校验，并闭环集成 `MusicalScaleFrequencies`。
+   - 测试: `test/domain/stretch_tuning_test.dart` 10 组测试全部通过。
+12. **阶段 4 / 切片 4.5: Scala (.scl) 音阶解析与导出** (下一任务):
+   - 编写标准 Huygens-Fokker Scala 音阶文件格式解析器与导出器。
+   - 测试: 编写 `test/domain/scala_parser_test.dart`。
 
 ---
 
 ## 四、当前阻塞条件与后续准入
 
-- **当前任务**: 阶段 4 / 切片 4.3 开发与验证已完成，工作区通过全部三道质量门禁。
-- **下一步准入要求**: 等待用户代码审查确认后，方可启动【切片 4.4：延展调音曲线 (Stretch Tuning)】。
+- **当前任务**: 阶段 4 / 切片 4.4 开发与验证已完成，全量 131 项自动化测试 100% 通过。
+- **下一步准入要求**: 等待用户代码审查确认后，方可启动【切片 4.5：Scala (.scl) 音阶解析与导出】。
