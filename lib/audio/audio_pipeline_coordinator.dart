@@ -65,7 +65,8 @@ class AudioPipelineCoordinator {
         weightingMode: preferences.acousticWeighting,
         includeSpectrum: true,
         includeWaveformSnapshot: true,
-        maxFps: 60,
+        maxFps:
+            null, // Audio analysis frames must not be dropped to ensure continuous pitch tracking
       );
 
       // 2. Initialize Audio Source (Microphone with Mock fallback)
@@ -111,8 +112,8 @@ class AudioPipelineCoordinator {
         },
       );
 
-      // 4. Connect isolate results -> telemetry broadcast
-      _resultSubscription = _isolate!.throttledResultStream.listen((
+      // 4. Connect isolate results -> telemetry broadcast (unthrottled for 100% audio window coverage)
+      _resultSubscription = _isolate!.unthrottledResultStream.listen((
         AudioAnalysisResult result,
       ) {
         if (!_analysisStreamController.isClosed) {
