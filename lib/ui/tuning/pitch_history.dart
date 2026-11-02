@@ -19,7 +19,7 @@ import 'pitch_history_state.dart';
 /// - Tri-state current pitch indicator point (green glowing circle, upward triangle, downward triangle).
 /// - Dynamic cent deviation text badge when out of tune.
 /// - Stylized plot window outline border.
-class PitchHistory extends StatelessWidget {
+class PitchHistory extends StatefulWidget {
   const PitchHistory({
     super.key,
     required this.state,
@@ -96,91 +96,272 @@ class PitchHistory extends StatelessWidget {
   final bool preferSharp;
 
   @override
+  State<PitchHistory> createState() => _PitchHistoryState();
+}
+
+class _PitchHistoryState extends State<PitchHistory>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+  late Animation<double> _midiMinAnimation;
+  late Animation<double> _midiMaxAnimation;
+
+  double _currentMidiMin = 0.0;
+  double _currentMidiMax = 0.0;
+
+  // Gesture state tracking
+  double _panDeltaMidi = 0.0;
+  double _zoomFactor = 1.0;
+  bool _isUserInteracting = false;
+  double _prevScale = 1.0;
+  Offset _prevFocal = Offset.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    final (initMin, initMax) = _computeTargetMidiRange(
+      widget.targetNote,
+      widget.state.latestFrequency,
+    );
+    _currentMidiMin = initMin;
+    _currentMidiMax = initMax;
+
+    _animController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 260),
+        )..addListener(() {
+          setState(() {
+            _currentMidiMin = _midiMinAnimation.value;
+            _currentMidiMax = _midiMaxAnimation.value;
+          });
+        });
+
+    _midiMinAnimation = AlwaysStoppedAnimation(_currentMidiMin);
+    _midiMaxAnimation = AlwaysStoppedAnimation(_currentMidiMax);
+
+    widget.state.addListener(_onStateUpdated);
+  }
+
+  @override
+  void didUpdateWidget(PitchHistory oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.state != oldWidget.state) {
+      oldWidget.state.removeListener(_onStateUpdated);
+      widget.state.addListener(_onStateUpdated);
+    }
+    _checkAnimateRange();
+  }
+
+  @override
+  void dispose() {
+    widget.state.removeListener(_onStateUpdated);
+    _animController.dispose();
+    super.dispose();
+  }
+
+  void _onStateUpdated() {
+    _checkAnimateRange();
+  }
+
+  void _checkAnimateRange() {
+    if (_isUserInteracting) return;
+    final (targetMin, targetMax) = _computeTargetMidiRange(
+      widget.targetNote,
+      widget.state.latestFrequency,
+    );
+
+    if ((targetMin - _currentMidiMin).abs() > 0.05 ||
+        (targetMax - _currentMidiMax).abs() > 0.05) {
+      _midiMinAnimation = Tween<double>(begin: _currentMidiMin, end: targetMin)
+          .animate(
+            CurvedAnimation(
+              parent: _animController,
+              curve: Curves.easeOutCubic,
+            ),
+          );
+      _midiMaxAnimation = Tween<double>(begin: _currentMidiMax, end: targetMax)
+          .animate(
+            CurvedAnimation(
+              parent: _animController,
+              curve: Curves.easeOutCubic,
+            ),
+          );
+      _animController.forward(from: 0.0);
+    }
+  }
+
+  static (double, double) _computeTargetMidiRange(
+    MusicalNote targetNote,
+    double? latestFreq,
+  ) {
+    final targetMidi = targetNote.midiNumber.toDouble();
+    final currentMidi = (latestFreq != null && latestFreq > 0.0)
+        ? 69.0 + (12.0 * math.log(latestFreq / 440.0) / math.ln2)
+        : null;
+
+    const visibleRangeInIndices = 1.5;
+    const visibleRangeInIndices2 = 0.38;
+
+    if (currentMidi == null) {
+      return (
+        targetMidi - visibleRangeInIndices,
+        targetMidi + visibleRangeInIndices,
+      );
+    } else {
+      final clampedCurrentMidi = currentMidi.clamp(
+        targetMidi - 4.0,
+        targetMidi + 4.0,
+      );
+      final lower = math.min(
+        targetMidi - visibleRangeInIndices,
+        clampedCurrentMidi.floorToDouble() - visibleRangeInIndices2,
+      );
+      final upper = math.max(
+        targetMidi + visibleRangeInIndices,
+        clampedCurrentMidi.ceilToDouble() + visibleRangeInIndices2,
+      );
+      return (lower, upper);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tunerColors = TunerColors.of(context);
 
     final resolvedTargetFreq =
-        targetFrequency ??
-        (440.0 * math.pow(2.0, (targetNote.midiNumber - 69) / 12.0));
+        widget.targetFrequency ??
+        (440.0 * math.pow(2.0, (widget.targetNote.midiNumber - 69) / 12.0));
 
-    final resolvedInTuneColor = colorInTune ?? tunerColors.positive;
-    final resolvedOutOfTuneColor = colorOutOfTune ?? tunerColors.negative;
-    final resolvedInactiveColor = colorInactive ?? theme.colorScheme.outline;
+    final resolvedInTuneColor = widget.colorInTune ?? tunerColors.positive;
+    final resolvedOutOfTuneColor =
+        widget.colorOutOfTune ?? tunerColors.negative;
+    final resolvedInactiveColor =
+        widget.colorInactive ?? theme.colorScheme.outline;
 
-    final resolvedOnInTuneColor = colorOnInTune ?? tunerColors.onPositive;
-    final resolvedOnOutOfTuneColor = colorOnOutOfTune ?? tunerColors.onNegative;
+    final resolvedOnInTuneColor =
+        widget.colorOnInTune ?? tunerColors.onPositive;
+    final resolvedOnOutOfTuneColor =
+        widget.colorOnOutOfTune ?? tunerColors.onNegative;
     final resolvedOnInactiveColor =
-        colorOnInactive ?? theme.colorScheme.onInverseSurface;
+        widget.colorOnInactive ?? theme.colorScheme.onInverseSurface;
 
-    final resolvedLineColor = lineColor ?? theme.colorScheme.onSurface;
+    final resolvedLineColor = widget.lineColor ?? theme.colorScheme.onSurface;
     final resolvedLineColorInactive =
-        lineColorInactive ?? theme.colorScheme.outline;
+        widget.lineColorInactive ?? theme.colorScheme.outline;
 
     final resolvedTickLineColor =
-        tickLineColor ?? theme.colorScheme.outline.withValues(alpha: 0.4);
+        widget.tickLineColor ??
+        theme.colorScheme.outline.withValues(alpha: 0.4);
     final resolvedTickLabelStyle =
-        tickLabelStyle ??
+        widget.tickLabelStyle ??
         theme.textTheme.labelMedium ??
         const TextStyle(fontSize: 12);
     final resolvedTickLabelColor =
-        tickLabelColor ?? theme.colorScheme.onSurface;
+        widget.tickLabelColor ?? theme.colorScheme.onSurface;
 
     final resolvedToleranceLineColor =
-        toleranceLineColor ?? theme.colorScheme.outline;
+        widget.toleranceLineColor ?? theme.colorScheme.outline;
     final resolvedToleranceLabelStyle =
-        toleranceLabelStyle ??
+        widget.toleranceLabelStyle ??
         theme.textTheme.labelSmall ??
         const TextStyle(fontSize: 10);
     final resolvedToleranceLabelColor =
-        toleranceLabelColor ?? theme.colorScheme.inverseSurface;
+        widget.toleranceLabelColor ?? theme.colorScheme.inverseSurface;
 
     final resolvedCentDeviationStyle =
-        centDeviationStyle ??
+        widget.centDeviationStyle ??
         theme.textTheme.labelSmall ??
         const TextStyle(fontSize: 11, fontWeight: FontWeight.bold);
     final resolvedCentDeviationColor =
-        centDeviationColor ?? theme.colorScheme.onSurface;
+        widget.centDeviationColor ?? theme.colorScheme.onSurface;
 
-    return ListenableBuilder(
-      listenable: state,
-      builder: (context, _) {
-        return CustomPaint(
-          size: Size.infinite,
-          painter: _PitchHistoryPainter(
-            state: state,
-            targetNote: targetNote,
-            targetFrequency: resolvedTargetFreq,
-            tuningState: tuningState,
-            toleranceInCents: toleranceInCents,
-            padding: plotWindowPadding,
-            outline: plotWindowOutline,
-            lineWidth: lineWidth,
-            lineWidthInactive: lineWidthInactive,
-            lineColor: resolvedLineColor,
-            lineColorInactive: resolvedLineColorInactive,
-            pointSize: pointSize,
-            pointSizeInactive: pointSizeInactive,
-            colorInTune: resolvedInTuneColor,
-            colorOutOfTune: resolvedOutOfTuneColor,
-            colorInactive: resolvedInactiveColor,
-            colorOnInTune: resolvedOnInTuneColor,
-            colorOnOutOfTune: resolvedOnOutOfTuneColor,
-            colorOnInactive: resolvedOnInactiveColor,
-            targetNoteLineWidth: targetNoteLineWidth,
-            toleranceLineColor: resolvedToleranceLineColor,
-            toleranceLabelStyle: resolvedToleranceLabelStyle,
-            toleranceLabelColor: resolvedToleranceLabelColor,
-            tickLineWidth: tickLineWidth,
-            tickLineColor: resolvedTickLineColor,
-            tickLabelStyle: resolvedTickLabelStyle,
-            tickLabelColor: resolvedTickLabelColor,
-            centDeviationStyle: resolvedCentDeviationStyle,
-            centDeviationColor: resolvedCentDeviationColor,
-            preferSharp: preferSharp,
-          ),
-        );
+    final centerMidi =
+        (_currentMidiMin + _currentMidiMax) / 2.0 + _panDeltaMidi;
+    final halfSpan = ((_currentMidiMax - _currentMidiMin) / 2.0) * _zoomFactor;
+    final effectiveMidiMin = centerMidi - halfSpan;
+    final effectiveMidiMax = centerMidi + halfSpan;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        setState(() {
+          _isUserInteracting = false;
+          _panDeltaMidi = 0.0;
+          _zoomFactor = 1.0;
+        });
+        _checkAnimateRange();
       },
+      onScaleStart: (details) {
+        _prevScale = 1.0;
+        _prevFocal = details.localFocalPoint;
+      },
+      onScaleUpdate: (details) {
+        final renderBox = context.findRenderObject() as RenderBox?;
+        if (renderBox == null) return;
+        final height = renderBox.size.height;
+        if (height <= 0) return;
+
+        final dy = details.localFocalPoint.dy - _prevFocal.dy;
+        final span = math.max(0.1, _currentMidiMax - _currentMidiMin);
+        // Drag down reveals higher notes above; drag up reveals lower notes
+        final deltaMidi = (dy / height) * span;
+
+        final scaleDelta = details.scale / _prevScale;
+        _prevScale = details.scale;
+        _prevFocal = details.localFocalPoint;
+
+        setState(() {
+          _isUserInteracting = true;
+          _panDeltaMidi += deltaMidi;
+          if ((scaleDelta - 1.0).abs() > 0.01) {
+            _zoomFactor = (_zoomFactor / scaleDelta).clamp(0.2, 5.0);
+          }
+        });
+      },
+      child: ListenableBuilder(
+        listenable: widget.state,
+        builder: (context, _) {
+          return CustomPaint(
+            size: Size.infinite,
+            painter: _PitchHistoryPainter(
+              state: widget.state,
+              targetNote: widget.targetNote,
+              targetFrequency: resolvedTargetFreq,
+              tuningState: widget.tuningState,
+              toleranceInCents: widget.toleranceInCents,
+              padding: widget.plotWindowPadding,
+              outline: widget.plotWindowOutline,
+              lineWidth: widget.lineWidth,
+              lineWidthInactive: widget.lineWidthInactive,
+              lineColor: resolvedLineColor,
+              lineColorInactive: resolvedLineColorInactive,
+              pointSize: widget.pointSize,
+              pointSizeInactive: widget.pointSizeInactive,
+              colorInTune: resolvedInTuneColor,
+              colorOutOfTune: resolvedOutOfTuneColor,
+              colorInactive: resolvedInactiveColor,
+              colorOnInTune: resolvedOnInTuneColor,
+              colorOnOutOfTune: resolvedOnOutOfTuneColor,
+              colorOnInactive: resolvedOnInactiveColor,
+              targetNoteLineWidth: widget.targetNoteLineWidth,
+              toleranceLineColor: resolvedToleranceLineColor,
+              toleranceLabelStyle: resolvedToleranceLabelStyle,
+              toleranceLabelColor: resolvedToleranceLabelColor,
+              tickLineWidth: widget.tickLineWidth,
+              tickLineColor: resolvedTickLineColor,
+              tickLabelStyle: resolvedTickLabelStyle,
+              tickLabelColor: resolvedTickLabelColor,
+              centDeviationStyle: resolvedCentDeviationStyle,
+              centDeviationColor: resolvedCentDeviationColor,
+              preferSharp: widget.preferSharp,
+              midiMin: effectiveMidiMin,
+              midiMax: effectiveMidiMax,
+              isUserInteracting: _isUserInteracting,
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -217,6 +398,9 @@ class _PitchHistoryPainter extends CustomPainter {
     required this.centDeviationStyle,
     required this.centDeviationColor,
     required this.preferSharp,
+    required this.midiMin,
+    required this.midiMax,
+    required this.isUserInteracting,
   });
 
   final PitchHistoryState state;
@@ -255,6 +439,10 @@ class _PitchHistoryPainter extends CustomPainter {
   final Color centDeviationColor;
   final bool preferSharp;
 
+  final double midiMin;
+  final double midiMax;
+  final bool isUserInteracting;
+
   Color get tuningColor {
     switch (tuningState) {
       case TuningState.inTune:
@@ -290,8 +478,12 @@ class _PitchHistoryPainter extends CustomPainter {
     // 1. Draw outline border if configured
     if (outline.lineWidth > 0) {
       final borderPaint = Paint()
-        ..color = outline.color ?? lineColorInactive.withValues(alpha: 0.5)
-        ..strokeWidth = outline.lineWidth
+        ..color = isUserInteracting
+            ? tuningColor
+            : (outline.color ?? lineColorInactive.withValues(alpha: 0.5))
+        ..strokeWidth = isUserInteracting
+            ? outline.lineWidth * 1.5
+            : outline.lineWidth
         ..style = PaintingStyle.stroke;
       if (outline.cornerRadius > 0) {
         canvas.drawRRect(
@@ -306,39 +498,12 @@ class _PitchHistoryPainter extends CustomPainter {
       }
     }
 
-    // 2. Compute ViewPort in musical MIDI numbers
+    // 2. ViewPort coordinates (animated smoothly or gesture-controlled)
     final targetMidi = targetNote.midiNumber.toDouble();
     final latestFreq = state.latestFrequency;
     final currentMidi = (latestFreq != null && latestFreq > 0.0)
         ? 69.0 + (12.0 * math.log(latestFreq / 440.0) / math.ln2)
         : null;
-
-    const visibleRangeInIndices = 1.5;
-    const visibleRangeInIndices2 = 0.38;
-
-    final double midiMin;
-    final double midiMax;
-
-    if (currentMidi == null) {
-      midiMin = targetMidi - visibleRangeInIndices;
-      midiMax = targetMidi + visibleRangeInIndices;
-    } else {
-      // Clamping currentMidi excursion to at most ±4 semitones from targetNote prevents
-      // transient glitch frames (e.g. low frequency breath rumble or high harmonics)
-      // from violently collapsing/expanding the viewport.
-      final clampedCurrentMidi = currentMidi.clamp(
-        targetMidi - 4.0,
-        targetMidi + 4.0,
-      );
-      midiMin = math.min(
-        targetMidi - visibleRangeInIndices,
-        clampedCurrentMidi.floorToDouble() - visibleRangeInIndices2,
-      );
-      midiMax = math.max(
-        targetMidi + visibleRangeInIndices,
-        clampedCurrentMidi.ceilToDouble() + visibleRangeInIndices2,
-      );
-    }
 
     final midiDelta = math.max(0.1, midiMax - midiMin);
 
