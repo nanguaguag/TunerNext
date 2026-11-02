@@ -148,6 +148,14 @@ class OutlierRemovingSmoother {
   /// Last valid smoothed value, or 0.0 if uninitialized.
   double smoothedValue = 0.0;
 
+  /// Whether the most recently evaluated value was rejected as an outlier.
+  bool get isLastValueOutlier =>
+      buffers.isNotEmpty && buffers[0].numSuccessiveOutliers > 0;
+
+  /// Running mean of the active primary buffer, even if size < [minNumValuesForValidMean].
+  double get currentMean =>
+      buffers.isNotEmpty && buffers[0].size > 0 ? buffers[0].mean : 0.0;
+
   /// Adds [value] to the smoother and returns the updated smoothed mean.
   ///
   /// Returns 0.0 if [value] is an outlier or if the active buffer has not yet reached

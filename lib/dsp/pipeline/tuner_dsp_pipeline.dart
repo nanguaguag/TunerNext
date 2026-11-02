@@ -94,6 +94,8 @@ class TunerDspPipeline {
     this.frequencyMin = 16.0,
     this.frequencyMax = 20000.0,
     this.silenceThresholdRms = 1e-4,
+    this.minConfidence = 0.25,
+    this.maxNoiseRatio = 0.80,
   }) : _weightingMode = weightingMode,
        _weighting = AcousticWeighting.fromMode(weightingMode),
        _smootherOrder = smootherOrder,
@@ -138,6 +140,14 @@ class TunerDspPipeline {
 
   /// RMS threshold below which signals are deemed silent.
   final double silenceThresholdRms;
+
+  /// Minimum detection clarity / confidence required to treat a frame as voiced pitch.
+  final double minConfidence;
+
+  /// Maximum acceptable non-periodic noise ratio before rejecting frame as turbulent noise.
+  final double maxNoiseRatio;
+
+  int _consecutiveNoiseFrames = 0;
 
   final ClassicPitchDetector _classicDetector;
   final McLeodPitchDetector _mpmDetector;
@@ -233,10 +243,20 @@ class TunerDspPipeline {
       frequencyMax: frequencyMax,
     );
 
-    if (detection.isSilence || detection.frequency <= 0.0) {
+    final isUnvoicedOrNoise =
+        detection.isSilence ||
+        detection.frequency <= 0.0 ||
+        detection.frequency.isNaN ||
+        detection.confidence < minConfidence ||
+        detection.noiseRatio > maxNoiseRatio;
+
+    if (isUnvoicedOrNoise) {
+      _consecutiveNoiseFrames++;
       _medianFilter.reset();
       _octaveJumpGate.reset();
-      _smoother.reset();
+      if (_consecutiveNoiseFrames >= 3) {
+        _smoother.reset();
+      }
       return TunerPipelineResult(
         rawFrequency: 0.0,
         smoothedFrequency: 0.0,
@@ -247,6 +267,8 @@ class TunerDspPipeline {
         executionTime: stopwatch.elapsed,
       );
     }
+
+    _consecutiveNoiseFrames = 0;
 
     // Step 3: Post-processing filtering chain
     var freq = detection.frequency;
@@ -265,9 +287,17 @@ class TunerDspPipeline {
     var smoothed = freq;
     if (useSmoother) {
       final s = _smoother(freq);
-      smoothed = (s > 0.0)
-          ? s
-          : (_smoother.smoothedValue > 0.0 ? _smoother.smoothedValue : freq);
+      if (s > 0.0) {
+        smoothed = s;
+      } else if (_smoother.isLastValueOutlier) {
+        // Reject outlier and maintain steady-state mean, strictly preventing outlier spikes
+        smoothed = _smoother.smoothedValue > 0.0
+            ? _smoother.smoothedValue
+            : _smoother.currentMean;
+      } else {
+        // Buffer is warming up with a valid (non-outlier) sample
+        smoothed = _smoother.currentMean > 0.0 ? _smoother.currentMean : freq;
+      }
     }
 
     return TunerPipelineResult(
@@ -289,5 +319,6 @@ class TunerDspPipeline {
     _medianFilter.reset();
     _octaveJumpGate.reset();
     _smoother.reset();
+    _consecutiveNoiseFrames = 0;
   }
 }
