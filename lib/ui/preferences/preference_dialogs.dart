@@ -16,38 +16,50 @@ class PitchAlgorithmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return SimpleDialog(
-      title: const Text('Pitch Algorithm'),
+      title: Text(l10n?.pitchAlgorithm ?? 'Pitch Algorithm'),
       children: [
         _buildOption(
           context,
           algorithm: PitchAlgorithm.mpm,
           name: 'McLeod Pitch Method (MPM)',
-          desc: 'High precision, robust octave-jump suppression for strings.',
+          desc:
+              l10n?.algorithmMpmDesc ??
+              'High precision, robust octave-jump suppression for strings.',
         ),
         _buildOption(
           context,
           algorithm: PitchAlgorithm.twm,
           name: 'Two-Way Mismatch (TWM)',
-          desc: 'Harmonic spectral matching for rich/inharmonic overtones.',
+          desc:
+              l10n?.algorithmTwmDesc ??
+              'Harmonic spectral matching for rich/inharmonic overtones.',
         ),
         _buildOption(
           context,
           algorithm: PitchAlgorithm.classic,
           name: 'Classic Autocorrelation',
-          desc: 'FFT-based autocorrelation with parabolic peak fitting.',
+          desc:
+              l10n?.algorithmClassicDesc ??
+              'FFT-based autocorrelation with parabolic peak fitting.',
         ),
         _buildOption(
           context,
           algorithm: PitchAlgorithm.hybridJacobsen,
           name: 'Hybrid Jacobsen',
-          desc: 'Enhanced complex 3-bin phase vocoder interpolation.',
+          desc:
+              l10n?.algorithmJacobsenDesc ??
+              'Enhanced complex 3-bin phase vocoder interpolation.',
         ),
         _buildOption(
           context,
           algorithm: PitchAlgorithm.pyin,
           name: 'pYIN (Probabilistic)',
-          desc: 'Viterbi path candidate tracking over time frames.',
+          desc:
+              l10n?.algorithmPyinDesc ??
+              'Viterbi path candidate tracking over time frames.',
         ),
       ],
     );
@@ -94,26 +106,33 @@ class AcousticWeightingDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return SimpleDialog(
-      title: const Text('Acoustic Weighting'),
+      title: Text(l10n?.acousticWeighting ?? 'Acoustic Weighting'),
       children: [
         _buildOption(
           context,
           mode: AcousticWeightingMode.none,
-          name: 'Flat / None (Z-weighting)',
-          desc: 'Unweighted flat frequency response.',
+          name: l10n?.weightingNone ?? 'Flat / None (Z-weighting)',
+          desc:
+              l10n?.weightingNoneDesc ?? 'Unweighted flat frequency response.',
         ),
         _buildOption(
           context,
           mode: AcousticWeightingMode.aWeighting,
-          name: 'A-Weighting (IEC 61672-1)',
-          desc: 'Human ear equal-loudness curve; cuts sub-bass rumble.',
+          name: l10n?.acousticWeightingA ?? 'A-Weighting (IEC 61672-1)',
+          desc:
+              l10n?.acousticWeightingADescription ??
+              'Human ear equal-loudness curve; cuts sub-bass rumble.',
         ),
         _buildOption(
           context,
           mode: AcousticWeightingMode.cWeighting,
-          name: 'C-Weighting',
-          desc: 'Flatter curve retaining bass for high-SPL musical signals.',
+          name: l10n?.acousticWeightingC ?? 'C-Weighting',
+          desc:
+              l10n?.acousticWeightingCDescription ??
+              'Flatter curve retaining bass for high-SPL musical signals.',
         ),
       ],
     );
@@ -160,26 +179,34 @@ class WindowingFunctionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return SimpleDialog(
-      title: const Text('Windowing Function'),
+      title: Text(l10n?.windowingFunction ?? 'Windowing Function'),
       children: [
         _buildOption(
           context,
           func: WindowingFunction.hanning,
           name: 'Hann (Hanning)',
-          desc: 'Smooth cosine taper with -31 dB side-lobe suppression.',
+          desc:
+              l10n?.windowingHanningDesc ??
+              'Smooth cosine taper with -31 dB side-lobe suppression.',
         ),
         _buildOption(
           context,
           func: WindowingFunction.hamming,
           name: 'Hamming',
-          desc: 'Optimized cosine window with -42 dB first side lobe.',
+          desc:
+              l10n?.windowingHammingDesc ??
+              'Optimized cosine window with -42 dB first side lobe.',
         ),
         _buildOption(
           context,
           func: WindowingFunction.tophat,
           name: 'Top-hat (Rectangular)',
-          desc: 'Narrowest main lobe, no edge tapering.',
+          desc:
+              l10n?.windowingTophatDesc ??
+              'Narrowest main lobe, no edge tapering.',
         ),
       ],
     );
@@ -226,25 +253,27 @@ class AppearanceDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return SimpleDialog(
-      title: const Text('Appearance'),
+      title: Text(l10n?.appearance ?? 'Appearance'),
       children: [
         _buildOption(
           context,
           mode: ThemeMode.system,
-          name: 'System Default',
+          name: l10n?.systemAppearanceShort ?? 'System Default',
           icon: Icons.brightness_auto,
         ),
         _buildOption(
           context,
           mode: ThemeMode.light,
-          name: 'Light',
+          name: l10n?.lightAppearanceShort ?? 'Light',
           icon: Icons.light_mode,
         ),
         _buildOption(
           context,
           mode: ThemeMode.dark,
-          name: 'Dark',
+          name: l10n?.darkAppearanceShort ?? 'Dark',
           icon: Icons.dark_mode,
         ),
       ],
@@ -361,22 +390,25 @@ class ResetSettingsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
-      title: const Text('Reset All Settings?'),
-      content: const Text(
-        'This will restore all tuning, DSP, appearance, and audio capture parameters to their default factory values.',
+      title: Text(l10n?.resetSettingsConfirmTitle ?? 'Reset All Settings?'),
+      content: Text(
+        l10n?.resetSettingsConfirmMessage ??
+            'This will restore all tuning, DSP, appearance, and audio capture parameters to their default factory values.',
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n?.abort ?? 'Cancel'),
         ),
         FilledButton(
           onPressed: () {
             Navigator.of(context).pop();
             onConfirm();
           },
-          child: const Text('Reset'),
+          child: Text(l10n?.resetAllSettings ?? 'Reset'),
         ),
       ],
     );
@@ -389,29 +421,32 @@ class AboutTunerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
-      title: const Text('About Tuner'),
-      content: const Column(
+      title: Text(l10n?.about ?? 'About Tuner'),
+      content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'High-Precision Acoustic Tuner',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 8.0),
+          const SizedBox(height: 8.0),
           Text(
-            'Version 1.0.0\n'
-            'Pure Dart Clean Architecture multi-engine acoustic pitch analyzer.\n\n'
-            'Features 19 historical & modern temperaments, custom Railsback stretch tuning, '
-            'scientific FFT spectrograms, and real-time autocorrelation analysis.',
+            l10n?.aboutTunerDesc ??
+                'Version 1.0.0\n'
+                    'Pure Dart Clean Architecture multi-engine acoustic pitch analyzer.\n\n'
+                    'Features 19 historical & modern temperaments, custom Railsback stretch tuning, '
+                    'scientific FFT spectrograms, and real-time autocorrelation analysis.',
           ),
         ],
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: Text(l10n?.dismiss ?? 'Close'),
         ),
       ],
     );

@@ -1260,4 +1260,120 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get vietnamese => 'Vietnamien';
+
+  @override
+  String get keepScreenOnDesc => 'Prevents display from sleeping while tuning';
+
+  @override
+  String get toleranceDesc => 'Threshold for green pitch accuracy indicator';
+
+  @override
+  String get preferFlatDesc =>
+      'Display accidentals as flat instead of sharp (♭)';
+
+  @override
+  String get chromaticAsStaffDesc =>
+      'Display musical stave in chromatic instrument mode';
+
+  @override
+  String get sensitivityDesc => 'Input gain threshold for pitch detection';
+
+  @override
+  String get octaveJumpGateDesc =>
+      'Eliminates transient harmonic doubling attacks';
+
+  @override
+  String get medianFilterDesc => 'Filters anomalous single-frame pitch spikes';
+
+  @override
+  String get scientificModeDesc =>
+      'Enable FFT spectrum and correlation analysis views';
+
+  @override
+  String get numMovingAverageDesc =>
+      'Taps for outlier-removing smoothing buffer';
+
+  @override
+  String get windowSizeDesc => 'Analysis buffer sample length';
+
+  @override
+  String get overlapDesc => 'Consecutive analysis frame overlap';
+
+  @override
+  String get pitchHistoryDurationDesc =>
+      'Time window shown on pitch history plot';
+
+  @override
+  String get jumpToNewPitchDirect => 'Directly jump to new pitch result';
+
+  @override
+  String jumpToNewPitchMultiple(int count) {
+    return 'After $count similar pitch results';
+  }
+
+  @override
+  String get audioCaptureDesc =>
+      'WAV export buffer capacity (0s disables export button)';
+
+  @override
+  String get audioCaptureDisabled => 'Disabled';
+
+  @override
+  String get displayOnLockScreenDesc =>
+      'Allows tuner to be active over device lock screen';
+
+  @override
+  String get resetAllSettingsDesc => 'Restore factory default parameters';
+
+  @override
+  String get aboutTunerDesc => 'Version and architectural specifications';
+
+  @override
+  String get resetSettingsConfirmTitle => 'Reset Settings';
+
+  @override
+  String get resetSettingsConfirmMessage =>
+      'Are you sure you want to restore all settings to default factory values? This cannot be undone.';
+
+  @override
+  String get algorithmMpmDesc =>
+      'High precision, robust octave-jump suppression for strings.';
+
+  @override
+  String get algorithmTwmDesc =>
+      'Harmonic spectral matching for rich/inharmonic overtones.';
+
+  @override
+  String get algorithmClassicDesc =>
+      'FFT-based autocorrelation with parabolic peak fitting.';
+
+  @override
+  String get algorithmJacobsenDesc =>
+      'Enhanced complex 3-bin phase vocoder interpolation.';
+
+  @override
+  String get algorithmPyinDesc =>
+      'Viterbi path candidate tracking over time frames.';
+
+  @override
+  String get weightingNone => 'None (Flat)';
+
+  @override
+  String get weightingNoneDesc =>
+      'Raw unweighted linear audio frequency spectrum.';
+
+  @override
+  String get windowingTophatDesc =>
+      'No windowing attenuation (highest frequency resolution).';
+
+  @override
+  String get windowingHammingDesc =>
+      'Moderate sidelobe suppression (-42 dB attenuation).';
+
+  @override
+  String get windowingHanningDesc =>
+      'Smooth cos^2 window with strong sidelobe drop-off.';
+
+  @override
+  String get pureBlackOled => 'Pure Black (OLED)';
 }

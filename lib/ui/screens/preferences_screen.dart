@@ -105,7 +105,9 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           ),
           SwitchPreference(
             title: l10n?.keepScreenOn ?? 'Keep Screen On',
-            subtitle: 'Prevents display from sleeping while tuning',
+            subtitle:
+                l10n?.keepScreenOnDesc ??
+                'Prevents display from sleeping while tuning',
             icon: Icons.screen_lock_portrait,
             value: _pref.keepScreenOn,
             onChanged: (v) => _pref.setKeepScreenOn(v),
@@ -152,7 +154,9 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           ),
           SliderPreference(
             title: l10n?.toleranceInCents ?? 'In-Tune Tolerance',
-            subtitle: 'Threshold for green pitch accuracy indicator',
+            subtitle:
+                l10n?.toleranceDesc ??
+                'Threshold for green pitch accuracy indicator',
             valueLabel: '±${_pref.toleranceInCents} ¢',
             icon: Icons.adjust,
             value: _pref.toleranceInCents.toDouble(),
@@ -163,7 +167,9 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           ),
           SwitchPreference(
             title: l10n?.preferFlat ?? 'Prefer Flat (♭)',
-            subtitle: 'Display accidentals as flat instead of sharp (♯)',
+            subtitle:
+                l10n?.preferFlatDesc ??
+                'Display accidentals as flat instead of sharp (♯)',
             icon: Icons.music_note_outlined,
             value: _pref.preferFlat,
             onChanged: (v) => _pref.setPreferFlat(v),
@@ -188,14 +194,18 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           ),
           SwitchPreference(
             title: l10n?.chromaticAsStaff ?? 'Chromatic as Staff',
-            subtitle: 'Display musical stave in chromatic instrument mode',
+            subtitle:
+                l10n?.chromaticAsStaffDesc ??
+                'Display musical stave in chromatic instrument mode',
             icon: Icons.piano,
             value: _pref.chromaticAsStaff,
             onChanged: (v) => _pref.setChromaticAsStaff(v),
           ),
           SliderPreference(
             title: l10n?.sensitivity ?? 'Microphone Sensitivity',
-            subtitle: 'Input gain threshold for pitch detection',
+            subtitle:
+                l10n?.sensitivityDesc ??
+                'Input gain threshold for pitch detection',
             valueLabel: '${_pref.sensitivity}%',
             icon: Icons.mic,
             value: _pref.sensitivity.toDouble(),
@@ -241,14 +251,18 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           ),
           SwitchPreference(
             title: l10n?.octaveJumpGate ?? 'Octave Jump Gate',
-            subtitle: 'Eliminates transient harmonic doubling attacks',
+            subtitle:
+                l10n?.octaveJumpGateDesc ??
+                'Eliminates transient harmonic doubling attacks',
             icon: Icons.electric_bolt,
             value: _pref.octaveJumpGate,
             onChanged: (v) => _pref.setOctaveJumpGate(v),
           ),
           SwitchPreference(
             title: l10n?.medianFilter ?? '3-Tap Median Filter',
-            subtitle: 'Filters anomalous single-frame pitch spikes',
+            subtitle:
+                l10n?.medianFilterDesc ??
+                'Filters anomalous single-frame pitch spikes',
             icon: Icons.filter_alt,
             value: _pref.medianFilter,
             onChanged: (v) => _pref.setMedianFilter(v),
@@ -260,14 +274,18 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           PreferenceSection(title: l10n?.expert ?? 'Expert / Scientific Mode'),
           SwitchPreference(
             title: l10n?.scientificMode ?? 'Scientific Mode',
-            subtitle: 'Enable FFT spectrum and correlation analysis views',
+            subtitle:
+                l10n?.scientificModeDesc ??
+                'Enable FFT spectrum and correlation analysis views',
             icon: Icons.science,
             value: _pref.scientificMode,
             onChanged: (v) => _pref.setScientificMode(v),
           ),
           SliderPreference(
             title: l10n?.numMovingAverage ?? 'Moving Average Smoothing',
-            subtitle: 'Taps for outlier-removing smoothing buffer',
+            subtitle:
+                l10n?.numMovingAverageDesc ??
+                'Taps for outlier-removing smoothing buffer',
             valueLabel: '${_pref.numMovingAverage} frames',
             icon: Icons.timeline,
             value: _pref.numMovingAverage.toDouble(),
@@ -294,7 +312,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           ),
           SliderPreference(
             title: l10n?.windowSize ?? 'FFT Window Size',
-            subtitle: 'Analysis buffer sample length',
+            subtitle: l10n?.windowSizeDesc ?? 'Analysis buffer sample length',
             valueLabel: '${_pref.windowSize} samples',
             icon: Icons.view_column,
             value: _pref.windowSizeExponent.toDouble(),
@@ -319,7 +337,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           ),
           SliderPreference(
             title: l10n?.overlap ?? 'Buffer Overlap',
-            subtitle: 'Consecutive analysis frame overlap',
+            subtitle: l10n?.overlapDesc ?? 'Consecutive analysis frame overlap',
             valueLabel: '${_pref.overlapPercent}%',
             icon: Icons.layers,
             value: _pref.overlapPercent.toDouble(),
@@ -330,7 +348,9 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           ),
           SliderPreference(
             title: l10n?.pitchHistoryDuration ?? 'Pitch History Duration',
-            subtitle: 'Time window shown on pitch history plot',
+            subtitle:
+                l10n?.pitchHistoryDurationDesc ??
+                'Time window shown on pitch history plot',
             valueLabel: '${_pref.pitchHistoryDuration.toStringAsFixed(1)} s',
             icon: Icons.history,
             value: _pref.pitchHistoryDuration,
@@ -342,8 +362,12 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           SliderPreference(
             title: l10n?.pitchHistoryNumFaultyValues ?? 'Jump to New Pitch',
             subtitle: _pref.pitchHistoryNumFaultyValues == 1
-                ? 'Directly jump to new pitch result'
-                : 'After ${_pref.pitchHistoryNumFaultyValues} similar pitch results',
+                ? (l10n?.jumpToNewPitchDirect ??
+                      'Directly jump to new pitch result')
+                : (l10n?.jumpToNewPitchMultiple(
+                        _pref.pitchHistoryNumFaultyValues,
+                      ) ??
+                      'After ${_pref.pitchHistoryNumFaultyValues} similar pitch results'),
             valueLabel: '${_pref.pitchHistoryNumFaultyValues}',
             icon: Icons.alt_route,
             value: _pref.pitchHistoryNumFaultyValues.toDouble(),
@@ -354,9 +378,11 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           ),
           SliderPreference(
             title: l10n?.capture ?? 'Audio Capture Duration',
-            subtitle: 'WAV export buffer capacity (0s disables export button)',
+            subtitle:
+                l10n?.audioCaptureDesc ??
+                'WAV export buffer capacity (0s disables export button)',
             valueLabel: _pref.waveWriterDuration == 0
-                ? 'Disabled'
+                ? (l10n?.audioCaptureDisabled ?? 'Disabled')
                 : '${_pref.waveWriterDuration} s',
             icon: Icons.audio_file,
             value: _pref.waveWriterDuration.toDouble(),
@@ -372,14 +398,18 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           PreferenceSection(title: l10n?.others ?? 'Others'),
           SwitchPreference(
             title: l10n?.displayOnLockScreen ?? 'Display on Lock Screen',
-            subtitle: 'Allows tuner to be active over device lock screen',
+            subtitle:
+                l10n?.displayOnLockScreenDesc ??
+                'Allows tuner to be active over device lock screen',
             icon: Icons.lock_outline,
             value: _pref.displayOnLockScreen,
             onChanged: (v) => _pref.setDisplayOnLockScreen(v),
           ),
           SimplePreference(
             title: l10n?.resetAllSettings ?? 'Reset All Settings',
-            subtitle: 'Restore factory default parameters',
+            subtitle:
+                l10n?.resetAllSettingsDesc ??
+                'Restore factory default parameters',
             icon: Icons.restore,
             onTap: () {
               showDialog<void>(
@@ -395,7 +425,9 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           ),
           SimplePreference(
             title: l10n?.about ?? 'About',
-            subtitle: 'Version and architectural specifications',
+            subtitle:
+                l10n?.aboutTunerDesc ??
+                'Version and architectural specifications',
             icon: Icons.info_outline,
             onTap: () {
               showDialog<void>(

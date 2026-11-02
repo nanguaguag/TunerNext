@@ -225,7 +225,7 @@ abstract class AppLocalizations {
   /// No description provided for @systemAppearanceShort.
   ///
   /// In en, this message translates to:
-  /// **'Auto'**
+  /// **'System Default'**
   String get systemAppearanceShort;
 
   /// No description provided for @settings.
@@ -2318,6 +2318,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vietnamese'**
   String get vietnamese;
+
+  /// No description provided for @keepScreenOnDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Prevents display from sleeping while tuning'**
+  String get keepScreenOnDesc;
+
+  /// No description provided for @toleranceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Threshold for green pitch accuracy indicator'**
+  String get toleranceDesc;
+
+  /// No description provided for @preferFlatDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Display accidentals as flat instead of sharp (♭)'**
+  String get preferFlatDesc;
+
+  /// No description provided for @chromaticAsStaffDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Display musical stave in chromatic instrument mode'**
+  String get chromaticAsStaffDesc;
+
+  /// No description provided for @sensitivityDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Input gain threshold for pitch detection'**
+  String get sensitivityDesc;
+
+  /// No description provided for @octaveJumpGateDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Eliminates transient harmonic doubling attacks'**
+  String get octaveJumpGateDesc;
+
+  /// No description provided for @medianFilterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters anomalous single-frame pitch spikes'**
+  String get medianFilterDesc;
+
+  /// No description provided for @scientificModeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable FFT spectrum and correlation analysis views'**
+  String get scientificModeDesc;
+
+  /// No description provided for @numMovingAverageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Taps for outlier-removing smoothing buffer'**
+  String get numMovingAverageDesc;
+
+  /// No description provided for @windowSizeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis buffer sample length'**
+  String get windowSizeDesc;
+
+  /// No description provided for @overlapDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Consecutive analysis frame overlap'**
+  String get overlapDesc;
+
+  /// No description provided for @pitchHistoryDurationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Time window shown on pitch history plot'**
+  String get pitchHistoryDurationDesc;
+
+  /// No description provided for @jumpToNewPitchDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Directly jump to new pitch result'**
+  String get jumpToNewPitchDirect;
+
+  /// No description provided for @jumpToNewPitchMultiple.
+  ///
+  /// In en, this message translates to:
+  /// **'After {count} similar pitch results'**
+  String jumpToNewPitchMultiple(int count);
+
+  /// No description provided for @audioCaptureDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'WAV export buffer capacity (0s disables export button)'**
+  String get audioCaptureDesc;
+
+  /// No description provided for @audioCaptureDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get audioCaptureDisabled;
+
+  /// No description provided for @displayOnLockScreenDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Allows tuner to be active over device lock screen'**
+  String get displayOnLockScreenDesc;
+
+  /// No description provided for @resetAllSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore factory default parameters'**
+  String get resetAllSettingsDesc;
+
+  /// No description provided for @aboutTunerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Version and architectural specifications'**
+  String get aboutTunerDesc;
+
+  /// No description provided for @resetSettingsConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Settings'**
+  String get resetSettingsConfirmTitle;
+
+  /// No description provided for @resetSettingsConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to restore all settings to default factory values? This cannot be undone.'**
+  String get resetSettingsConfirmMessage;
+
+  /// No description provided for @algorithmMpmDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'High precision, robust octave-jump suppression for strings.'**
+  String get algorithmMpmDesc;
+
+  /// No description provided for @algorithmTwmDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Harmonic spectral matching for rich/inharmonic overtones.'**
+  String get algorithmTwmDesc;
+
+  /// No description provided for @algorithmClassicDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'FFT-based autocorrelation with parabolic peak fitting.'**
+  String get algorithmClassicDesc;
+
+  /// No description provided for @algorithmJacobsenDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enhanced complex 3-bin phase vocoder interpolation.'**
+  String get algorithmJacobsenDesc;
+
+  /// No description provided for @algorithmPyinDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Viterbi path candidate tracking over time frames.'**
+  String get algorithmPyinDesc;
+
+  /// No description provided for @weightingNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None (Flat)'**
+  String get weightingNone;
+
+  /// No description provided for @weightingNoneDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw unweighted linear audio frequency spectrum.'**
+  String get weightingNoneDesc;
+
+  /// No description provided for @windowingTophatDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'No windowing attenuation (highest frequency resolution).'**
+  String get windowingTophatDesc;
+
+  /// No description provided for @windowingHammingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate sidelobe suppression (-42 dB attenuation).'**
+  String get windowingHammingDesc;
+
+  /// No description provided for @windowingHanningDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Smooth cos^2 window with strong sidelobe drop-off.'**
+  String get windowingHanningDesc;
+
+  /// No description provided for @pureBlackOled.
+  ///
+  /// In en, this message translates to:
+  /// **'Pure Black (OLED)'**
+  String get pureBlackOled;
 }
 
 class _AppLocalizationsDelegate

@@ -61,13 +61,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get systemAppearance => '跟随系统设置';
 
   @override
-  String get darkAppearanceShort => '暗色';
+  String get darkAppearanceShort => '深色';
 
   @override
-  String get lightAppearanceShort => '亮色';
+  String get lightAppearanceShort => '浅色';
 
   @override
-  String get systemAppearanceShort => '自动';
+  String get systemAppearanceShort => '跟随系统';
 
   @override
   String get settings => '设置';
@@ -1244,4 +1244,102 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vietnamese => '越南语';
+
+  @override
+  String get keepScreenOnDesc => '调音过程中保持屏幕常亮';
+
+  @override
+  String get toleranceDesc => '指示调准状态的绿色音分容差阈值';
+
+  @override
+  String get preferFlatDesc => '变音记号优先显示为降号 (♭) 而非升号 (♯)';
+
+  @override
+  String get chromaticAsStaffDesc => '在十二平均律半音模式下显示五线谱';
+
+  @override
+  String get sensitivityDesc => '音高检测的声音输入灵敏度门限';
+
+  @override
+  String get octaveJumpGateDesc => '抑制弦乐起奏摩擦导致的瞬态八度跳变';
+
+  @override
+  String get medianFilterDesc => '滤除单帧瞬态异常毛刺';
+
+  @override
+  String get scientificModeDesc => '开启 FFT 频谱与自相关曲线分析视图';
+
+  @override
+  String get numMovingAverageDesc => '多缓冲离群点平滑器的移动平均抽头数';
+
+  @override
+  String get windowSizeDesc => '音频分析时窗样本长度';
+
+  @override
+  String get overlapDesc => '连续音频分析帧之间的重叠率';
+
+  @override
+  String get pitchHistoryDurationDesc => '音高历史波形图展示的时间窗口';
+
+  @override
+  String get jumpToNewPitchDirect => '直接跳转到新识别的音高';
+
+  @override
+  String jumpToNewPitchMultiple(int count) {
+    return '连续出现 $count 次相同音高后才切换';
+  }
+
+  @override
+  String get audioCaptureDesc => 'WAV 音频导出缓冲时长（0秒关闭导出按钮）';
+
+  @override
+  String get audioCaptureDisabled => '已禁用';
+
+  @override
+  String get displayOnLockScreenDesc => '允许调音器在锁屏界面上方显示';
+
+  @override
+  String get resetAllSettingsDesc => '恢复出厂默认设置参数';
+
+  @override
+  String get aboutTunerDesc => '版本信息与软件说明';
+
+  @override
+  String get resetSettingsConfirmTitle => '重置设置';
+
+  @override
+  String get resetSettingsConfirmMessage => '确定要将所有设置恢复为出厂默认值吗？此操作无法撤销。';
+
+  @override
+  String get algorithmMpmDesc => '高精度，针对琴弦起奏八度跳变具备强鲁棒性抑制。';
+
+  @override
+  String get algorithmTwmDesc => '双向失配频谱谐波匹配，攻克琴弦非谐性与缺失基频。';
+
+  @override
+  String get algorithmClassicDesc => '基于 FFT 的经典自相关与抛物线极值拟合。';
+
+  @override
+  String get algorithmJacobsenDesc => '复数 3-bin Jacobsen 二次插值与相位声码器展开。';
+
+  @override
+  String get algorithmPyinDesc => '隐马尔可夫模型维特比跨帧多候选路径概率追踪。';
+
+  @override
+  String get weightingNone => '无（平直响应）';
+
+  @override
+  String get weightingNoneDesc => '未经加权的线性原始音频频谱。';
+
+  @override
+  String get windowingTophatDesc => '无窗函数衰减（最高频率分辨率，有旁瓣泄漏）。';
+
+  @override
+  String get windowingHammingDesc => '中度旁瓣抑制（-42 dB 衰减）。';
+
+  @override
+  String get windowingHanningDesc => '平滑余弦平方窗，具有极强的旁瓣衰减能力。';
+
+  @override
+  String get pureBlackOled => '纯黑 (OLED 省电)';
 }

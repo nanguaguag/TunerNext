@@ -645,5 +645,47 @@
   "czech": "Czech",
   "swedish": "Swedish",
   "spanish": "Spanish",
-  "vietnamese": "Vietnamese"
+  "vietnamese": "Vietnamese",
+  "keepScreenOnDesc": "Prevents display from sleeping while tuning",
+  "toleranceDesc": "Threshold for green pitch accuracy indicator",
+  "preferFlatDesc": "Display accidentals as flat instead of sharp (♭)",
+  "chromaticAsStaffDesc": "Display musical stave in chromatic instrument mode",
+  "sensitivityDesc": "Input gain threshold for pitch detection",
+  "octaveJumpGateDesc": "Eliminates transient harmonic doubling attacks",
+  "medianFilterDesc": "Filters anomalous single-frame pitch spikes",
+  "scientificModeDesc": "Enable FFT spectrum and correlation analysis views",
+  "numMovingAverageDesc": "Taps for outlier-removing smoothing buffer",
+  "windowSizeDesc": "Analysis buffer sample length",
+  "overlapDesc": "Consecutive analysis frame overlap",
+  "pitchHistoryDurationDesc": "Time window shown on pitch history plot",
+  "jumpToNewPitchDirect": "Directly jump to new pitch result",
+  "jumpToNewPitchMultiple": "After {count} similar pitch results",
+  "@jumpToNewPitchMultiple": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "audioCaptureDesc": "WAV export buffer capacity (0s disables export button)",
+  "audioCaptureDisabled": "Disabled",
+  "displayOnLockScreenDesc": "Allows tuner to be active over device lock screen",
+  "resetAllSettingsDesc": "Restore factory default parameters",
+  "aboutTunerDesc": "Version and architectural specifications",
+  "resetSettingsConfirmTitle": "Reset Settings",
+  "resetSettingsConfirmMessage": "Are you sure you want to restore all settings to default factory values? This cannot be undone.",
+  "algorithmMpmDesc": "High precision, robust octave-jump suppression for strings.",
+  "algorithmTwmDesc": "Harmonic spectral matching for rich/inharmonic overtones.",
+  "algorithmClassicDesc": "FFT-based autocorrelation with parabolic peak fitting.",
+  "algorithmJacobsenDesc": "Enhanced complex 3-bin phase vocoder interpolation.",
+  "algorithmPyinDesc": "Viterbi path candidate tracking over time frames.",
+  "weightingNone": "None (Flat)",
+  "weightingNoneDesc": "Raw unweighted linear audio frequency spectrum.",
+  "windowingTophatDesc": "No windowing attenuation (highest frequency resolution).",
+  "windowingHammingDesc": "Moderate sidelobe suppression (-42 dB attenuation).",
+  "windowingHanningDesc": "Smooth cos^2 window with strong sidelobe drop-off.",
+  "pureBlackOled": "Pure Black (OLED)",
+  "systemAppearanceShort": "System Default",
+  "lightAppearanceShort": "Light",
+  "darkAppearanceShort": "Dark"
 }
