@@ -96,6 +96,7 @@ class TunerDspPipeline {
     this.silenceThresholdRms = 1e-4,
     this.minConfidence = 0.25,
     this.maxNoiseRatio = 0.80,
+    this.sensitivity = 50,
   }) : _weightingMode = weightingMode,
        _weighting = AcousticWeighting.fromMode(weightingMode),
        _smootherOrder = smootherOrder,
@@ -147,6 +148,9 @@ class TunerDspPipeline {
   /// Maximum acceptable non-periodic noise ratio before rejecting frame as turbulent noise.
   final double maxNoiseRatio;
 
+  /// User sensitivity threshold [0, 100]. Higher values detect weaker acoustic signals.
+  int sensitivity;
+
   int _consecutiveNoiseFrames = 0;
 
   final ClassicPitchDetector _classicDetector;
@@ -188,6 +192,25 @@ class TunerDspPipeline {
     }
   }
 
+  /// Updates detection sensitivity [0, 100].
+  void setSensitivity(int value) {
+    sensitivity = value.clamp(0, 100);
+  }
+
+  /// Maps physical signal energy to a normalized 0-100 perceptual logarithmic level.
+  /// 1:1 mathematical parity with Kotlin `FrequencyEvaluator.transformEnergyToLevelFrom0To100`.
+  static double transformEnergyToLevelFrom0To100(double energy) {
+    const minValue = 1e-7;
+    const minLevel = -7.0; // log10(1e-7)
+    const maxLevel = -2.0; // log10(1e-2)
+    final clampedEnergy = math.max(energy, minValue);
+    final energyLevel = math.log(clampedEnergy) / math.ln10;
+    return (100.0 * (energyLevel - minLevel) / (maxLevel - minLevel)).clamp(
+      0.0,
+      100.0,
+    );
+  }
+
   /// Selects the underlying [PitchDetector] matching [_algorithm].
   PitchDetector get _activeDetector {
     switch (algorithm) {
@@ -212,15 +235,18 @@ class TunerDspPipeline {
       return TunerPipelineResult.silence;
     }
 
-    // Step 1: RMS Energy check
+    // Step 1: RMS Energy and Dynamic Sensitivity check
     var sumSq = 0.0;
     for (var i = 0; i < frameSize; i++) {
       final s = samples[i];
       sumSq += s * s;
     }
     final rms = math.sqrt(sumSq / frameSize);
+    final energy = rms * rms;
+    final energyLevel = transformEnergyToLevelFrom0To100(energy);
+    final requiredEnergyLevel = (100 - sensitivity - 0.0001).clamp(0.0, 100.0);
 
-    if (rms < silenceThresholdRms) {
+    if (rms < silenceThresholdRms || energyLevel < requiredEnergyLevel) {
       _medianFilter.reset();
       _octaveJumpGate.reset();
       _smoother.reset();

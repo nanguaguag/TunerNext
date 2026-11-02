@@ -68,6 +68,10 @@ class AudioPipelineCoordinator {
         maxFps:
             null, // Audio analysis frames must not be dropped to ensure continuous pitch tracking
       );
+      _isolate?.configure(
+        sensitivity: preferences.sensitivity,
+        smootherOrder: preferences.numMovingAverage,
+      );
 
       // 2. Initialize Audio Source (Microphone with Mock fallback)
       if (forceMock) {
@@ -142,6 +146,8 @@ class AudioPipelineCoordinator {
       weightingMode: preferences.acousticWeighting,
       windowSize: preferences.windowSize,
       stride: stride,
+      sensitivity: preferences.sensitivity,
+      smootherOrder: preferences.numMovingAverage,
       includeSpectrum: true,
       includeWaveformSnapshot: true,
     );

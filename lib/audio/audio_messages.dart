@@ -24,6 +24,7 @@ class ConfigureDspMessage extends MainToWorkerMessage {
     this.stride,
     this.sampleRate,
     this.smootherOrder,
+    this.sensitivity,
     this.includeWaveformSnapshot = true,
     this.snapshotSize = 1024,
     this.includeSpectrum = false,
@@ -35,6 +36,7 @@ class ConfigureDspMessage extends MainToWorkerMessage {
   final int? stride;
   final int? sampleRate;
   final int? smootherOrder;
+  final int? sensitivity;
   final bool includeWaveformSnapshot;
   final int snapshotSize;
   final bool includeSpectrum;

@@ -167,6 +167,9 @@ void _audioWorkerEntry(_IsolateInitParams initParams) async {
       if (message.smootherOrder != null) {
         pipeline.setSmootherOrder(message.smootherOrder!);
       }
+      if (message.sensitivity != null) {
+        pipeline.setSensitivity(message.sensitivity!);
+      }
       if (message.sampleRate != null && message.sampleRate! > 0) {
         currentSampleRate = message.sampleRate!;
         autoCorrData = AutoCorrelationData(
@@ -361,6 +364,7 @@ class AudioProcessingIsolate {
     int? stride,
     int? sampleRate,
     int? smootherOrder,
+    int? sensitivity,
     bool includeWaveformSnapshot = true,
     int snapshotSize = 1024,
     bool includeSpectrum = false,
@@ -374,6 +378,7 @@ class AudioProcessingIsolate {
         stride: stride,
         sampleRate: sampleRate,
         smootherOrder: smootherOrder,
+        sensitivity: sensitivity,
         includeWaveformSnapshot: includeWaveformSnapshot,
         snapshotSize: snapshotSize,
         includeSpectrum: includeSpectrum,
