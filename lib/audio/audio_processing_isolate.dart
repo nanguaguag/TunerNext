@@ -5,6 +5,8 @@ import 'dart:typed_data';
 
 import '../core/constants/acoustic_constants.dart';
 import '../domain/models/dsp_enums.dart';
+import '../dsp/correlation/auto_correlation.dart';
+import '../dsp/correlation/correlation.dart';
 import '../dsp/fft/fft.dart';
 import '../dsp/pipeline/tuner_dsp_pipeline.dart';
 import 'audio_messages.dart';
@@ -63,6 +65,11 @@ void _audioWorkerEntry(_IsolateInitParams initParams) async {
   );
 
   var analysisBuffer = Float32List(currentWindowSize);
+  var correlationInstance = Correlation(currentWindowSize);
+  var autoCorrData = AutoCorrelationData(
+    size: currentWindowSize,
+    dt: 1.0 / currentSampleRate,
+  );
   FFT? fftInstance;
   Float32List? fftOutBuffer;
 
@@ -93,6 +100,30 @@ void _audioWorkerEntry(_IsolateInitParams initParams) async {
             snapshot = ringBuffer.getLatestSnapshot(snapshotSize);
           }
 
+          Float32List? correlationValues;
+          Float32List? correlationTimes;
+          var correlationZero = 0.5;
+
+          if (includeSnapshot) {
+            if (correlationInstance.size != currentWindowSize) {
+              correlationInstance = Correlation(currentWindowSize);
+              autoCorrData = AutoCorrelationData(
+                size: currentWindowSize,
+                dt: 1.0 / currentSampleRate,
+              );
+            }
+            correlationInstance.correlateToData(
+              analysisBuffer,
+              autoCorrData,
+              disableWindow: false,
+            );
+            correlationValues = Float32List.fromList(
+              autoCorrData.plotValuesNormalized,
+            );
+            correlationTimes = Float32List.fromList(autoCorrData.times);
+            correlationZero = autoCorrData.plotValuesNormalizedZero;
+          }
+
           Float32List? spectrumAmplitudes;
           if (includeSpectrum) {
             if (fftInstance == null || fftInstance.size != currentWindowSize) {
@@ -113,6 +144,9 @@ void _audioWorkerEntry(_IsolateInitParams initParams) async {
             result,
             waveformSnapshot: snapshot,
             spectrumAmplitudes: spectrumAmplitudes,
+            correlationValues: correlationValues,
+            correlationTimes: correlationTimes,
+            correlationZeroPosition: correlationZero,
             timestampMicros: DateTime.now().microsecondsSinceEpoch,
           );
 
@@ -135,6 +169,10 @@ void _audioWorkerEntry(_IsolateInitParams initParams) async {
       }
       if (message.sampleRate != null && message.sampleRate! > 0) {
         currentSampleRate = message.sampleRate!;
+        autoCorrData = AutoCorrelationData(
+          size: currentWindowSize,
+          dt: 1.0 / currentSampleRate,
+        );
       }
       if (message.windowSize != null && message.windowSize! > 0) {
         currentWindowSize = message.windowSize!;
@@ -144,6 +182,11 @@ void _audioWorkerEntry(_IsolateInitParams initParams) async {
         );
         fftInstance = null;
         fftOutBuffer = null;
+        correlationInstance = Correlation(currentWindowSize);
+        autoCorrData = AutoCorrelationData(
+          size: currentWindowSize,
+          dt: 1.0 / currentSampleRate,
+        );
       }
       if (message.stride != null && message.stride! > 0) {
         currentStride = message.stride!;

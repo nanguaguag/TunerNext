@@ -83,6 +83,9 @@ class AudioAnalysisResult extends WorkerToMainMessage {
     required this.executionLatency,
     this.waveformSnapshot,
     this.spectrumAmplitudes,
+    this.correlationValues,
+    this.correlationTimes,
+    this.correlationZeroPosition = 0.5,
     this.timestampMicros,
   });
 
@@ -91,6 +94,9 @@ class AudioAnalysisResult extends WorkerToMainMessage {
     TunerPipelineResult pipelineResult, {
     Float32List? waveformSnapshot,
     Float32List? spectrumAmplitudes,
+    Float32List? correlationValues,
+    Float32List? correlationTimes,
+    double correlationZeroPosition = 0.5,
     int? timestampMicros,
   }) {
     return AudioAnalysisResult(
@@ -103,6 +109,9 @@ class AudioAnalysisResult extends WorkerToMainMessage {
       executionLatency: pipelineResult.executionTime,
       waveformSnapshot: waveformSnapshot,
       spectrumAmplitudes: spectrumAmplitudes,
+      correlationValues: correlationValues,
+      correlationTimes: correlationTimes,
+      correlationZeroPosition: correlationZeroPosition,
       timestampMicros: timestampMicros,
     );
   }
@@ -134,6 +143,15 @@ class AudioAnalysisResult extends WorkerToMainMessage {
   /// FFT magnitude spectrum for scientific frequency plot rendering.
   final Float32List? spectrumAmplitudes;
 
+  /// Normalized autocorrelation values for scientific correlation plot rendering.
+  final Float32List? correlationValues;
+
+  /// Time shifts / lags corresponding to [correlationValues].
+  final Float32List? correlationTimes;
+
+  /// The normalized Y-position of 0.0 correlation baseline.
+  final double correlationZeroPosition;
+
   /// Timestamp in microseconds when this frame was analyzed.
   final int? timestampMicros;
 
@@ -146,5 +164,6 @@ class AudioAnalysisResult extends WorkerToMainMessage {
     isSilence: true,
     algorithm: PitchAlgorithm.mpm,
     executionLatency: Duration.zero,
+    correlationZeroPosition: 0.5,
   );
 }

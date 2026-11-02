@@ -177,20 +177,62 @@ class AudioPipelineCoordinator {
     return points.isNotEmpty ? LineCoordinates(points) : null;
   }
 
+  /// Converts autocorrelation results into [LineCoordinates].
+  /// Matches Kotlin's `correlationPlotData = correlationPlotData.mutate(times, plotValuesNormalized)`.
+  static LineCoordinates? convertCorrelationToLineCoordinates(
+    Float32List? values,
+    Float32List? times,
+  ) {
+    if (values == null || times == null || values.isEmpty || times.isEmpty) {
+      return null;
+    }
+
+    final count = math.min(values.length, times.length);
+    final points = <Offset>[];
+    // Decimate slightly if too many points for Canvas rendering (~200 points max)
+    final step = math.max<int>(1, (count / 200).floor());
+
+    for (var i = 0; i < count; i += step) {
+      points.add(Offset(times[i], values[i]));
+    }
+
+    return points.isNotEmpty ? LineCoordinates(points) : null;
+  }
+
   /// Converts time-domain waveform snapshot into [LineCoordinates].
+  /// If [displayPoints] is less than or equal to snapshot length, searches for
+  /// a rising-edge zero-crossing trigger in the first half of snapshot so the waveform
+  /// remains visually stable on screen like an oscilloscope.
   static LineCoordinates? convertWaveformToLineCoordinates(
     Float32List? snapshot, {
     int sampleRate = AcousticConstants.defaultSampleRate,
+    int? displayPoints,
   }) {
     if (snapshot == null || snapshot.isEmpty) return null;
 
-    final points = <Offset>[];
     final len = snapshot.length;
-    final step = math.max<int>(1, (len / 200).floor());
+    var targetPoints = displayPoints ?? len;
+    if (targetPoints > len) {
+      targetPoints = len;
+    }
 
-    for (var i = 0; i < len; i += step) {
+    var triggerIndex = 0;
+    if (displayPoints != null && displayPoints < len) {
+      final maxSearch = (len ~/ 2).clamp(1, len - displayPoints);
+      for (var i = 1; i < maxSearch; i++) {
+        if (snapshot[i - 1] <= 0.0 && snapshot[i] > 0.0) {
+          triggerIndex = i;
+          break;
+        }
+      }
+    }
+
+    final points = <Offset>[];
+    final available = math.min(targetPoints, len - triggerIndex);
+    for (var i = 0; i < available; i++) {
+      final sampleIdx = triggerIndex + i;
       final t = i / sampleRate;
-      final y = (0.5 + 0.5 * snapshot[i]).clamp(0.0, 1.0);
+      final y = (0.5 + 0.5 * snapshot[sampleIdx]).clamp(0.0, 1.0);
       points.add(Offset(t, y));
     }
 

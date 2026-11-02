@@ -206,6 +206,8 @@ class TunerHomeScreen extends ConsumerWidget {
         toleranceInCents: state.preferences.toleranceInCents,
         frequencyPlotData: state.frequencyPlotData,
         correlationPlotData: state.correlationPlotData,
+        correlationPlotDataYZeroPosition:
+            state.correlationPlotDataYZeroPosition,
         harmonicFrequencies: state.harmonicFrequencies,
         waveWriterDuration: state.preferences.waveWriterDuration,
         onExportWav: () {

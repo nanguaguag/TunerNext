@@ -31,6 +31,7 @@ class TunerAppState {
     this.waveformSnapshot,
     this.frequencyPlotData,
     this.correlationPlotData,
+    this.correlationPlotDataYZeroPosition = 0.5,
     this.harmonicFrequencies,
     this.isAudioRunning = false,
   });
@@ -64,6 +65,7 @@ class TunerAppState {
   final Float32List? waveformSnapshot;
   final LineCoordinates? frequencyPlotData;
   final LineCoordinates? correlationPlotData;
+  final double correlationPlotDataYZeroPosition;
   final List<double>? harmonicFrequencies;
   final bool isAudioRunning;
 
@@ -85,6 +87,7 @@ class TunerAppState {
     Float32List? waveformSnapshot,
     LineCoordinates? frequencyPlotData,
     LineCoordinates? correlationPlotData,
+    double? correlationPlotDataYZeroPosition,
     List<double>? harmonicFrequencies,
     bool? isAudioRunning,
   }) {
@@ -107,6 +110,9 @@ class TunerAppState {
       waveformSnapshot: waveformSnapshot ?? this.waveformSnapshot,
       frequencyPlotData: frequencyPlotData ?? this.frequencyPlotData,
       correlationPlotData: correlationPlotData ?? this.correlationPlotData,
+      correlationPlotDataYZeroPosition:
+          correlationPlotDataYZeroPosition ??
+          this.correlationPlotDataYZeroPosition,
       harmonicFrequencies: harmonicFrequencies ?? this.harmonicFrequencies,
       isAudioRunning: isAudioRunning ?? this.isAudioRunning,
     );

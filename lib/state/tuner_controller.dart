@@ -146,7 +146,14 @@ class TunerController extends Notifier<TunerAppState> {
     }
 
     LineCoordinates? corrData;
-    if (result.waveformSnapshot != null) {
+    var corrZero = 0.5;
+    if (result.correlationValues != null && result.correlationTimes != null) {
+      corrData = AudioPipelineCoordinator.convertCorrelationToLineCoordinates(
+        result.correlationValues,
+        result.correlationTimes,
+      );
+      corrZero = result.correlationZeroPosition;
+    } else if (result.waveformSnapshot != null) {
       corrData = AudioPipelineCoordinator.convertWaveformToLineCoordinates(
         result.waveformSnapshot,
         sampleRate: _audioCoordinator.sampleRate,
@@ -161,6 +168,7 @@ class TunerController extends Notifier<TunerAppState> {
       waveformSnapshot: result.waveformSnapshot,
       frequencyPlotData: freqData,
       correlationPlotData: corrData,
+      correlationPlotDataYZeroPosition: corrZero,
       isAudioRunning: _audioCoordinator.isRunning,
     );
   }

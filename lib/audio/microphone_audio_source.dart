@@ -147,6 +147,7 @@ class MicrophoneAudioSource with WidgetsBindingObserver implements AudioSource {
   StreamSubscription<Uint8List>? _streamSubscription;
   bool _wasRecordingBeforeSleep = false;
   bool _isDisposed = false;
+  int? _leftoverByte;
 
   @override
   Stream<Float32List> get sampleStream => _sampleController.stream;
@@ -198,11 +199,31 @@ class MicrophoneAudioSource with WidgetsBindingObserver implements AudioSource {
       final byteStream = await _driver.startStream(sampleRate);
 
       _lastError = null;
+      _leftoverByte = null;
       _changeState(AudioSourceState.recording);
 
       _streamSubscription = byteStream.listen(
         (chunk) {
-          final floatSamples = pcm16BytesToFloat32(chunk);
+          Uint8List alignedChunk;
+          if (_leftoverByte != null) {
+            alignedChunk = Uint8List(chunk.length + 1);
+            alignedChunk[0] = _leftoverByte!;
+            alignedChunk.setRange(1, alignedChunk.length, chunk);
+            _leftoverByte = null;
+          } else {
+            alignedChunk = chunk;
+          }
+
+          if (alignedChunk.length % 2 != 0) {
+            _leftoverByte = alignedChunk.last;
+            alignedChunk = Uint8List.sublistView(
+              alignedChunk,
+              0,
+              alignedChunk.length - 1,
+            );
+          }
+
+          final floatSamples = pcm16BytesToFloat32(alignedChunk);
           if (floatSamples.isNotEmpty && !_sampleController.isClosed) {
             _sampleController.add(floatSamples);
           }
