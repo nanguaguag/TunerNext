@@ -100,7 +100,7 @@ class Correlation {
               : 0.0;
           spectrumStorage[ir2] = i2 < size ? _window[i2] * input[i2] : 0.0;
           spectrumStorage[ir2 + 1] = (i2 + 1) < size
-              ? _window[ir2 + 1] * input[ir2 + 1]
+              ? _window[i2 + 1] * input[i2 + 1]
               : 0.0;
         }
       }

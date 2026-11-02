@@ -151,16 +151,6 @@ class _TemperamentDialogState extends State<TemperamentDialog> {
                     ),
                   _buildSection(
                     context,
-                    title: l10n?.otherTemperaments ?? 'Historical Temperaments',
-                    items: filteredHistorical,
-                    isExpanded: _historicalExpanded,
-                    isSearching: isSearching,
-                    onToggle: () => setState(
-                      () => _historicalExpanded = !_historicalExpanded,
-                    ),
-                  ),
-                  _buildSection(
-                    context,
                     title:
                         l10n?.edoTemperaments ??
                         'Equal Temperaments (5 - 72 EDO)',
@@ -169,6 +159,16 @@ class _TemperamentDialogState extends State<TemperamentDialog> {
                     isSearching: isSearching,
                     onToggle: () =>
                         setState(() => _edoExpanded = !_edoExpanded),
+                  ),
+                  _buildSection(
+                    context,
+                    title: l10n?.otherTemperaments ?? 'Historical Temperaments',
+                    items: filteredHistorical,
+                    isExpanded: _historicalExpanded,
+                    isSearching: isSearching,
+                    onToggle: () => setState(
+                      () => _historicalExpanded = !_historicalExpanded,
+                    ),
                   ),
                 ],
               ),
