@@ -33,19 +33,30 @@ class InstrumentTunerScreen extends StatefulWidget {
     this.initialTemperament,
     this.initialReferenceNote = const MusicalNote(base: BaseNote.a, octave: 4),
     this.initialReferenceFrequency = 440.0,
+    this.initialStretchTuningName,
+    this.initialPreferFlat = false,
     this.onOpenPreferences,
     this.onOpenInstrumentList,
     this.onOpenScientificMode,
+    this.onOpenStretchTuning,
+    this.onTemperamentChanged,
+    this.onReferenceNoteChanged,
   });
 
   final Instrument initialInstrument;
   final Temperament? initialTemperament;
   final MusicalNote initialReferenceNote;
   final double initialReferenceFrequency;
+  final String? initialStretchTuningName;
+  final bool initialPreferFlat;
 
   final VoidCallback? onOpenPreferences;
   final VoidCallback? onOpenInstrumentList;
   final VoidCallback? onOpenScientificMode;
+  final VoidCallback? onOpenStretchTuning;
+  final ValueChanged<Temperament>? onTemperamentChanged;
+  final void Function(MusicalNote note, double frequency)?
+  onReferenceNoteChanged;
 
   @override
   State<InstrumentTunerScreen> createState() => _InstrumentTunerScreenState();
@@ -76,11 +87,38 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
         widget.initialTemperament ?? PredefinedTemperaments.edo12();
     _referenceNote = widget.initialReferenceNote;
     _referenceFrequency = widget.initialReferenceFrequency;
-    _preferFlat = false;
+    _stretchTuningName = widget.initialStretchTuningName;
+    _preferFlat = widget.initialPreferFlat;
 
     _pitchHistoryState = PitchHistoryState(capacity: 80);
     _rebuildPitchConverter();
     _initTargetNote();
+  }
+
+  @override
+  void didUpdateWidget(InstrumentTunerScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialInstrument != widget.initialInstrument) {
+      _currentInstrument = widget.initialInstrument;
+      _initTargetNote();
+    }
+    if (oldWidget.initialTemperament != widget.initialTemperament &&
+        widget.initialTemperament != null) {
+      _currentTemperament = widget.initialTemperament!;
+    }
+    if (oldWidget.initialReferenceFrequency !=
+            widget.initialReferenceFrequency ||
+        oldWidget.initialReferenceNote != widget.initialReferenceNote) {
+      _referenceFrequency = widget.initialReferenceFrequency;
+      _referenceNote = widget.initialReferenceNote;
+      _rebuildPitchConverter();
+    }
+    if (oldWidget.initialStretchTuningName != widget.initialStretchTuningName) {
+      _stretchTuningName = widget.initialStretchTuningName;
+    }
+    if (oldWidget.initialPreferFlat != widget.initialPreferFlat) {
+      _preferFlat = widget.initialPreferFlat;
+    }
   }
 
   void _rebuildPitchConverter() {
@@ -177,6 +215,7 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
               _targetFrequency = _pitchConverter.noteToFrequency(_targetNote!);
             }
           });
+          widget.onReferenceNoteChanged?.call(note, frequency);
         },
       ),
     );
@@ -191,6 +230,7 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
           setState(() {
             _currentTemperament = temp;
           });
+          widget.onTemperamentChanged?.call(temp);
         },
       ),
     );
@@ -289,6 +329,7 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
         stretchTuningName: _stretchTuningName,
         onReferenceNoteClicked: _showReferenceNoteDialog,
         onTemperamentClicked: _showTemperamentDialog,
+        onStretchTuningClicked: widget.onOpenStretchTuning,
         onSharpFlatClicked: () {
           setState(() {
             _preferFlat = !_preferFlat;

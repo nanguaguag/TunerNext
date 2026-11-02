@@ -227,4 +227,54 @@ class AppPreferences extends ChangeNotifier {
     notifyListeners();
     await save();
   }
+
+  // --- Setter helpers ---
+  void setScientificMode(bool value) {
+    if (scientificMode != value) {
+      scientificMode = value;
+      notifyListeners();
+    }
+  }
+
+  void setThemeMode(ThemeMode mode) {
+    if (themeMode != mode) {
+      themeMode = mode;
+      notifyListeners();
+    }
+  }
+
+  void setPreferFlat(bool value) {
+    if (preferFlat != value) {
+      preferFlat = value;
+      notifyListeners();
+    }
+  }
+
+  void setReferenceFrequency(double freq) {
+    if (referenceFrequency != freq) {
+      referenceFrequency = freq;
+      notifyListeners();
+    }
+  }
+
+  void setReferenceNote(MusicalNote note) {
+    if (referenceNote != note) {
+      referenceNote = note;
+      notifyListeners();
+    }
+  }
+
+  void setTemperamentName(String name) {
+    if (temperamentName != name) {
+      temperamentName = name;
+      notifyListeners();
+    }
+  }
+
+  void setStretchTuningName(String name) {
+    if (stretchTuningName != name) {
+      stretchTuningName = name;
+      notifyListeners();
+    }
+  }
 }

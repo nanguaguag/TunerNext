@@ -35,6 +35,7 @@ class ScientificTunerScreen extends StatefulWidget {
     this.canNavigateUp = false,
     this.onNavigateUp,
     this.onOpenPreferences,
+    this.onOpenInstrumentTunerMode,
     this.onTogglePreferFlat,
     this.onOpenReferenceNote,
     this.onOpenTemperament,
@@ -63,6 +64,7 @@ class ScientificTunerScreen extends StatefulWidget {
   final bool canNavigateUp;
   final VoidCallback? onNavigateUp;
   final VoidCallback? onOpenPreferences;
+  final VoidCallback? onOpenInstrumentTunerMode;
   final VoidCallback? onTogglePreferFlat;
   final VoidCallback? onOpenReferenceNote;
   final VoidCallback? onOpenTemperament;
@@ -139,6 +141,12 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
               )
             : null,
         actions: [
+          if (widget.onOpenInstrumentTunerMode != null)
+            IconButton(
+              icon: const Icon(Icons.tune),
+              tooltip: 'Instrument Tuner',
+              onPressed: widget.onOpenInstrumentTunerMode,
+            ),
           if (widget.onOpenPreferences != null)
             IconButton(
               icon: const Icon(Icons.settings),
