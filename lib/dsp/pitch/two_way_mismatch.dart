@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import '../../domain/models/dsp_enums.dart';
 import '../correlation/auto_correlation.dart';
 import '../correlation/correlation.dart';
+import '../filters/acoustic_weighting.dart';
 import 'pitch_detector_interface.dart';
 import 'polynomial_fit.dart';
 
@@ -344,6 +345,7 @@ class TwoWayMismatchDetector implements PitchDetector {
     required int sampleRate,
     double frequencyMin = 16.0,
     double frequencyMax = 20000.0,
+    AcousticWeighting? weighting,
   }) {
     final size = samples.length;
     if (size < 64) return PitchDetectionResult.silence;

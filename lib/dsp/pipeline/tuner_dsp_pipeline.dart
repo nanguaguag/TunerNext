@@ -267,6 +267,7 @@ class TunerDspPipeline {
       sampleRate: sampleRate,
       frequencyMin: frequencyMin,
       frequencyMax: frequencyMax,
+      weighting: _weighting,
     );
 
     final isUnvoicedOrNoise =

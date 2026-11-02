@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import '../correlation/auto_correlation.dart';
 import '../correlation/correlation.dart';
+import '../filters/acoustic_weighting.dart';
 import 'pitch_detector_interface.dart';
 import 'polynomial_fit.dart';
 
@@ -108,6 +109,7 @@ class McLeodPitchDetector implements PitchDetector {
     required int sampleRate,
     double frequencyMin = 16.0,
     double frequencyMax = 20000.0,
+    AcousticWeighting? weighting,
   }) {
     final size = samples.length;
     if (size < 64) return PitchDetectionResult.silence;
@@ -131,8 +133,13 @@ class McLeodPitchDetector implements PitchDetector {
       _nsdfBuffer = Float32List(size ~/ 2);
     }
 
-    // 2. Fast autocorrelation via FFT
-    _correlator!.correlateToData(samples, _autoCorr!);
+    // 2. Fast autocorrelation via FFT with optional acoustic weighting
+    _correlator!.correlateToData(
+      samples,
+      _autoCorr!,
+      weighting: weighting,
+      sampleRate: sampleRate,
+    );
 
     final r0 = _autoCorr!.values[0];
     if (r0 <= 1e-9 || r0.isNaN) return PitchDetectionResult.silence;

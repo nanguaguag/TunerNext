@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import '../filters/acoustic_weighting.dart';
 
 /// Common data packet representing the raw output of pitch detection prior to smoothing.
 class PitchDetectionResult {
@@ -51,6 +52,7 @@ abstract class PitchDetector {
     required int sampleRate,
     double frequencyMin = 16.0,
     double frequencyMax = 20000.0,
+    AcousticWeighting? weighting,
   });
 
   /// Resets internal state (buffers, filters, history).

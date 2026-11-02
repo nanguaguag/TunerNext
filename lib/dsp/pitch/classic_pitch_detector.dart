@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import '../correlation/auto_correlation.dart';
 import '../correlation/correlation.dart';
+import '../filters/acoustic_weighting.dart';
 import 'pitch_detector_interface.dart';
 import 'polynomial_fit.dart';
 
@@ -283,6 +284,7 @@ class ClassicPitchDetector implements PitchDetector {
     required int sampleRate,
     double frequencyMin = 16.0,
     double frequencyMax = 20000.0,
+    AcousticWeighting? weighting,
   }) {
     if (samples.length < frameSize || sampleRate <= 0) {
       return PitchDetectionResult.silence;
@@ -304,7 +306,12 @@ class ClassicPitchDetector implements PitchDetector {
     if (_autoCorrData.dt != dt) {
       _autoCorrData = AutoCorrelationData(size: frameSize, dt: dt);
     }
-    _correlation.correlate(samples, _autoCorrData.values);
+    _correlation.correlate(
+      samples,
+      _autoCorrData.values,
+      weighting: weighting,
+      sampleRate: sampleRate,
+    );
 
     // Step 3: Peak detection and subharmonic suppression
     findCorrelationBasedFrequency(

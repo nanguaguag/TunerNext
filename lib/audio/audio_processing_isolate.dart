@@ -9,6 +9,7 @@ import '../dsp/correlation/auto_correlation.dart';
 import '../dsp/correlation/correlation.dart';
 import '../dsp/fft/fft.dart';
 import '../dsp/pipeline/tuner_dsp_pipeline.dart';
+import '../dsp/windowing/windowing.dart';
 import 'audio_messages.dart';
 import 'audio_ring_buffer.dart';
 
@@ -72,6 +73,11 @@ void _audioWorkerEntry(_IsolateInitParams initParams) async {
   );
   FFT? fftInstance;
   Float32List? fftOutBuffer;
+  var windowedFftInput = Float32List(currentWindowSize);
+  var fftWindow = Windowing.getWindow(
+    WindowingFunction.hanning,
+    currentWindowSize,
+  );
 
   // Handshake step 2: worker ready
   initParams.toMainSendPort.send(const WorkerReadyMessage());
@@ -129,8 +135,16 @@ void _audioWorkerEntry(_IsolateInitParams initParams) async {
             if (fftInstance == null || fftInstance.size != currentWindowSize) {
               fftInstance = FFT(currentWindowSize);
               fftOutBuffer = Float32List(currentWindowSize + 2);
+              windowedFftInput = Float32List(currentWindowSize);
+              fftWindow = Windowing.getWindow(
+                WindowingFunction.hanning,
+                currentWindowSize,
+              );
             }
-            fftInstance.fftReal(analysisBuffer, fftOutBuffer!);
+            for (var i = 0; i < currentWindowSize; i++) {
+              windowedFftInput[i] = analysisBuffer[i] * fftWindow[i];
+            }
+            fftInstance.fftReal(windowedFftInput, fftOutBuffer!);
             final numBins = currentWindowSize ~/ 2 + 1;
             spectrumAmplitudes = Float32List(numBins);
             var minVal = double.infinity;
@@ -196,6 +210,11 @@ void _audioWorkerEntry(_IsolateInitParams initParams) async {
         );
         fftInstance = null;
         fftOutBuffer = null;
+        windowedFftInput = Float32List(currentWindowSize);
+        fftWindow = Windowing.getWindow(
+          WindowingFunction.hanning,
+          currentWindowSize,
+        );
         correlationInstance = Correlation(currentWindowSize);
         autoCorrData = AutoCorrelationData(
           size: currentWindowSize,

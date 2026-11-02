@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import '../../domain/models/dsp_enums.dart';
 import '../fft/fft.dart';
+import '../filters/acoustic_weighting.dart';
 import '../windowing/windowing.dart';
 import 'auto_correlation.dart';
 
@@ -9,6 +10,7 @@ import 'auto_correlation.dart';
 /// Implements the Wiener-Khinchin theorem:
 /// $$R_{xx}[\tau] = \mathcal{F}^{-1}\left\{ |\mathcal{F}\{x_{\text{padded}}\}|^2 \right\}$$
 /// Using zero-padding up to $2N$ avoids circular correlation distortion at larger lags.
+/// Supports optional IEC 61672-1 acoustic weighting (A/C weighting) in the frequency domain.
 class Correlation {
   /// Creates a [Correlation] processor for input frames of [size] samples.
   ///
@@ -46,11 +48,15 @@ class Correlation {
   /// - [disableWindow]: If true, forces rectangular/tophat windowing regardless of [windowType].
   /// - [spectrum]: Optional buffer of length >= `2 * size + 2` to receive the complex spectrum
   ///   of the zero-padded input.
+  /// - [weighting]: Optional IEC 61672-1 acoustic weighting filter to suppress low-frequency electrical hum.
+  /// - [sampleRate]: Sampling rate in Hz required when [weighting] is applied.
   void correlate(
     Float32List input,
     Float32List output, {
     bool disableWindow = false,
     Float32List? spectrum,
+    AcousticWeighting? weighting,
+    int sampleRate = 44100,
   }) {
     if (input.length < size) {
       throw ArgumentError(
@@ -94,7 +100,7 @@ class Correlation {
               : 0.0;
           spectrumStorage[ir2] = i2 < size ? _window[i2] * input[i2] : 0.0;
           spectrumStorage[ir2 + 1] = (i2 + 1) < size
-              ? _window[i2 + 1] * input[i2 + 1]
+              ? _window[ir2 + 1] * input[ir2 + 1]
               : 0.0;
         }
       }
@@ -104,11 +110,23 @@ class Correlation {
     _fft.fftBitReversed(spectrumStorage);
     _fft.combineFFTResultForRealFFT(spectrumStorage);
 
-    // 3. Compute power spectrum |X[k]|^2
+    // 3. Compute power spectrum |X[k]|^2 with optional frequency weighting
+    final applyWeighting =
+        weighting != null && weighting.mode != AcousticWeightingMode.none;
+    final binFreqStep = sampleRate / (2.0 * size);
+
     for (var i = 0; i <= size; i++) {
       final re = spectrumStorage[2 * i];
       final im = spectrumStorage[2 * i + 1];
-      _inputBitReversed[2 * i] = re * re + im * im;
+      var pwr = re * re + im * im;
+
+      if (applyWeighting) {
+        final freq = i * binFreqStep;
+        final w = weighting.applyToAmplitude(1.0, freq);
+        pwr *= (w * w);
+      }
+
+      _inputBitReversed[2 * i] = pwr;
       _inputBitReversed[2 * i + 1] = 0.0;
     }
 
@@ -127,12 +145,16 @@ class Correlation {
     AutoCorrelationData autoCorr, {
     bool disableWindow = false,
     Float32List? spectrum,
+    AcousticWeighting? weighting,
+    int sampleRate = 44100,
   }) {
     correlate(
       input,
       autoCorr.values,
       disableWindow: disableWindow,
       spectrum: spectrum,
+      weighting: weighting,
+      sampleRate: sampleRate,
     );
     autoCorr.updatePlotNormalized();
   }
