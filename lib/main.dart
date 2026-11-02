@@ -102,6 +102,11 @@ class TunerHomeScreen extends ConsumerWidget {
                 .read(tunerControllerProvider.notifier)
                 .updateCustomInstrument(inst);
           },
+          onDeleteCustomInstrument: (Instrument inst) {
+            ref
+                .read(tunerControllerProvider.notifier)
+                .deleteCustomInstrument(inst);
+          },
         ),
       ),
     );
@@ -190,6 +195,23 @@ class TunerHomeScreen extends ConsumerWidget {
         currentFrequency: state.currentFrequency,
         tuningState: state.tuningState,
         toleranceInCents: state.preferences.toleranceInCents,
+        frequencyPlotData: state.frequencyPlotData,
+        correlationPlotData: state.correlationPlotData,
+        harmonicFrequencies: state.harmonicFrequencies,
+        waveWriterDuration: state.preferences.waveWriterDuration,
+        onExportWav: () {
+          final wav = notifier.exportWavSnapshot();
+          if (wav != null && context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'WAV snapshot exported (${wav.lengthInBytes} bytes)',
+                ),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
         onOpenInstrumentTunerMode: () => notifier.setScientificMode(false),
         onOpenPreferences: () => _openPreferences(context, state),
         onTogglePreferFlat: notifier.togglePreferFlat,
@@ -207,6 +229,7 @@ class TunerHomeScreen extends ConsumerWidget {
       initialReferenceFrequency: state.referenceFrequency,
       initialStretchTuningName: state.currentStretchTuning.name,
       initialPreferFlat: state.preferFlat,
+      currentFrequency: state.currentFrequency,
       onOpenScientificMode: () => notifier.setScientificMode(true),
       onOpenPreferences: () => _openPreferences(context, state),
       onOpenInstrumentList: () => _openInstruments(context, ref, state),

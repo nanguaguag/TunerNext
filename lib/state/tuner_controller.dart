@@ -1,24 +1,189 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../audio/audio_messages.dart';
+import '../audio/audio_pipeline_coordinator.dart';
 import '../data/preferences/app_preferences.dart';
 import '../domain/instruments/instrument.dart';
+import '../domain/instruments/instrument_io.dart';
 import '../domain/models/musical_note.dart';
 import '../domain/models/tuning_state.dart';
 import '../domain/stretch_tuning/stretch_tuning.dart';
 import '../domain/temperaments/temperament.dart';
+import '../domain/tuning/frequency_to_note_converter.dart';
+import '../ui/plot/line_coordinates.dart';
 import 'tuner_state.dart';
 
-/// Main Riverpod notifier managing active application state and audio synchronization.
+/// Main Riverpod notifier managing active application state, settings persistence,
+/// and live audio DSP telemetry synchronization.
 class TunerController extends Notifier<TunerAppState> {
+  static const _kCustomInstrumentsKey = 'pref_custom_instruments_data';
+
+  late final AudioPipelineCoordinator _audioCoordinator;
+  late FrequencyToNoteConverter _pitchConverter;
+  StreamSubscription<AudioAnalysisResult>? _analysisSubscription;
+  AppPreferences? _preferences;
+
   @override
   TunerAppState build() {
+    _audioCoordinator = AudioPipelineCoordinator();
+    _rebuildPitchConverter(
+      440.0,
+      const MusicalNote(base: BaseNote.a, octave: 4),
+      10,
+    );
+    ref.onDispose(() {
+      _analysisSubscription?.cancel();
+      _audioCoordinator.dispose();
+      _preferences?.removeListener(_onPreferencesChanged);
+      _preferences = null;
+    });
     return TunerAppState.initial();
   }
 
-  void initializeWithPreferences(AppPreferences preferences) {
+  void _rebuildPitchConverter(double freq, MusicalNote note, int tolerance) {
+    _pitchConverter = FrequencyToNoteConverter(
+      referenceFrequency: freq,
+      referenceMidi: note.midiNumber,
+      toleranceInCents: tolerance.toDouble(),
+    );
+  }
+
+  void initializeWithPreferences(
+    AppPreferences preferences, {
+    bool startAudio = true,
+    bool forceMock = false,
+  }) {
+    if (_preferences != null) {
+      _preferences!.removeListener(_onPreferencesChanged);
+    }
+    _preferences = preferences;
+
     state = TunerAppState.initial(preferences: preferences);
+    _rebuildPitchConverter(
+      preferences.referenceFrequency,
+      preferences.referenceNote,
+      preferences.toleranceInCents,
+    );
+
+    preferences.addListener(_onPreferencesChanged);
+
+    loadCustomInstruments();
+
+    if (startAudio) {
+      startAudioPipeline(forceMock: forceMock);
+    }
+  }
+
+  void _onPreferencesChanged() {
+    _rebuildPitchConverter(
+      state.preferences.referenceFrequency,
+      state.preferences.referenceNote,
+      state.preferences.toleranceInCents,
+    );
+    _audioCoordinator.reconfigure(state.preferences);
+    state = state.copyWith(
+      preferFlat: state.preferences.preferFlat,
+      referenceFrequency: state.preferences.referenceFrequency,
+      referenceNote: state.preferences.referenceNote,
+    );
+  }
+
+  /// Starts the platform microphone or mock audio source and connects the Isolate pipeline.
+  Future<void> startAudioPipeline({bool forceMock = false}) async {
+    await _audioCoordinator.start(
+      preferences: state.preferences,
+      forceMock: forceMock,
+    );
+
+    await _analysisSubscription?.cancel();
+    _analysisSubscription = _audioCoordinator.analysisStream.listen(
+      (AudioAnalysisResult result) {
+        _onAudioAnalysisResult(result);
+      },
+      onError: (Object error) {
+        debugPrint('TunerController audio analysis error: $error');
+      },
+    );
+
+    state = state.copyWith(isAudioRunning: _audioCoordinator.isRunning);
+  }
+
+  void _onAudioAnalysisResult(AudioAnalysisResult result) {
+    double? detectedFreq;
+    TuningState stateParam = TuningState.unknown;
+
+    if (!result.isSilence &&
+        result.smoothedFrequency > 0 &&
+        !result.smoothedFrequency.isNaN) {
+      detectedFreq = result.smoothedFrequency;
+      final assessment = _pitchConverter.evaluatePitch(detectedFreq);
+      stateParam = assessment.tuningState;
+    }
+
+    LineCoordinates? freqData;
+    if (result.spectrumAmplitudes != null) {
+      freqData = AudioPipelineCoordinator.convertSpectrumToLineCoordinates(
+        result.spectrumAmplitudes,
+        sampleRate: _audioCoordinator.sampleRate,
+        windowSize: state.preferences.windowSize,
+      );
+    }
+
+    LineCoordinates? corrData;
+    if (result.waveformSnapshot != null) {
+      corrData = AudioPipelineCoordinator.convertWaveformToLineCoordinates(
+        result.waveformSnapshot,
+        sampleRate: _audioCoordinator.sampleRate,
+      );
+    }
+
+    state = state.copyWith(
+      currentFrequency: detectedFreq,
+      clearCurrentFrequency: detectedFreq == null,
+      tuningState: stateParam,
+      spectrumAmplitudes: result.spectrumAmplitudes,
+      waveformSnapshot: result.waveformSnapshot,
+      frequencyPlotData: freqData,
+      correlationPlotData: corrData,
+      isAudioRunning: _audioCoordinator.isRunning,
+    );
+  }
+
+  /// Exports recent audio as a WAV snapshot.
+  Uint8List? exportWavSnapshot() {
+    return _audioCoordinator.exportWavSnapshot(
+      durationSeconds: state.preferences.waveWriterDuration,
+    );
+  }
+
+  // --- Persistence for Custom Instruments ---
+  Future<void> loadCustomInstruments() async {
+    try {
+      final sp = await SharedPreferences.getInstance();
+      final data = sp.getString(_kCustomInstrumentsKey);
+      if (data != null && data.isNotEmpty) {
+        final parsed = InstrumentIO.stringToInstruments(data);
+        if (parsed.isOk && parsed.instruments.isNotEmpty) {
+          state = state.copyWith(customInstruments: parsed.instruments);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading custom instruments: $e');
+    }
+  }
+
+  Future<void> _saveCustomInstruments() async {
+    try {
+      final sp = await SharedPreferences.getInstance();
+      final str = InstrumentIO.instrumentsListToString(state.customInstruments);
+      await sp.setString(_kCustomInstrumentsKey, str);
+    } catch (e) {
+      debugPrint('Error saving custom instruments: $e');
+    }
   }
 
   void setScientificMode(bool enabled) {
@@ -63,6 +228,7 @@ class TunerController extends Notifier<TunerAppState> {
       customInstruments: list,
       currentInstrument: instrument,
     );
+    _saveCustomInstruments();
   }
 
   void updateCustomInstrument(Instrument instrument) {
@@ -76,12 +242,14 @@ class TunerController extends Notifier<TunerAppState> {
       customInstruments: list,
       currentInstrument: isCurrent ? instrument : null,
     );
+    _saveCustomInstruments();
   }
 
   void deleteCustomInstrument(Instrument instrument) {
     final list = List<Instrument>.from(state.customInstruments)
       ..removeWhere((i) => i.stableId == instrument.stableId);
     state = state.copyWith(customInstruments: list);
+    _saveCustomInstruments();
   }
 
   void setCurrentTemperament(Temperament temperament) {
@@ -111,6 +279,8 @@ class TunerController extends Notifier<TunerAppState> {
     TuningState? stateParam,
     Float32List? spectrum,
     Float32List? waveform,
+    LineCoordinates? freqData,
+    LineCoordinates? corrData,
   }) {
     state = state.copyWith(
       currentFrequency: frequency,
@@ -118,6 +288,8 @@ class TunerController extends Notifier<TunerAppState> {
       tuningState: stateParam ?? state.tuningState,
       spectrumAmplitudes: spectrum ?? state.spectrumAmplitudes,
       waveformSnapshot: waveform ?? state.waveformSnapshot,
+      frequencyPlotData: freqData ?? state.frequencyPlotData,
+      correlationPlotData: corrData ?? state.correlationPlotData,
     );
   }
 }

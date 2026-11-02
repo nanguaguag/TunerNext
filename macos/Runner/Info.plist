@@ -28,5 +28,7 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Tuner requires access to the microphone to detect and analyze acoustic instrument pitch in real time.</string>
 </dict>
 </plist>

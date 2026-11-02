@@ -35,6 +35,7 @@ class InstrumentTunerScreen extends StatefulWidget {
     this.initialReferenceFrequency = 440.0,
     this.initialStretchTuningName,
     this.initialPreferFlat = false,
+    this.currentFrequency,
     this.onOpenPreferences,
     this.onOpenInstrumentList,
     this.onOpenScientificMode,
@@ -49,6 +50,7 @@ class InstrumentTunerScreen extends StatefulWidget {
   final double initialReferenceFrequency;
   final String? initialStretchTuningName;
   final bool initialPreferFlat;
+  final double? currentFrequency;
 
   final VoidCallback? onOpenPreferences;
   final VoidCallback? onOpenInstrumentList;
@@ -118,6 +120,9 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
     }
     if (oldWidget.initialPreferFlat != widget.initialPreferFlat) {
       _preferFlat = widget.initialPreferFlat;
+    }
+    if (oldWidget.currentFrequency != widget.currentFrequency) {
+      feedPitch(widget.currentFrequency);
     }
   }
 

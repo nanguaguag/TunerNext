@@ -221,11 +221,12 @@ class AudioProcessingIsolate {
 
     setThrottleFps(maxFps);
 
-    _fromWorkerPort = ReceivePort();
+    final fromWorkerPort = ReceivePort();
+    _fromWorkerPort = fromWorkerPort;
     final workerReadyCompleter = Completer<void>();
 
     final initParams = _IsolateInitParams(
-      toMainSendPort: _fromWorkerPort!.sendPort,
+      toMainSendPort: fromWorkerPort.sendPort,
       sampleRate: sampleRate,
       windowSize: windowSize,
       stride: stride,
@@ -237,13 +238,20 @@ class AudioProcessingIsolate {
       includeSpectrum: includeSpectrum,
     );
 
-    _isolate = await Isolate.spawn<_IsolateInitParams>(
+    final workerIsolate = await Isolate.spawn<_IsolateInitParams>(
       _audioWorkerEntry,
       initParams,
       debugName: 'AudioProcessingWorkerIsolate',
     );
 
-    _workerSubscription = _fromWorkerPort!.listen((message) {
+    if (_isDisposed) {
+      fromWorkerPort.close();
+      workerIsolate.kill(priority: Isolate.immediate);
+      return;
+    }
+    _isolate = workerIsolate;
+
+    _workerSubscription = fromWorkerPort.listen((message) {
       if (message is SendPort) {
         _toWorkerPort = message;
       } else if (message is WorkerReadyMessage) {

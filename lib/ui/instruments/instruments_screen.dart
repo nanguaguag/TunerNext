@@ -22,6 +22,7 @@ class InstrumentsScreen extends StatefulWidget {
     required this.onSelectInstrument,
     this.onAddCustomInstrument,
     this.onUpdateCustomInstrument,
+    this.onDeleteCustomInstrument,
   });
 
   final Instrument selectedInstrument;
@@ -29,6 +30,7 @@ class InstrumentsScreen extends StatefulWidget {
   final ValueChanged<Instrument> onSelectInstrument;
   final ValueChanged<Instrument>? onAddCustomInstrument;
   final ValueChanged<Instrument>? onUpdateCustomInstrument;
+  final ValueChanged<Instrument>? onDeleteCustomInstrument;
 
   @override
   State<InstrumentsScreen> createState() => _InstrumentsScreenState();
@@ -60,19 +62,21 @@ class _InstrumentsScreenState extends State<InstrumentsScreen> {
     return _customList.where((i) => i.name.toLowerCase().contains(q)).toList();
   }
 
-  void _openEditor({Instrument? instrumentToEdit}) {
+  void _openEditor({Instrument? instrumentToEdit, bool isDuplicate = false}) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => InstrumentEditorScreen(
           initialInstrument: instrumentToEdit,
           onSaveInstrument: (saved) {
             setState(() {
-              if (instrumentToEdit != null) {
+              if (instrumentToEdit != null && !isDuplicate) {
                 final idx = _customList.indexWhere(
                   (inst) => inst.stableId == instrumentToEdit.stableId,
                 );
                 if (idx >= 0) {
                   _customList[idx] = saved;
+                } else {
+                  _customList.add(saved);
                 }
                 widget.onUpdateCustomInstrument?.call(saved);
               } else {
@@ -82,6 +86,32 @@ class _InstrumentsScreenState extends State<InstrumentsScreen> {
             });
           },
         ),
+      ),
+    );
+  }
+
+  void _confirmDelete(Instrument inst) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Instrument'),
+        content: Text('Are you sure you want to delete "${inst.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              setState(() {
+                _customList.removeWhere((i) => i.stableId == inst.stableId);
+              });
+              widget.onDeleteCustomInstrument?.call(inst);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }
@@ -194,12 +224,41 @@ class _InstrumentsScreenState extends State<InstrumentsScreen> {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (isCustom)
+          if (isCustom) ...[
             IconButton(
               icon: const Icon(Icons.edit_outlined, size: 20),
               tooltip: 'Edit',
               onPressed: () => _openEditor(instrumentToEdit: inst),
             ),
+            IconButton(
+              icon: const Icon(Icons.copy_outlined, size: 20),
+              tooltip: 'Copy',
+              onPressed: () => _openEditor(
+                instrumentToEdit: inst.copyWith(
+                  name: '${inst.name} (Copy)',
+                  stableId: DateTime.now().millisecondsSinceEpoch,
+                ),
+                isDuplicate: true,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline, size: 20),
+              tooltip: 'Delete',
+              onPressed: () => _confirmDelete(inst),
+            ),
+          ] else if (!inst.isChromatic) ...[
+            IconButton(
+              icon: const Icon(Icons.copy_outlined, size: 20),
+              tooltip: 'Copy to customize',
+              onPressed: () => _openEditor(
+                instrumentToEdit: inst.copyWith(
+                  name: '${inst.name} (Custom)',
+                  stableId: DateTime.now().millisecondsSinceEpoch,
+                ),
+                isDuplicate: true,
+              ),
+            ),
+          ],
           if (isSelected)
             Icon(
               Icons.check_circle,

@@ -75,7 +75,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
                 context: context,
                 builder: (ctx) => LanguageDialog(
                   selectedLanguage: _pref.language,
-                  onSelected: (l) => setState(() => _pref.language = l),
+                  onSelected: (l) => _pref.setLanguage(l),
                 ),
               );
             },
@@ -93,7 +93,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
                 context: context,
                 builder: (ctx) => AppearanceDialog(
                   selectedMode: _pref.themeMode,
-                  onSelected: (m) => setState(() => _pref.themeMode = m),
+                  onSelected: (m) => _pref.setThemeMode(m),
                 ),
               );
             },
@@ -103,7 +103,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             subtitle: 'Prevents display from sleeping while tuning',
             icon: Icons.screen_lock_portrait,
             value: _pref.keepScreenOn,
-            onChanged: (v) => setState(() => _pref.keepScreenOn = v),
+            onChanged: (v) => _pref.setKeepScreenOn(v),
           ),
           SimplePreference(
             title: 'Reference Pitch',
@@ -117,10 +117,8 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
                   initialNote: _pref.referenceNote,
                   initialFrequency: _pref.referenceFrequency,
                   onConfirm: (n, f) {
-                    setState(() {
-                      _pref.referenceNote = n;
-                      _pref.referenceFrequency = f;
-                    });
+                    _pref.setReferenceNote(n);
+                    _pref.setReferenceFrequency(f);
                   },
                 ),
               );
@@ -140,7 +138,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
                         orElse: () => PredefinedTemperaments.edo12(),
                       ),
                   onSelectTemperament: (t) {
-                    setState(() => _pref.temperamentName = t.name);
+                    _pref.setTemperamentName(t.name);
                   },
                 ),
               );
@@ -155,22 +153,21 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             min: 1.0,
             max: 20.0,
             divisions: 19,
-            onChanged: (v) =>
-                setState(() => _pref.toleranceInCents = v.round()),
+            onChanged: (v) => _pref.setToleranceInCents(v.round()),
           ),
           SwitchPreference(
             title: 'Prefer Flat (♭)',
             subtitle: 'Display accidentals as flat instead of sharp (♯)',
             icon: Icons.music_note_outlined,
             value: _pref.preferFlat,
-            onChanged: (v) => setState(() => _pref.preferFlat = v),
+            onChanged: (v) => _pref.setPreferFlat(v),
           ),
           SwitchPreference(
             title: 'Chromatic as Staff',
             subtitle: 'Display musical stave in chromatic instrument mode',
             icon: Icons.piano,
             value: _pref.chromaticAsStaff,
-            onChanged: (v) => setState(() => _pref.chromaticAsStaff = v),
+            onChanged: (v) => _pref.setChromaticAsStaff(v),
           ),
           SliderPreference(
             title: 'Microphone Sensitivity',
@@ -181,7 +178,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             min: 0.0,
             max: 100.0,
             divisions: 20,
-            onChanged: (v) => setState(() => _pref.sensitivity = v.round()),
+            onChanged: (v) => _pref.setSensitivity(v.round()),
           ),
 
           const Divider(),
@@ -197,7 +194,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
                 context: context,
                 builder: (ctx) => PitchAlgorithmDialog(
                   selectedAlgorithm: _pref.pitchAlgorithm,
-                  onSelected: (a) => setState(() => _pref.pitchAlgorithm = a),
+                  onSelected: (a) => _pref.setPitchAlgorithm(a),
                 ),
               );
             },
@@ -211,8 +208,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
                 context: context,
                 builder: (ctx) => AcousticWeightingDialog(
                   selectedMode: _pref.acousticWeighting,
-                  onSelected: (w) =>
-                      setState(() => _pref.acousticWeighting = w),
+                  onSelected: (w) => _pref.setAcousticWeighting(w),
                 ),
               );
             },
@@ -222,14 +218,14 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             subtitle: 'Eliminates transient harmonic doubling attacks',
             icon: Icons.electric_bolt,
             value: _pref.octaveJumpGate,
-            onChanged: (v) => setState(() => _pref.octaveJumpGate = v),
+            onChanged: (v) => _pref.setOctaveJumpGate(v),
           ),
           SwitchPreference(
             title: '3-Tap Median Filter',
             subtitle: 'Filters anomalous single-frame pitch spikes',
             icon: Icons.filter_alt,
             value: _pref.medianFilter,
-            onChanged: (v) => setState(() => _pref.medianFilter = v),
+            onChanged: (v) => _pref.setMedianFilter(v),
           ),
 
           const Divider(),
@@ -241,7 +237,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             subtitle: 'Enable FFT spectrum and correlation analysis views',
             icon: Icons.science,
             value: _pref.scientificMode,
-            onChanged: (v) => setState(() => _pref.scientificMode = v),
+            onChanged: (v) => _pref.setScientificMode(v),
           ),
           SliderPreference(
             title: 'Moving Average Smoothing',
@@ -252,8 +248,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             min: 1.0,
             max: 15.0,
             divisions: 14,
-            onChanged: (v) =>
-                setState(() => _pref.numMovingAverage = v.round()),
+            onChanged: (v) => _pref.setNumMovingAverage(v.round()),
           ),
           SimplePreference(
             title: 'Stretch Tuning',
@@ -264,7 +259,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
                 MaterialPageRoute<void>(
                   builder: (context) => StretchTuningOverviewScreen(
                     onSelectStretchTuning: (st) {
-                      setState(() => _pref.stretchTuningName = st.name);
+                      _pref.setStretchTuningName(st.name);
                     },
                   ),
                 ),
@@ -280,8 +275,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             min: 7.0,
             max: 15.0,
             divisions: 8,
-            onChanged: (v) =>
-                setState(() => _pref.windowSizeExponent = v.round()),
+            onChanged: (v) => _pref.setWindowSizeExponent(v.round()),
           ),
           SimplePreference(
             title: 'Windowing Function',
@@ -292,8 +286,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
                 context: context,
                 builder: (ctx) => WindowingFunctionDialog(
                   selectedWindowing: _pref.windowingFunction,
-                  onSelected: (wf) =>
-                      setState(() => _pref.windowingFunction = wf),
+                  onSelected: (wf) => _pref.setWindowingFunction(wf),
                 ),
               );
             },
@@ -307,7 +300,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             min: 0.0,
             max: 80.0,
             divisions: 16,
-            onChanged: (v) => setState(() => _pref.overlapPercent = v.round()),
+            onChanged: (v) => _pref.setOverlapPercent(v.round()),
           ),
           SliderPreference(
             title: 'Pitch History Duration',
@@ -318,7 +311,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             min: 0.5,
             max: 10.0,
             divisions: 19,
-            onChanged: (v) => setState(() => _pref.pitchHistoryDuration = v),
+            onChanged: (v) => _pref.setPitchHistoryDuration(v),
           ),
           SliderPreference(
             title: 'Audio Capture Duration',
@@ -331,8 +324,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             min: 0.0,
             max: 5.0,
             divisions: 5,
-            onChanged: (v) =>
-                setState(() => _pref.waveWriterDuration = v.round()),
+            onChanged: (v) => _pref.setWaveWriterDuration(v.round()),
           ),
 
           const Divider(),

@@ -9,6 +9,7 @@ import '../domain/stretch_tuning/predefined_stretch_tunings.dart';
 import '../domain/stretch_tuning/stretch_tuning.dart';
 import '../domain/temperaments/predefined_temperament.dart';
 import '../domain/temperaments/temperament.dart';
+import '../ui/plot/line_coordinates.dart';
 
 /// Immutable state bundle representing the entire active state of the Tuner application.
 @immutable
@@ -28,6 +29,9 @@ class TunerAppState {
     this.tuningState = TuningState.unknown,
     this.spectrumAmplitudes,
     this.waveformSnapshot,
+    this.frequencyPlotData,
+    this.correlationPlotData,
+    this.harmonicFrequencies,
     this.isAudioRunning = false,
   });
 
@@ -58,6 +62,9 @@ class TunerAppState {
   final TuningState tuningState;
   final Float32List? spectrumAmplitudes;
   final Float32List? waveformSnapshot;
+  final LineCoordinates? frequencyPlotData;
+  final LineCoordinates? correlationPlotData;
+  final List<double>? harmonicFrequencies;
   final bool isAudioRunning;
 
   TunerAppState copyWith({
@@ -76,6 +83,9 @@ class TunerAppState {
     TuningState? tuningState,
     Float32List? spectrumAmplitudes,
     Float32List? waveformSnapshot,
+    LineCoordinates? frequencyPlotData,
+    LineCoordinates? correlationPlotData,
+    List<double>? harmonicFrequencies,
     bool? isAudioRunning,
   }) {
     return TunerAppState(
@@ -95,6 +105,9 @@ class TunerAppState {
       tuningState: tuningState ?? this.tuningState,
       spectrumAmplitudes: spectrumAmplitudes ?? this.spectrumAmplitudes,
       waveformSnapshot: waveformSnapshot ?? this.waveformSnapshot,
+      frequencyPlotData: frequencyPlotData ?? this.frequencyPlotData,
+      correlationPlotData: correlationPlotData ?? this.correlationPlotData,
+      harmonicFrequencies: harmonicFrequencies ?? this.harmonicFrequencies,
       isAudioRunning: isAudioRunning ?? this.isAudioRunning,
     );
   }

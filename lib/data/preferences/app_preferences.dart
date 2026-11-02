@@ -233,6 +233,7 @@ class AppPreferences extends ChangeNotifier {
     if (scientificMode != value) {
       scientificMode = value;
       notifyListeners();
+      save();
     }
   }
 
@@ -240,6 +241,23 @@ class AppPreferences extends ChangeNotifier {
     if (themeMode != mode) {
       themeMode = mode;
       notifyListeners();
+      save();
+    }
+  }
+
+  void setLanguage(String? lang) {
+    if (language != lang) {
+      language = lang;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setKeepScreenOn(bool value) {
+    if (keepScreenOn != value) {
+      keepScreenOn = value;
+      notifyListeners();
+      save();
     }
   }
 
@@ -247,6 +265,7 @@ class AppPreferences extends ChangeNotifier {
     if (preferFlat != value) {
       preferFlat = value;
       notifyListeners();
+      save();
     }
   }
 
@@ -254,6 +273,7 @@ class AppPreferences extends ChangeNotifier {
     if (referenceFrequency != freq) {
       referenceFrequency = freq;
       notifyListeners();
+      save();
     }
   }
 
@@ -261,6 +281,7 @@ class AppPreferences extends ChangeNotifier {
     if (referenceNote != note) {
       referenceNote = note;
       notifyListeners();
+      save();
     }
   }
 
@@ -268,6 +289,79 @@ class AppPreferences extends ChangeNotifier {
     if (temperamentName != name) {
       temperamentName = name;
       notifyListeners();
+      save();
+    }
+  }
+
+  void setToleranceInCents(int cents) {
+    if (toleranceInCents != cents) {
+      toleranceInCents = cents;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setNotationType(String type) {
+    if (notationType != type) {
+      notationType = type;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setChromaticAsStaff(bool value) {
+    if (chromaticAsStaff != value) {
+      chromaticAsStaff = value;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setSensitivity(int value) {
+    if (sensitivity != value) {
+      sensitivity = value;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setPitchAlgorithm(PitchAlgorithm algo) {
+    if (pitchAlgorithm != algo) {
+      pitchAlgorithm = algo;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setAcousticWeighting(AcousticWeightingMode mode) {
+    if (acousticWeighting != mode) {
+      acousticWeighting = mode;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setOctaveJumpGate(bool value) {
+    if (octaveJumpGate != value) {
+      octaveJumpGate = value;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setMedianFilter(bool value) {
+    if (medianFilter != value) {
+      medianFilter = value;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setNumMovingAverage(int value) {
+    if (numMovingAverage != value) {
+      numMovingAverage = value;
+      notifyListeners();
+      save();
     }
   }
 
@@ -275,6 +369,63 @@ class AppPreferences extends ChangeNotifier {
     if (stretchTuningName != name) {
       stretchTuningName = name;
       notifyListeners();
+      save();
+    }
+  }
+
+  void setWindowSizeExponent(int exp) {
+    if (windowSizeExponent != exp) {
+      windowSizeExponent = exp;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setWindowingFunction(WindowingFunction func) {
+    if (windowingFunction != func) {
+      windowingFunction = func;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setOverlapPercent(int pct) {
+    if (overlapPercent != pct) {
+      overlapPercent = pct;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setPitchHistoryDuration(double dur) {
+    if (pitchHistoryDuration != dur) {
+      pitchHistoryDuration = dur;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setPitchHistoryNumFaultyValues(int num) {
+    if (pitchHistoryNumFaultyValues != num) {
+      pitchHistoryNumFaultyValues = num;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setWaveWriterDuration(int dur) {
+    if (waveWriterDuration != dur) {
+      waveWriterDuration = dur;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setDisplayOnLockScreen(bool value) {
+    if (displayOnLockScreen != value) {
+      displayOnLockScreen = value;
+      notifyListeners();
+      save();
     }
   }
 }
