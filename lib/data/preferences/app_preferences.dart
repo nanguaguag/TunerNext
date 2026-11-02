@@ -23,6 +23,7 @@ class AppPreferences extends ChangeNotifier {
   static const _kToleranceInCents = 'pref_tolerance_in_cents';
   static const _kPreferFlat = 'pref_prefer_flat';
   static const _kNotationType = 'pref_notation_type';
+  static const _kOctaveNotation = 'pref_octave_notation';
   static const _kChromaticAsStaff = 'pref_chromatic_as_staff';
   static const _kSensitivity = 'pref_sensitivity';
   static const _kPitchAlgorithm = 'pref_pitch_algorithm';
@@ -51,6 +52,7 @@ class AppPreferences extends ChangeNotifier {
   int toleranceInCents = 10;
   bool preferFlat = false;
   String notationType = 'Standard (C D E)';
+  String octaveNotation = 'Scientific';
   bool chromaticAsStaff = false;
   int sensitivity = 50;
 
@@ -84,6 +86,7 @@ class AppPreferences extends ChangeNotifier {
     toleranceInCents = 10;
     preferFlat = false;
     notationType = 'Standard (C D E)';
+    octaveNotation = 'Scientific';
     chromaticAsStaff = false;
     sensitivity = 50;
 
@@ -132,6 +135,7 @@ class AppPreferences extends ChangeNotifier {
     toleranceInCents = prefs.getInt(_kToleranceInCents) ?? 10;
     preferFlat = prefs.getBool(_kPreferFlat) ?? false;
     notationType = prefs.getString(_kNotationType) ?? 'Standard (C D E)';
+    octaveNotation = prefs.getString(_kOctaveNotation) ?? 'Scientific';
     chromaticAsStaff = prefs.getBool(_kChromaticAsStaff) ?? false;
     sensitivity = prefs.getInt(_kSensitivity) ?? 50;
 
@@ -198,6 +202,7 @@ class AppPreferences extends ChangeNotifier {
     await prefs.setInt(_kToleranceInCents, toleranceInCents);
     await prefs.setBool(_kPreferFlat, preferFlat);
     await prefs.setString(_kNotationType, notationType);
+    await prefs.setString(_kOctaveNotation, octaveNotation);
     await prefs.setBool(_kChromaticAsStaff, chromaticAsStaff);
     await prefs.setInt(_kSensitivity, sensitivity);
 
@@ -304,6 +309,14 @@ class AppPreferences extends ChangeNotifier {
   void setNotationType(String type) {
     if (notationType != type) {
       notationType = type;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setOctaveNotation(String notation) {
+    if (octaveNotation != notation) {
+      octaveNotation = notation;
       notifyListeners();
       save();
     }

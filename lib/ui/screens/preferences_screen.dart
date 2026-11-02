@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/preferences/app_preferences.dart';
 import '../../domain/temperaments/predefined_temperament.dart';
+import '../../l10n/app_localizations.dart';
 import '../dialogs/reference_note_dialog.dart';
 import '../dialogs/temperament_dialog.dart';
 import '../preferences/preference_dialogs.dart';
@@ -52,9 +53,11 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n?.settings ?? 'Settings'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -63,11 +66,11 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
       body: ListView(
         children: [
           // ==================== BASIC SECTION ====================
-          const PreferenceSection(title: 'Basic'),
+          PreferenceSection(title: l10n?.basic ?? 'Basic'),
           SimplePreference(
-            title: 'Language',
+            title: l10n?.language ?? 'Language',
             subtitle: _pref.language == null
-                ? 'System Default'
+                ? (l10n?.systemDefault ?? 'System Default')
                 : _pref.language!,
             icon: Icons.language,
             onTap: () {
@@ -81,12 +84,12 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             },
           ),
           SimplePreference(
-            title: 'Appearance',
+            title: l10n?.appearance ?? 'Appearance',
             subtitle: _pref.themeMode == ThemeMode.light
-                ? 'Light'
+                ? (l10n?.lightAppearanceShort ?? 'Light')
                 : (_pref.themeMode == ThemeMode.dark
-                      ? 'Dark'
-                      : 'System Default'),
+                      ? (l10n?.darkAppearanceShort ?? 'Dark')
+                      : (l10n?.systemAppearanceShort ?? 'System Default')),
             icon: Icons.brightness_6,
             onTap: () {
               showDialog<void>(
@@ -99,14 +102,14 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             },
           ),
           SwitchPreference(
-            title: 'Keep Screen On',
+            title: l10n?.keepScreenOn ?? 'Keep Screen On',
             subtitle: 'Prevents display from sleeping while tuning',
             icon: Icons.screen_lock_portrait,
             value: _pref.keepScreenOn,
             onChanged: (v) => _pref.setKeepScreenOn(v),
           ),
           SimplePreference(
-            title: 'Reference Pitch',
+            title: l10n?.referenceFrequency ?? 'Reference Pitch',
             subtitle:
                 '${_pref.referenceNote.name}${_pref.referenceNote.octave} = ${_pref.referenceFrequency.toStringAsFixed(1)} Hz',
             icon: Icons.music_note,
@@ -125,7 +128,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             },
           ),
           SimplePreference(
-            title: 'Temperament',
+            title: l10n?.temperament ?? 'Temperament',
             subtitle: _pref.temperamentName,
             icon: Icons.tune,
             onTap: () {
@@ -145,7 +148,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             },
           ),
           SliderPreference(
-            title: 'In-Tune Tolerance',
+            title: l10n?.toleranceInCents ?? 'In-Tune Tolerance',
             subtitle: 'Threshold for green pitch accuracy indicator',
             valueLabel: '±${_pref.toleranceInCents} ¢',
             icon: Icons.adjust,
@@ -156,21 +159,39 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             onChanged: (v) => _pref.setToleranceInCents(v.round()),
           ),
           SwitchPreference(
-            title: 'Prefer Flat (♭)',
+            title: l10n?.preferFlat ?? 'Prefer Flat (♭)',
             subtitle: 'Display accidentals as flat instead of sharp (♯)',
             icon: Icons.music_note_outlined,
             value: _pref.preferFlat,
             onChanged: (v) => _pref.setPreferFlat(v),
           ),
+          SimplePreference(
+            title: l10n?.notation ?? 'Notation',
+            subtitle: '${_pref.notationType}, ${_pref.octaveNotation}',
+            icon: Icons.queue_music,
+            onTap: () {
+              showDialog<void>(
+                context: context,
+                builder: (ctx) => NotationDialog(
+                  currentNotation: _pref.notationType,
+                  currentOctaveNotation: _pref.octaveNotation,
+                  onConfirm: (notation, octave) {
+                    _pref.setNotationType(notation);
+                    _pref.setOctaveNotation(octave);
+                  },
+                ),
+              );
+            },
+          ),
           SwitchPreference(
-            title: 'Chromatic as Staff',
+            title: l10n?.chromaticAsStaff ?? 'Chromatic as Staff',
             subtitle: 'Display musical stave in chromatic instrument mode',
             icon: Icons.piano,
             value: _pref.chromaticAsStaff,
             onChanged: (v) => _pref.setChromaticAsStaff(v),
           ),
           SliderPreference(
-            title: 'Microphone Sensitivity',
+            title: l10n?.sensitivity ?? 'Microphone Sensitivity',
             subtitle: 'Input gain threshold for pitch detection',
             valueLabel: '${_pref.sensitivity}%',
             icon: Icons.mic,
@@ -184,9 +205,11 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           const Divider(),
 
           // ==================== ADVANCED ACOUSTIC DSP ====================
-          const PreferenceSection(title: 'Advanced Acoustic DSP'),
+          PreferenceSection(
+            title: l10n?.advancedAcousticDsp ?? 'Advanced Acoustic DSP',
+          ),
           SimplePreference(
-            title: 'Pitch Algorithm',
+            title: l10n?.pitchAlgorithm ?? 'Pitch Algorithm',
             subtitle: _pref.pitchAlgorithm.name.toUpperCase(),
             icon: Icons.auto_graph,
             onTap: () {
@@ -200,7 +223,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             },
           ),
           SimplePreference(
-            title: 'Acoustic Weighting',
+            title: l10n?.acousticWeighting ?? 'Acoustic Weighting',
             subtitle: _pref.acousticWeighting.name,
             icon: Icons.graphic_eq,
             onTap: () {
@@ -214,14 +237,14 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             },
           ),
           SwitchPreference(
-            title: 'Octave Jump Gate',
+            title: l10n?.octaveJumpGate ?? 'Octave Jump Gate',
             subtitle: 'Eliminates transient harmonic doubling attacks',
             icon: Icons.electric_bolt,
             value: _pref.octaveJumpGate,
             onChanged: (v) => _pref.setOctaveJumpGate(v),
           ),
           SwitchPreference(
-            title: '3-Tap Median Filter',
+            title: l10n?.medianFilter ?? '3-Tap Median Filter',
             subtitle: 'Filters anomalous single-frame pitch spikes',
             icon: Icons.filter_alt,
             value: _pref.medianFilter,
@@ -231,16 +254,16 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           const Divider(),
 
           // ==================== EXPERT / SCIENTIFIC ====================
-          const PreferenceSection(title: 'Expert / Scientific Mode'),
+          PreferenceSection(title: l10n?.expert ?? 'Expert / Scientific Mode'),
           SwitchPreference(
-            title: 'Scientific Mode',
+            title: l10n?.scientificMode ?? 'Scientific Mode',
             subtitle: 'Enable FFT spectrum and correlation analysis views',
             icon: Icons.science,
             value: _pref.scientificMode,
             onChanged: (v) => _pref.setScientificMode(v),
           ),
           SliderPreference(
-            title: 'Moving Average Smoothing',
+            title: l10n?.numMovingAverage ?? 'Moving Average Smoothing',
             subtitle: 'Taps for outlier-removing smoothing buffer',
             valueLabel: '${_pref.numMovingAverage} frames',
             icon: Icons.timeline,
@@ -251,7 +274,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             onChanged: (v) => _pref.setNumMovingAverage(v.round()),
           ),
           SimplePreference(
-            title: 'Stretch Tuning',
+            title: l10n?.stretchTuning ?? 'Stretch Tuning',
             subtitle: _pref.stretchTuningName,
             icon: Icons.stacked_line_chart,
             onTap: () {
@@ -267,7 +290,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             },
           ),
           SliderPreference(
-            title: 'FFT Window Size',
+            title: l10n?.windowSize ?? 'FFT Window Size',
             subtitle: 'Analysis buffer sample length',
             valueLabel: '${_pref.windowSize} samples',
             icon: Icons.view_column,
@@ -278,7 +301,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             onChanged: (v) => _pref.setWindowSizeExponent(v.round()),
           ),
           SimplePreference(
-            title: 'Windowing Function',
+            title: l10n?.windowingFunction ?? 'Windowing Function',
             subtitle: _pref.windowingFunction.name,
             icon: Icons.waves,
             onTap: () {
@@ -292,7 +315,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             },
           ),
           SliderPreference(
-            title: 'Buffer Overlap',
+            title: l10n?.overlap ?? 'Buffer Overlap',
             subtitle: 'Consecutive analysis frame overlap',
             valueLabel: '${_pref.overlapPercent}%',
             icon: Icons.layers,
@@ -303,7 +326,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             onChanged: (v) => _pref.setOverlapPercent(v.round()),
           ),
           SliderPreference(
-            title: 'Pitch History Duration',
+            title: l10n?.pitchHistoryDuration ?? 'Pitch History Duration',
             subtitle: 'Time window shown on pitch history plot',
             valueLabel: '${_pref.pitchHistoryDuration.toStringAsFixed(1)} s',
             icon: Icons.history,
@@ -314,7 +337,20 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             onChanged: (v) => _pref.setPitchHistoryDuration(v),
           ),
           SliderPreference(
-            title: 'Audio Capture Duration',
+            title: l10n?.pitchHistoryNumFaultyValues ?? 'Jump to New Pitch',
+            subtitle: _pref.pitchHistoryNumFaultyValues == 1
+                ? 'Directly jump to new pitch result'
+                : 'After ${_pref.pitchHistoryNumFaultyValues} similar pitch results',
+            valueLabel: '${_pref.pitchHistoryNumFaultyValues}',
+            icon: Icons.alt_route,
+            value: _pref.pitchHistoryNumFaultyValues.toDouble(),
+            min: 1.0,
+            max: 12.0,
+            divisions: 11,
+            onChanged: (v) => _pref.setPitchHistoryNumFaultyValues(v.round()),
+          ),
+          SliderPreference(
+            title: l10n?.capture ?? 'Audio Capture Duration',
             subtitle: 'WAV export buffer capacity (0s disables export button)',
             valueLabel: _pref.waveWriterDuration == 0
                 ? 'Disabled'
@@ -330,9 +366,16 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           const Divider(),
 
           // ==================== OTHERS ====================
-          const PreferenceSection(title: 'Others'),
+          PreferenceSection(title: l10n?.others ?? 'Others'),
+          SwitchPreference(
+            title: l10n?.displayOnLockScreen ?? 'Display on Lock Screen',
+            subtitle: 'Allows tuner to be active over device lock screen',
+            icon: Icons.lock_outline,
+            value: _pref.displayOnLockScreen,
+            onChanged: (v) => _pref.setDisplayOnLockScreen(v),
+          ),
           SimplePreference(
-            title: 'Reset All Settings',
+            title: l10n?.resetAllSettings ?? 'Reset All Settings',
             subtitle: 'Restore factory default parameters',
             icon: Icons.restore,
             onTap: () {
@@ -348,7 +391,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             },
           ),
           SimplePreference(
-            title: 'About',
+            title: l10n?.about ?? 'About',
             subtitle: 'Version and architectural specifications',
             icon: Icons.info_outline,
             onTap: () {

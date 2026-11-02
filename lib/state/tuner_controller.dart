@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../audio/audio_messages.dart';
 import '../audio/audio_pipeline_coordinator.dart';
@@ -36,6 +37,7 @@ class TunerController extends Notifier<TunerAppState> {
       10,
     );
     ref.onDispose(() {
+      _syncKeepScreenOn(false);
       _analysisSubscription?.cancel();
       _audioCoordinator.dispose();
       _preferences?.removeListener(_onPreferencesChanged);
@@ -70,6 +72,7 @@ class TunerController extends Notifier<TunerAppState> {
     );
 
     preferences.addListener(_onPreferencesChanged);
+    _syncKeepScreenOn(preferences.keepScreenOn);
 
     loadCustomInstruments();
 
@@ -79,6 +82,7 @@ class TunerController extends Notifier<TunerAppState> {
   }
 
   void _onPreferencesChanged() {
+    _syncKeepScreenOn(state.preferences.keepScreenOn);
     _rebuildPitchConverter(
       state.preferences.referenceFrequency,
       state.preferences.referenceNote,
@@ -90,6 +94,14 @@ class TunerController extends Notifier<TunerAppState> {
       referenceFrequency: state.preferences.referenceFrequency,
       referenceNote: state.preferences.referenceNote,
     );
+  }
+
+  void _syncKeepScreenOn(bool enable) {
+    try {
+      WakelockPlus.toggle(enable: enable).catchError((Object _) {});
+    } catch (_) {
+      // Graceful fallback for test or unsupported environments.
+    }
   }
 
   /// Starts the platform microphone or mock audio source and connects the Isolate pipeline.

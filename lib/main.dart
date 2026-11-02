@@ -7,6 +7,7 @@ import 'domain/instruments/instrument.dart';
 import 'domain/models/musical_note.dart';
 import 'domain/stretch_tuning/stretch_tuning.dart';
 import 'domain/temperaments/temperament.dart';
+import 'l10n/app_localizations.dart';
 import 'state/tuner_controller.dart';
 import 'state/tuner_state.dart';
 import 'ui/dialogs/reference_note_dialog.dart';
@@ -38,6 +39,11 @@ class TunerApp extends ConsumerStatefulWidget {
 }
 
 class _TunerAppState extends ConsumerState<TunerApp> {
+  Locale? _resolveLocale(String? code) {
+    if (code == null || code.isEmpty) return null;
+    return Locale(code);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -60,6 +66,9 @@ class _TunerAppState extends ConsumerState<TunerApp> {
       theme: TunerTheme.light(),
       darkTheme: TunerTheme.dark(),
       themeMode: state.preferences.themeMode,
+      locale: _resolveLocale(state.preferences.language),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: const TunerHomeScreen(),
     );
   }

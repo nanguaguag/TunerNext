@@ -7,6 +7,7 @@ import '../../domain/models/tuning_state.dart';
 import '../../domain/temperaments/predefined_temperament.dart';
 import '../../domain/temperaments/temperament.dart';
 import '../../domain/tuning/frequency_to_note_converter.dart';
+import '../../l10n/app_localizations.dart';
 import '../common/quick_settings_bar.dart';
 import '../dialogs/reference_note_dialog.dart';
 import '../dialogs/temperament_dialog.dart';
@@ -245,21 +246,22 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final strings = _currentStringInfos;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tuner'),
+        title: Text(l10n?.appName ?? 'Tuner'),
         actions: [
           if (widget.onOpenScientificMode != null)
             IconButton(
               icon: const Icon(Icons.analytics_outlined),
-              tooltip: 'Scientific Mode',
+              tooltip: l10n?.scientificTuner ?? 'Scientific Mode',
               onPressed: widget.onOpenScientificMode,
             ),
           if (widget.onOpenPreferences != null)
             IconButton(
               icon: const Icon(Icons.settings_outlined),
-              tooltip: 'Settings',
+              tooltip: l10n?.settings ?? 'Settings',
               onPressed: widget.onOpenPreferences,
             ),
         ],

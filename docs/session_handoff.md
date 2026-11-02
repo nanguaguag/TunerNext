@@ -1,8 +1,8 @@
 # 会话交接备忘录 (Session Handoff & Context Continuity)
 
 > **交接时间**: 2026-11-02  
-> **会话状态**: 阶段 6 ~ 8 全量 11 个 UI 功能切片（切片 6.1 至切片 8.4）已全部 100% 施工完成并提交（累计 319 项测试 100% 通过，`flutter analyze` 零告警，`dart format` 合规）。  
-> **交付状态**: 1:1 完全复刻原 Kotlin 项目的所有 UI 界面与交互能力，只能增加不能减少，等待用户审查验收。
+> **会话状态**: 阶段 6 ~ 8 全量 UI 功能与系统适配已全部 100% 施工完成并验证通过（累计 335 项测试 100% 通过，`flutter analyze` 零告警，`dart format` 合规）。  
+> **交付状态**: 1:1 完全复刻原 Kotlin 项目的所有 UI 界面、交互与系统能力，只能增加不能减少，阶段 8 国际化与常亮适配完成。
 
 ---
 
@@ -16,8 +16,28 @@
 2. **Flutter 重构工程 (重构目标仓库)**:
    - 路径: `/Users/huzongyao/flutterProjects/tuner_flutter`
    - 当前分支: `feature/rollback`
-   - HEAD Commit: `5eb0069` ("feat(ui): complete root app assembly, TunerScaffold, TunerController & full navigation (slice 8.4)")
-   - 工作区状态: 静态分析 `flutter analyze` 零告警 (0 issues)，格式化规范 `dart format` 合规，自动化测试 **319 项用例 100% 全部通过**。
+   - 工作区状态: 静态分析 `flutter analyze` 零告警 (0 issues)，格式化规范 `dart format` 合规，自动化测试 **335 项用例 100% 全部通过**。
+
+---
+
+## 二、阶段 8 完成情况审计 (多语言国际化与系统级适配)
+
+1. **16 语种全量国际化支持 (i18n / Localization)**:
+   - 配置 `l10n.yaml` 与 16 份 `.arb` 资源（`en, zh, de, fr, es, it, ja, pt, ru, pl, hu, cs, ro, sv, uk, vi`）。
+   - 主屏、科学模式、偏好设置、乐器弹窗与各个对话框全面使用 `AppLocalizations` 动态响应。
+   - `LanguageDialog` 覆盖全量 16 款语言，切换时全局实时热刷新。
+2. **跨平台屏幕常亮唤醒锁 (WakeLock)**:
+   - 接入 `wakelock_plus: ^1.8.2` 插件。
+   - 在 `TunerController` 中绑定 `keepScreenOn` 偏好状态，动态开启/关闭屏幕休眠唤醒锁，并防范未处理的异步异常。
+3. **全量偏好设置对话框与功能完备性对齐**:
+   - 引入 `NotationDialog`，完整支持记谱体系（Regional, Solfège, International）与八度记法（Scientific, Helmholtz, Helmholtz Numbered）选择与持久化。
+   - 补齐 `pitchHistoryNumFaultyValues`（跳变阈值步长）与 `displayOnLockScreen`（锁屏显示）。
+   - 保证了偏好变更热更至 `AudioProcessingIsolate`、实时主题切换与重置出厂默认值逻辑。
+4. **自动化测试覆盖**:
+   - `test/unit/l10n_test.dart`: 5 项单测全部通过。
+   - `test/widget/l10n_widget_test.dart`: 5 项 Widget 动态切语言测试全部通过。
+   - `test/unit/app_preferences_test.dart`: 4 项完整设置项序列化与响应式测试通过。
+   - 全工程累计测试数达到 **335 / 335 项通过**。
 
 ---
 

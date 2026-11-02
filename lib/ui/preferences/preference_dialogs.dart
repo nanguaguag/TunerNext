@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/models/dsp_enums.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Modal dialog for selecting pitch detection algorithm.
 class PitchAlgorithmDialog extends StatelessWidget {
@@ -290,41 +291,64 @@ class LanguageDialog extends StatelessWidget {
 
   static const languages = [
     (null, 'System Default'),
-    ('en', 'English'),
-    ('zh', '中文 (Chinese)'),
+    ('cs', 'Čeština (Czech)'),
     ('de', 'Deutsch (German)'),
-    ('fr', 'Français (French)'),
+    ('en', 'English'),
     ('es', 'Español (Spanish)'),
+    ('fr', 'Français (French)'),
+    ('hu', 'Magyar (Hungarian)'),
     ('it', 'Italiano (Italian)'),
     ('ja', '日本語 (Japanese)'),
-    ('ru', 'Русский (Russian)'),
+    ('pl', 'Polski (Polish)'),
     ('pt', 'Português (Portuguese)'),
+    ('ro', 'Română (Romanian)'),
+    ('ru', 'Русский (Russian)'),
+    ('sv', 'Svenska (Swedish)'),
+    ('uk', 'Українська (Ukrainian)'),
+    ('vi', 'Tiếng Việt (Vietnamese)'),
+    ('zh', '简体中文 (Chinese)'),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return SimpleDialog(
-      title: const Text('Language'),
-      children: languages.map((l) {
-        final isSelected = l.$1 == selectedLanguage;
-        final theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
-        return ListTile(
-          leading: isSelected
-              ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
-              : const Icon(Icons.radio_button_unchecked),
-          title: Text(
-            l.$2,
-            style: TextStyle(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          onTap: () {
-            onSelected(l.$1);
-            Navigator.of(context).pop();
+    return AlertDialog(
+      title: Text(l10n?.language ?? 'Language'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: languages.length,
+          itemBuilder: (context, index) {
+            final l = languages[index];
+            final isSelected = l.$1 == selectedLanguage;
+
+            return ListTile(
+              leading: isSelected
+                  ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
+                  : const Icon(Icons.radio_button_unchecked),
+              title: Text(
+                l.$2,
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+              onTap: () {
+                onSelected(l.$1);
+                Navigator.of(context).pop();
+              },
+            );
           },
-        );
-      }).toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n?.abort ?? 'Cancel'),
+        ),
+      ],
     );
   }
 }
@@ -388,6 +412,117 @@ class AboutTunerDialog extends StatelessWidget {
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Close'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Modal dialog for selecting musical notation and octave representation.
+class NotationDialog extends StatefulWidget {
+  const NotationDialog({
+    super.key,
+    required this.currentNotation,
+    required this.currentOctaveNotation,
+    required this.onConfirm,
+  });
+
+  final String currentNotation;
+  final String currentOctaveNotation;
+  final void Function(String notation, String octaveNotation) onConfirm;
+
+  @override
+  State<NotationDialog> createState() => _NotationDialogState();
+}
+
+class _NotationDialogState extends State<NotationDialog> {
+  late String _notation;
+  late String _octave;
+
+  @override
+  void initState() {
+    super.initState();
+    _notation = widget.currentNotation;
+    _octave = widget.currentOctaveNotation;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    const notationOptions = [
+      ('Standard (C D E)', 'Regional', 'C-D-E-…-B'),
+      ('Solfège', 'Solfège', 'Do-Re-Mi-…-Si'),
+      ('International', 'International', 'C-D-E-…-B'),
+    ];
+
+    const octaveOptions = [
+      ('Scientific', 'Scientific', '… C¹ C² C³ C⁴ …'),
+      ('Helmholtz', 'Helmholtz', '… C, C c c\' …'),
+      ('Helmholtz Numbered', 'Helmholtz numbered', '… C₁ C c c¹ …'),
+    ];
+
+    return AlertDialog(
+      title: Text(l10n?.notation ?? 'Notation'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n?.notation ?? 'Notation',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8.0),
+            ...notationOptions.map((opt) {
+              final isSelected = _notation == opt.$1;
+              return ListTile(
+                leading: isSelected
+                    ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
+                    : const Icon(Icons.radio_button_unchecked),
+                title: Text(opt.$2),
+                subtitle: Text(opt.$3, style: const TextStyle(fontSize: 12)),
+                onTap: () => setState(() => _notation = opt.$1),
+                contentPadding: EdgeInsets.zero,
+              );
+            }),
+            const Divider(height: 24.0),
+            Text(
+              l10n?.octaveRepresentation ?? 'Octave representation',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8.0),
+            ...octaveOptions.map((opt) {
+              final isSelected = _octave == opt.$1;
+              return ListTile(
+                leading: isSelected
+                    ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
+                    : const Icon(Icons.radio_button_unchecked),
+                title: Text(opt.$2),
+                subtitle: Text(opt.$3, style: const TextStyle(fontSize: 12)),
+                onTap: () => setState(() => _octave = opt.$1),
+                contentPadding: EdgeInsets.zero,
+              );
+            }),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n?.abort ?? 'Cancel'),
+        ),
+        FilledButton(
+          onPressed: () {
+            widget.onConfirm(_notation, _octave);
+            Navigator.of(context).pop();
+          },
+          child: Text(l10n?.done ?? 'Done'),
         ),
       ],
     );

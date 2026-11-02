@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/models/musical_note.dart';
 import '../../domain/models/tuning_state.dart';
+import '../../l10n/app_localizations.dart';
 import '../common/quick_settings_bar.dart';
 import '../plot/gesture_based_viewport.dart';
 import '../plot/line_coordinates.dart';
@@ -131,9 +132,11 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
       color: theme.colorScheme.outline,
     );
 
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scientific Tuner'),
+        title: Text(l10n?.scientificTuner ?? 'Scientific Tuner'),
         leading: widget.canNavigateUp
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -144,13 +147,13 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
           if (widget.onOpenInstrumentTunerMode != null)
             IconButton(
               icon: const Icon(Icons.tune),
-              tooltip: 'Instrument Tuner',
+              tooltip: l10n?.instrumentTuner ?? 'Instrument Tuner',
               onPressed: widget.onOpenInstrumentTunerMode,
             ),
           if (widget.onOpenPreferences != null)
             IconButton(
               icon: const Icon(Icons.settings),
-              tooltip: 'Preferences',
+              tooltip: l10n?.settings ?? 'Settings',
               onPressed: widget.onOpenPreferences,
             ),
         ],
@@ -158,7 +161,7 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: widget.waveWriterDuration > 0
           ? FloatingActionButton.small(
-              tooltip: 'Export WAV snapshot',
+              tooltip: l10n?.exportWav ?? 'Export WAV snapshot',
               onPressed: widget.onExportWav,
               child: const Icon(Icons.mic),
             )
@@ -201,6 +204,8 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
     PlotWindowOutline outline,
     TextTheme textTheme,
   ) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -211,7 +216,7 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Spectrum',
+                l10n?.spectrum ?? 'Spectrum',
                 style: textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -239,7 +244,7 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Autocorrelation',
+                l10n?.autocorrelation ?? 'Autocorrelation',
                 style: textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -268,7 +273,7 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Pitch History',
+                l10n?.pitchHistory ?? 'Pitch History',
                 style: textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
