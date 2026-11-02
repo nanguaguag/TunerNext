@@ -122,9 +122,7 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
     if (oldWidget.initialPreferFlat != widget.initialPreferFlat) {
       _preferFlat = widget.initialPreferFlat;
     }
-    if (oldWidget.currentFrequency != widget.currentFrequency) {
-      feedPitch(widget.currentFrequency);
-    }
+    feedPitch(widget.currentFrequency);
   }
 
   void _rebuildPitchConverter() {
@@ -157,9 +155,9 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
   void feedPitch(double? frequency) {
     if (!mounted) return;
 
-    _pitchHistoryState.addFrequency(frequency);
-
     if (frequency != null && frequency > 0.0 && !frequency.isNaN) {
+      _pitchHistoryState.addFrequency(frequency);
+
       if (_lockedStringKey != null) {
         // Manual lock mode
         final cents = _pitchConverter.centsDeviation(
@@ -167,25 +165,34 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
           _targetFrequency,
         );
         final state = _pitchConverter.determineTuningState(cents);
-        setState(() {
-          _tuningState = state;
-        });
+        if (_tuningState != state) {
+          setState(() {
+            _tuningState = state;
+          });
+        }
       } else {
         // Automatic tracking mode with hysteresis
         final assessment = _pitchConverter.evaluatePitch(
           frequency,
           previousTarget: _targetNote,
         );
-        setState(() {
-          _targetNote = assessment.target.note;
-          _targetFrequency = assessment.target.frequency;
-          _tuningState = assessment.tuningState;
-        });
+        if (_targetNote != assessment.target.note ||
+            _targetFrequency != assessment.target.frequency ||
+            _tuningState != assessment.tuningState) {
+          setState(() {
+            _targetNote = assessment.target.note;
+            _targetFrequency = assessment.target.frequency;
+            _tuningState = assessment.tuningState;
+          });
+        }
       }
     } else {
-      setState(() {
-        _tuningState = TuningState.unknown;
-      });
+      // Unvoiced/silent frame: mark tuning state unknown without polluting history with nulls
+      if (_tuningState != TuningState.unknown) {
+        setState(() {
+          _tuningState = TuningState.unknown;
+        });
+      }
     }
   }
 

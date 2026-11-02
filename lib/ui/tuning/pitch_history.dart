@@ -323,13 +323,20 @@ class _PitchHistoryPainter extends CustomPainter {
       midiMin = targetMidi - visibleRangeInIndices;
       midiMax = targetMidi + visibleRangeInIndices;
     } else {
+      // Clamping currentMidi excursion to at most ±4 semitones from targetNote prevents
+      // transient glitch frames (e.g. low frequency breath rumble or high harmonics)
+      // from violently collapsing/expanding the viewport.
+      final clampedCurrentMidi = currentMidi.clamp(
+        targetMidi - 4.0,
+        targetMidi + 4.0,
+      );
       midiMin = math.min(
         targetMidi - visibleRangeInIndices,
-        currentMidi.floorToDouble() - visibleRangeInIndices2,
+        clampedCurrentMidi.floorToDouble() - visibleRangeInIndices2,
       );
       midiMax = math.max(
         targetMidi + visibleRangeInIndices,
-        currentMidi.ceilToDouble() + visibleRangeInIndices2,
+        clampedCurrentMidi.ceilToDouble() + visibleRangeInIndices2,
       );
     }
 
@@ -460,7 +467,7 @@ class _PitchHistoryPainter extends CustomPainter {
       Offset(pillLeft + pillPaddingH, pillTop + pillPaddingV),
     );
 
-    // 6. Draw pitch history polyline (clipping to plot window)
+    // 6. Draw pitch history polyline (clipped to plot window via Liang-Barsky)
     final cap = math.max(2, state.capacity);
     final xStep = plotRect.width / ((cap - 1) * 1.1);
 
@@ -468,22 +475,30 @@ class _PitchHistoryPainter extends CustomPainter {
     canvas.clipRect(plotRect);
 
     final historyPath = Path();
-    bool inSegment = false;
+    Offset? lastPoint;
 
-    for (int i = 0; i < state.size; i++) {
-      final f = state.frequencies[i];
-      final x = plotLeft + (i * xStep);
-      if (f != null && f > 0.0) {
-        final m = 69.0 + (12.0 * math.log(f / 440.0) / math.ln2);
-        final y = midiToY(m);
-        if (!inSegment) {
-          historyPath.moveTo(x, y);
-          inSegment = true;
-        } else {
-          historyPath.lineTo(x, y);
-        }
+    for (int i = 0; i < state.size - 1; i++) {
+      final f0 = state.frequencies[i];
+      final f1 = state.frequencies[i + 1];
+      if (f0 != null && f0 > 0.0 && f1 != null && f1 > 0.0) {
+        final x0 = plotLeft + (i * xStep);
+        final x1 = plotLeft + ((i + 1) * xStep);
+        final m0 = 69.0 + (12.0 * math.log(f0 / 440.0) / math.ln2);
+        final m1 = 69.0 + (12.0 * math.log(f1 / 440.0) / math.ln2);
+        final y0 = midiToY(m0);
+        final y1 = midiToY(m1);
+
+        _clipSegmentLiangBarsky(x0, y0, x1, y1, plotRect, (cx0, cy0, cx1, cy1) {
+          if (lastPoint == null ||
+              (lastPoint!.dx - cx0).abs() > 0.5 ||
+              (lastPoint!.dy - cy0).abs() > 0.5) {
+            historyPath.moveTo(cx0, cy0);
+          }
+          historyPath.lineTo(cx1, cy1);
+          lastPoint = Offset(cx1, cy1);
+        });
       } else {
-        inSegment = false;
+        lastPoint = null;
       }
     }
 
@@ -505,50 +520,52 @@ class _PitchHistoryPainter extends CustomPainter {
         currentMidi != null) {
       final xLast = plotLeft + ((state.size - 1) * xStep);
       final yLast = midiToY(currentMidi);
-      final pointOffset = Offset(xLast, yLast);
+      if (yLast >= plotTop && yLast <= plotBottom) {
+        final pointOffset = Offset(xLast, yLast);
 
-      final pSize = isInactive ? pointSizeInactive : pointSize;
-      PointShapePainter.drawTuningPoint(
-        canvas,
-        pointOffset,
-        tuningState: tuningState,
-        size: pSize,
-        inTuneColor: colorInTune,
-        outOfTuneColor: colorOutOfTune,
-        inactiveColor: colorInactive,
-      );
-
-      // Cent deviation badge if out of tune
-      if (tuningState == TuningState.tooHigh ||
-          tuningState == TuningState.tooLow) {
-        final devCents =
-            (1200.0 * math.log(latestFreq / targetFrequency) / math.ln2)
-                .round();
-        final devSign = devCents > 0 ? '+' : '';
-        final devText = '$devSign$devCents ¢';
-
-        final devTp = TextPainter(
-          text: TextSpan(
-            text: devText,
-            style: centDeviationStyle.copyWith(color: centDeviationColor),
-          ),
-          textDirection: TextDirection.ltr,
-        )..layout();
-
-        // Kotlin: if TooHigh, south (above); if TooLow, north (below)
-        final double devY;
-        if (tuningState == TuningState.tooHigh) {
-          devY = yLast - (pSize / 2.0) - devTp.height - 4.0;
-        } else {
-          devY = yLast + (pSize / 2.0) + 4.0;
-        }
-
-        final devX = (xLast - (devTp.width / 2.0)).clamp(
-          plotLeft,
-          plotRight - devTp.width,
+        final pSize = isInactive ? pointSizeInactive : pointSize;
+        PointShapePainter.drawTuningPoint(
+          canvas,
+          pointOffset,
+          tuningState: tuningState,
+          size: pSize,
+          inTuneColor: colorInTune,
+          outOfTuneColor: colorOutOfTune,
+          inactiveColor: colorInactive,
         );
 
-        devTp.paint(canvas, Offset(devX, devY));
+        // Cent deviation badge if out of tune
+        if (tuningState == TuningState.tooHigh ||
+            tuningState == TuningState.tooLow) {
+          final devCents =
+              (1200.0 * math.log(latestFreq / targetFrequency) / math.ln2)
+                  .round();
+          final devSign = devCents > 0 ? '+' : '';
+          final devText = '$devSign$devCents ¢';
+
+          final devTp = TextPainter(
+            text: TextSpan(
+              text: devText,
+              style: centDeviationStyle.copyWith(color: centDeviationColor),
+            ),
+            textDirection: TextDirection.ltr,
+          )..layout();
+
+          // Kotlin: if TooHigh, south (above); if TooLow, north (below)
+          final double devY;
+          if (tuningState == TuningState.tooHigh) {
+            devY = yLast - (pSize / 2.0) - devTp.height - 4.0;
+          } else {
+            devY = yLast + (pSize / 2.0) + 4.0;
+          }
+
+          final devX = (xLast - (devTp.width / 2.0)).clamp(
+            plotLeft,
+            plotRight - devTp.width,
+          );
+
+          devTp.paint(canvas, Offset(devX, devY));
+        }
       }
     }
   }
@@ -568,6 +585,50 @@ class _PitchHistoryPainter extends CustomPainter {
       canvas.drawLine(Offset(currentX, y), Offset(nextX, y), paint);
       currentX += dashWidth + dashSpace;
     }
+  }
+
+  /// Parametric Liang-Barsky line clipping against [bounds] to eliminate flying line spikes.
+  static bool _clipSegmentLiangBarsky(
+    double x0,
+    double y0,
+    double x1,
+    double y1,
+    Rect bounds,
+    void Function(double cx0, double cy0, double cx1, double cy1) onSegment,
+  ) {
+    final dx = x1 - x0;
+    final dy = y1 - y0;
+
+    var u1 = 0.0;
+    var u2 = 1.0;
+
+    bool clipTest(double p, double q) {
+      if (p < 0.0) {
+        final r = q / p;
+        if (r > u2) return false;
+        if (r > u1) u1 = r;
+      } else if (p > 0.0) {
+        final r = q / p;
+        if (r < u1) return false;
+        if (r < u2) u2 = r;
+      } else if (q < 0.0) {
+        return false;
+      }
+      return true;
+    }
+
+    if (clipTest(-dx, x0 - bounds.left) &&
+        clipTest(dx, bounds.right - x0) &&
+        clipTest(-dy, y0 - bounds.top) &&
+        clipTest(dy, bounds.bottom - y0)) {
+      final cx0 = x0 + u1 * dx;
+      final cy0 = y0 + u1 * dy;
+      final cx1 = x0 + u2 * dx;
+      final cy1 = y0 + u2 * dy;
+      onSegment(cx0, cy0, cx1, cy1);
+      return true;
+    }
+    return false;
   }
 
   @override
