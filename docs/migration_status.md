@@ -1,9 +1,8 @@
 # 迁移基线与阶段开发状态 (Migration Status)
 
-> **更新时间**: 2026-11-01  
-> **当前可信 Git 基线**: `def38d1` (分支: `feature/rollback`)  
-> **归档参考分支**: `archive/exploration-phase6-8` (保存前期 UI 探索与 16 语种 ARB 资源备查)  
-> **工作区状态**: 纯净无改动 (`working tree clean`)，`flutter analyze` 零告警，自动化测试 100% 通过 (227/227 项)。
+> **更新时间**: 2026-11-02  
+> **当前可信 Git 基线**: feature/rollback  
+> **工作区状态**: 格式化校验通过，`flutter analyze` 零告警，自动化测试 100% 通过 (237/237 项)。
 
 ---
 
@@ -16,7 +15,7 @@
 | **阶段 3** | 纯 Dart DSP 算法引擎与基准测试 | 已完成 | `7a01bea` 提交 | 全量 78 项测试通过 | **VERIFIED** |
 | **阶段 4** | 乐理模型、19种律制与 Scala IO | 已完成 | 全切片 4.1~4.6 完成 | 166 项单测全部通过 | **VERIFIED** |
 | **阶段 5** | 平台音频流采集与 Isolate 并发管道 | 已完成 | 全切片 5.1~5.4 完成 | 61 项音频单测全部通过 | **VERIFIED** |
-| **阶段 6** | 乐器调音主界面 (琴弦/表盘/历史图) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
+| **阶段 6** | 乐器调音主界面 (琴弦/表盘/历史图) | 进行中 | 切片 6.1 完成 | 10 项 UI/Widget 单测通过 | **IN_PROGRESS** |
 | **阶段 7** | 科学调音界面 (示波器/FFT谱/波形) | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 8** | 偏好设置、16语种国际化与状态持久化 | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
 | **阶段 9** | 端到端集成验收与真机声学调优 | 待启动 | 待实现 | 待实现 | **NOT_STARTED** |
@@ -176,10 +175,15 @@
     - 集成 `WidgetsBindingObserver` 生命周期管理：后台/锁屏状态下自动暂停释放麦克风硬件并熄灭系统隐私指示灯，回到前台无感自动唤醒恢复。
     - 完整支持权限拒绝降级（`PermissionDeniedError`）与硬件流异常恢复（`MicrophoneUnavailableError`）。
     - 测试: `test/unit/microphone_audio_source_test.dart` 12 组测试全部通过。
+18. **阶段 6 / 切片 6.1: 乐器专属矢量图标库 (15 种全覆盖) 与顶部乐器卡片 (InstrumentButton)** (`VERIFIED`):
+    - 文件: `lib/ui/plot/plot_window_outline.dart`, `lib/ui/instruments/instrument_icons.dart`, `lib/ui/instruments/instrument_button.dart`
+    - 1:1 严格对标 Kotlin `app/src/main/res/drawable/ic_*.xml` 矢量资源，纯 Dart 实现全量 15 款乐器矢量图标库（吉他、电吉他、贝斯、低音提琴、大提琴、小提琴、尤克里里、钢琴、小号、萨克斯、长笛、竖琴、塔尔琴、塞塔尔琴、卡曼恰琴），彻底杜绝用通用占位符或简省图标糊弄过关的问题。
+    - 1:1 严格对标 Kotlin `InstrumentButton.kt` 实现 Material 3 大号卡片 `InstrumentButton`，封装 `PlotWindowOutline` 边框参数，支持当前乐器图标、名称自适应居中与截断防溢出、点击事件、以及律制不兼容时的 `errorMessage` 错误警示态（自动切换为 `error` 边框与 `errorContainer` 语义底色）。
+    - 测试: `test/unit/plot_window_outline_test.dart` (3 组单测), `test/widget/instrument_icons_test.dart` (3 组测试), `test/widget/instrument_button_test.dart` (4 组交互与布局测试)，全量 10 项新增测试 100% 通过。
 
 ---
 
 ## 四、当前阻塞条件与后续准入
 
-- **当前任务**: 阶段 1~5 全部底层算法与管道已 100% 验证通过（227 项测试）。已全面复盘 Kotlin 原版 UI 架构并完成《UI 架构与复刻规划白皮书 (`ui_architecture_and_reconstruction_plan.md`)》，工作区回退至纯净基线 `def38d1`。
-- **下一步准入要求**: 新会话启动【UI 界面全功能复刻专项】，首要执行【阶段 6 / 切片 6.1：乐器专属矢量图标库 (7种) 与顶部乐器卡片 (InstrumentButton)】。禁止在 UI 呈现上做任何简化或占位符敷衍。
+- **当前进展**: 切片 6.1 已圆满完成并 100% 验证通过（累计 237 项测试通过，静态分析零告警）。
+- **下一步准入要求**: 严格遵循单切片渐进式原则，开始执行【阶段 6 / 切片 6.2：琴弦粗细物理侧边栏与半音网格对数音高历史波形图 (`Strings` & `PitchHistory`)】。对标 Kotlin `ui/instruments/Strings.kt`, `ui/tuning/PitchHistory.kt`, `ui/plot/Point.kt`。
