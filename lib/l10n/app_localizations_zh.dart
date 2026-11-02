@@ -92,8 +92,8 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'After $count similar pitch results',
-      one: 'Directly jump to new pitch result',
+      other: '连续检测到 $count 次相似音高后跳转',
+      one: '直接跳转到新音高结果',
     );
     return '$_temp0';
   }
@@ -106,8 +106,8 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Average over $count pitch results',
-      one: 'No averaging',
+      other: '对连续 $count 次音高结果取移动平均',
+      one: '不进行平滑平均',
     );
     return '$_temp0';
   }
@@ -332,8 +332,8 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items deleted',
-      one: '$count item deleted',
+      other: '已删除 $count 个项目',
+      one: '已删除 $count 个项目',
     );
     return '$_temp0';
   }
@@ -357,8 +357,8 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Writing $count items to \\\"$filename\\\".',
-      one: 'Writing $count item to \\\"$filename\\\".',
+      other: '正在将 $count 个项目保存至 \"$filename\"',
+      one: '正在将 $count 个项目保存至 \"$filename\"',
     );
     return '$_temp0';
   }
@@ -371,8 +371,8 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Loading $count instruments',
-      one: 'Loading $count instrument',
+      other: '正在加载 $count 种乐器',
+      one: '正在加载 $count 种乐器',
     );
     return '$_temp0';
   }
@@ -393,8 +393,8 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Loading $count stretch tunings',
-      one: 'Loading $count stretch tuning',
+      other: '正在加载 $count 个延展调音预设',
+      one: '正在加载 $count 个延展调音预设',
     );
     return '$_temp0';
   }
@@ -441,11 +441,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get doubleBassEadg => '低音提琴';
 
   @override
-  String get equalTemperament12 => 'Equal temperament';
+  String get equalTemperament12 => '十二平均律';
 
   @override
   String equalTemperamentX(int divisions) {
-    return 'Equal temperament $divisions';
+    return '$divisions 平均律';
   }
 
   @override
@@ -453,160 +453,160 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count notes per octave',
-      one: '$count note per octave',
+      other: '每个八度包含 $count 个音符',
+      one: '每个八度包含 $count 个音符',
     );
     return '$_temp0';
   }
 
   @override
   String equalTemperamentXAbbr(int divisions) {
-    return 'EDO $divisions';
+    return '$divisions-EDO';
   }
 
   @override
-  String get pythagoreanTuning => 'Pythagorean tuning';
+  String get pythagoreanTuning => '毕达哥拉斯音律 (五度相生律)';
 
   @override
-  String get pythagoreanTuningAbbr => 'Pythagorean';
+  String get pythagoreanTuningAbbr => '毕达哥拉斯律';
 
   @override
-  String get pureTuning => 'Just tuning';
+  String get pureTuning => '纯律 (五极限自然纯律)';
 
   @override
-  String get pureTuningDesc => '5-limit, asymmetric scale';
+  String get pureTuningDesc => '五极限非对称纯律，纯正纯三度与纯五度';
 
   @override
-  String get pureTuningAbbr => 'Just';
+  String get pureTuningAbbr => '纯律';
 
   @override
-  String get quarterCommaMeanTone => '¼ comma meantone';
+  String get quarterCommaMeanTone => '¼ 常见中庸全音律';
 
   @override
-  String get quarterCommaMeanToneDesc => 'Pure major 3rds';
+  String get quarterCommaMeanToneDesc => '纯大三度音程调律';
 
   @override
-  String get quarterCommaMeanToneAbbr => '¼ comma meantone';
+  String get quarterCommaMeanToneAbbr => '¼ 中庸全音律';
 
   @override
-  String get thirdCommaMeanTone => '⅓ comma meantone';
+  String get thirdCommaMeanTone => '⅓ 常见中庸全音律';
 
   @override
-  String get thirdCommaMeanToneDesc => 'Pure minor 3rds';
+  String get thirdCommaMeanToneDesc => '纯小三度音程调律';
 
   @override
-  String get thirdCommaMeanToneAbbr => '⅓ comma meantone';
+  String get thirdCommaMeanToneAbbr => '⅓ 中庸全音律';
 
   @override
-  String get fifthCommaMeanTone => '⅕ comma meantone';
+  String get fifthCommaMeanTone => '⅕ 常见中庸全音律';
 
   @override
-  String get fifthCommaMeanToneDesc => 'Pure diatonic semitones';
+  String get fifthCommaMeanToneDesc => '纯自然半音调律';
 
   @override
-  String get fifthCommaMeanToneAbbr => '⅕ comma meantone';
+  String get fifthCommaMeanToneAbbr => '⅕ 中庸全音律';
 
   @override
-  String get werckmeisterIii => 'Werckmeister III';
+  String get werckmeisterIii => '韦克迈斯特第 III 律制';
 
   @override
-  String get werckmeisterIiiDesc => '¼ comma divisions';
+  String get werckmeisterIiiDesc => '¼ 音差分割良律';
 
   @override
-  String get werckmeisterIiiAbbr => 'Werckmeister III';
+  String get werckmeisterIiiAbbr => '韦克迈斯特 III';
 
   @override
-  String get werckmeisterIv => 'Werckmeister IV';
+  String get werckmeisterIv => '韦克迈斯特第 IV 律制';
 
   @override
-  String get werckmeisterIvDesc => '⅓ comma divisions';
+  String get werckmeisterIvDesc => '⅓ 音差分割良律';
 
   @override
-  String get werckmeisterIvAbbr => 'Werckmeister IV';
+  String get werckmeisterIvAbbr => '韦克迈斯特 IV';
 
   @override
-  String get werckmeisterV => 'Werckmeister V';
+  String get werckmeisterV => '韦克迈斯特第 V 律制';
 
   @override
-  String get werckmeisterVDesc => 'Other ¼ comma divisions';
+  String get werckmeisterVDesc => '其他 ¼ 音差分割良律';
 
   @override
-  String get werckmeisterVAbbr => 'Werckmeister V';
+  String get werckmeisterVAbbr => '韦克迈斯特 V';
 
   @override
-  String get werckmeisterVi => 'Werckmeister VI';
+  String get werckmeisterVi => '韦克迈斯特第 VI 律制 (七分律)';
 
   @override
-  String get werckmeisterViDesc => 'Septenarius';
+  String get werckmeisterViDesc => '七分等分分割律';
 
   @override
-  String get werckmeisterViAbbr => 'Werckmeister VI';
+  String get werckmeisterViAbbr => '韦克迈斯特 VI';
 
   @override
-  String get kirnberger1 => 'Kirnberger I';
+  String get kirnberger1 => '柯恩伯格第 I 律制';
 
   @override
-  String get kirnberger1Desc => 'One syntonic comma';
+  String get kirnberger1Desc => '含一个单音差调律';
 
   @override
-  String get kirnberger1Abbr => 'Kirnberger I';
+  String get kirnberger1Abbr => '柯恩伯格 I';
 
   @override
-  String get kirnberger2 => 'Kirnberger II';
+  String get kirnberger2 => '柯恩伯格第 II 律制';
 
   @override
-  String get kirnberger2Desc => '½ syntonic comma divisions';
+  String get kirnberger2Desc => '½ 双音差分割调律';
 
   @override
-  String get kirnberger2Abbr => 'Kirnberger II';
+  String get kirnberger2Abbr => '柯恩伯格 II';
 
   @override
-  String get kirnberger3 => 'Kirnberger III';
+  String get kirnberger3 => '柯恩伯格第 III 律制';
 
   @override
-  String get kirnberger3Desc => '¼ syntonic comma divisions';
+  String get kirnberger3Desc => '¼ 常见音差分割调律';
 
   @override
-  String get kirnberger3Abbr => 'Kirnberger III';
+  String get kirnberger3Abbr => '柯恩伯格 III';
 
   @override
-  String get neidhardt1 => 'Neidhardt 1';
+  String get neidhardt1 => '诺伊哈特第 1 律制';
 
   @override
-  String get neidhardt1Desc => 'For a village, 1732';
+  String get neidhardt1Desc => '乡村环境调律，1732';
 
   @override
-  String get neidhardt1Abbr => 'Neidhardt 1';
+  String get neidhardt1Abbr => '诺伊哈特 1';
 
   @override
-  String get neidhardt2 => 'Neidhardt 2';
+  String get neidhardt2 => '诺伊哈特第 2 律制';
 
   @override
-  String get neidhardt2Desc => 'For a small town, 1732';
+  String get neidhardt2Desc => '城镇环境调律，1732';
 
   @override
-  String get neidhardt2Abbr => 'Neidhardt 2';
+  String get neidhardt2Abbr => '诺伊哈特 2';
 
   @override
-  String get neidhardt3 => 'Neidhardt 3';
+  String get neidhardt3 => '诺伊哈特第 3 律制';
 
   @override
-  String get neidhardt3Desc => 'For a big city, 1732';
+  String get neidhardt3Desc => '大都市环境调律，1732';
 
   @override
-  String get neidhardt3Abbr => 'Neidhardt 3';
+  String get neidhardt3Abbr => '诺伊哈特 3';
 
   @override
-  String get valotti => 'Vallotti';
+  String get valotti => '瓦洛蒂律制';
 
   @override
-  String get valottiAbbr => 'Vallotti';
+  String get valottiAbbr => '瓦洛蒂';
 
   @override
-  String get young2 => 'Young 2';
+  String get young2 => '杨氏第 2 律制';
 
   @override
-  String get young2Abbr => 'Young 2';
+  String get young2Abbr => '杨氏 2';
 
   @override
   String get referenceFrequency => '基准频率';
@@ -649,7 +649,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pythagoreanCommaDesc =>
-      'pC: Pythagorean Comma, 531441\\u2044524288\nsC: Syntonic Comma, 81\\u204480\nsch: Schisma, 32805\\u204432768';
+      'pC: 毕氏音差 (Pythagorean Comma), 531441⁄524288\nsC: 联音音差 (Syntonic Comma), 81⁄80\nsch: 缓音差 (Schisma), 32805⁄32768';
 
   @override
   String get circleOfFifths => '五度圈';
@@ -670,34 +670,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get incorrectTemperament => '不兼容的音律！';
 
   @override
-  String get keySignatureSharp =>
-      'Key signature: one more sharp or one less flat';
+  String get keySignatureSharp => '调号：增加一个升号或减少一个降号';
 
   @override
-  String get keySignatureFlat =>
-      'Key signature: one more flat or one less sharp';
+  String get keySignatureFlat => '调号：增加一个降号或减少一个升号';
 
   @override
-  String get staffClef => 'Clef';
+  String get staffClef => '谱号';
 
   @override
-  String get staffClefGrand => 'Piano (treble and bass)';
+  String get staffClefGrand => '大谱表 (高低音谱表)';
 
   @override
-  String get staffClefTreble => 'Treble';
+  String get staffClefTreble => '高音谱号 (G 谱号)';
 
   @override
-  String get staffClefTenor => 'Tenor (octave treble)';
+  String get staffClefTenor => '次中音谱号 (C 谱号)';
 
   @override
-  String get staffClefBass => 'Bass';
+  String get staffClefBass => '低音谱号 (F 谱号)';
 
   @override
-  String get chromaticAsStaff => 'Chromatic tuner as note staff';
+  String get chromaticAsStaff => '半音阶调音器五线谱显示';
 
   @override
-  String get chromaticAsStaffSummary =>
-      'Show the target note on a staff instead of the list of all notes';
+  String get chromaticAsStaffSummary => '在五线谱上显示目标音符，而非展示所有音符列表';
 
   @override
   String get ok => '确定';
@@ -756,7 +753,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ni2Carnatic => 'Ni₂';
 
   @override
-  String get notationCarnatic => 'Carnatic';
+  String get notationCarnatic => '卡纳提克记谱法';
 
   @override
   String get notationCarnaticDescription => 'Sa-Ri₁-Ri₂-…-Ni₂';
@@ -798,7 +795,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ni2Hindustani => 'Ni₂';
 
   @override
-  String get notationHindustani => 'Hindustani';
+  String get notationHindustani => '印度斯坦记谱法';
 
   @override
   String get notationHindustaniDescription => 'Sa-Re₁-Re₂-…-Ni₂';
@@ -825,16 +822,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get zoByzantine => 'Ζω';
 
   @override
-  String get notationByzantine => 'Byzantine';
+  String get notationByzantine => '拜占庭记谱法';
 
   @override
   String get notationByzantineDescription => 'Νη-Πα-Βου-…-Ζω';
 
   @override
-  String get extendedQuarterCommaMeanTone => 'Extended ¼ comma meantone';
+  String get extendedQuarterCommaMeanTone => '扩展 ¼ 常见中庸全音律';
 
   @override
-  String get extendedQuarterCommaMeanToneDesc => 'Pure major 3rds, 15 notes';
+  String get extendedQuarterCommaMeanToneDesc => '纯大三度音程，包含 15 个音级';
 
   @override
   String get extendedQuarterCommaMeanToneAbbr => '¼ 半音音程';
@@ -843,111 +840,108 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sensitivity => '灵敏度';
 
   @override
-  String get deleteItems => 'Delete items';
+  String get deleteItems => '删除项目';
 
   @override
-  String get databaseEmptyShare => 'There are no items to share.';
+  String get databaseEmptyShare => '暂无可以分享的乐器项目。';
 
   @override
-  String get audioRecordPermissionRationale =>
-      'Grant microphone access to start tuning.';
+  String get audioRecordPermissionRationale => '请授予麦克风录音权限以启动调音分析。';
 
   @override
   String soundSourceInvalidBufferSize(int error) {
-    return 'Recording audio is not supported with the current settings (error $error).';
+    return '当前设置不支持当前音频缓冲区大小 (错误代码 $error)。';
   }
 
   @override
-  String get soundSourceMicrophoneUnavailable =>
-      'Cannot access the microphone. Another app might be using it.';
+  String get soundSourceMicrophoneUnavailable => '无法访问麦克风设备，可能正被其他应用程序独占占用。';
 
   @override
   String soundSourceReadFailed(int error) {
-    return 'Recording from the microphone failed (error $error). Another app might be using it.';
+    return '从麦克风读取音频数据失败 (错误代码 $error)，可能已被系统中断或被其他应用占用。';
   }
 
   @override
   String writingWaveFile(String filename) {
-    return 'Writing wave file: $filename';
+    return '正在保存音频文件：$filename';
   }
 
   @override
-  String get failedWritingWaveFile => 'Did not write wave file.';
+  String get failedWritingWaveFile => '音频文件保存失败。';
 
   @override
-  String get instruments => 'Instruments';
+  String get instruments => '乐器管理';
 
   @override
-  String get edit => 'Edit';
+  String get edit => '编辑';
 
   @override
-  String get copy => 'Copy';
+  String get copy => '复制';
 
   @override
-  String get delete => 'Delete';
+  String get delete => '删除';
 
   @override
-  String get temperaments => 'Temperaments';
+  String get temperaments => '历史与现代律制';
 
   @override
-  String get save => 'Save';
+  String get save => '保存';
 
   @override
-  String get temperamentEditor => 'Edit temperament';
+  String get temperamentEditor => '编辑音律';
 
   @override
-  String get noteNumber => 'Number of notes';
+  String get noteNumber => '音符数量';
 
   @override
-  String get centStr => 'cent';
+  String get centStr => '音分';
 
   @override
-  String get octaveOffset => 'Octave offset';
+  String get octaveOffset => '八度偏移';
 
   @override
-  String get ratio => 'ratio';
+  String get ratio => '音程比率';
 
   @override
-  String get temperamentName => 'Temperament name';
+  String get temperamentName => '律制名称';
 
   @override
-  String get temperamentAbbreviation => 'Abbreviation';
+  String get temperamentAbbreviation => '律制缩写';
 
   @override
-  String get temperamentDescription => 'Description';
+  String get temperamentDescription => '律制描述';
 
   @override
-  String get decreasingValueError =>
-      'Value must be greater than the previous one.';
+  String get decreasingValueError => '数值必须严格大于前一个音级值。';
 
   @override
-  String get missingNoteName => 'Missing note name.';
+  String get missingNoteName => '缺少音符名称。';
 
   @override
-  String get missingValue => 'Missing cent or ratio value.';
+  String get missingValue => '缺少音分或比率数值。';
 
   @override
-  String get duplicateNoteName => 'Duplicate note name.';
+  String get duplicateNoteName => '音符名称重复。';
 
   @override
-  String get invalidValue => 'Invalid value.';
+  String get invalidValue => '无效的数值格式。';
 
   @override
   String maximumValueExceeded(int max) {
-    return 'Maximum value of $max exceeded.';
+    return '超出最大允许值 $max。';
   }
 
   @override
-  String get edoTemperaments => 'Equal temperaments';
+  String get edoTemperaments => '平均律体系 (EDO)';
 
   @override
-  String get otherTemperaments => 'Other temperaments';
+  String get otherTemperaments => '历史名律与其他律制';
 
   @override
-  String get customTemperaments => 'Custom temperaments';
+  String get customTemperaments => '自定义律制';
 
   @override
-  String get notationVietnamese => 'Vietnamese';
+  String get notationVietnamese => '越南记谱法';
 
   @override
   String get notationVietnameseDescription => 'Hò-Xư-Y-…-Phan';
@@ -974,13 +968,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get bNoteVietnamese => 'Phan';
 
   @override
-  String get useDefault => 'Use default';
+  String get useDefault => '恢复默认';
 
   @override
-  String get detectFrequency => 'Detect frequency';
+  String get detectFrequency => '检测基频';
 
   @override
-  String get stretch => 'Stretch';
+  String get stretch => '延展调音';
 
   @override
   String get stretchTuning => '拉伸调音';
@@ -992,16 +986,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get stretchTuningOff => '拉伸调音已关闭。';
 
   @override
-  String get railsback => 'Railsback';
+  String get railsback => '雷尔斯贝克曲线 (Railsback)';
 
   @override
-  String get railsbackDescription => 'Railsback data (average)';
+  String get railsbackDescription => '雷尔斯贝克钢琴声学校准曲线 (平均统计值)';
 
   @override
-  String get name => 'Name';
+  String get name => '名称';
 
   @override
-  String get description => 'Description';
+  String get description => '说明描述';
 
   @override
   String get stretchTuningEditor => '编辑拉伸调音';
@@ -1013,10 +1007,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get stretchedFrequency => '拉伸的频率';
 
   @override
-  String get inputIsNoNumber => 'Input is no valid number.';
+  String get inputIsNoNumber => '输入内容非有效数字格式。';
 
   @override
-  String get valueMustBeLargerZero => 'Value must be larger than zero.';
+  String get valueMustBeLargerZero => '数值必须大于零。';
 
   @override
   String get centSymbol => '¢';
@@ -1040,46 +1034,46 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get octaveNotationScientific => 'Scientific';
+  String get octaveNotationScientific => '科学记谱法 (C4, A4)';
 
   @override
   String get octaveNotationScientificDescription => '… C¹ C² C³ C⁴ …';
 
   @override
-  String get octaveNotationHelmholtz => 'Helmholtz';
+  String get octaveNotationHelmholtz => '亥姆霍兹记谱法 (c\'\'\', a\'\')';
 
   @override
   String get octaveNotationHelmholtzDescription => '… C, C c c\' …';
 
   @override
-  String get octaveNotationHelmholtzNumbered => 'Helmholtz numbered';
+  String get octaveNotationHelmholtzNumbered => '亥姆霍兹数字记谱法 (c1, a1)';
 
   @override
   String get octaveNotationHelmholtzNumberedDescription => '… C₁ C c c¹ …';
 
   @override
-  String get octaveRepresentation => 'Octave representation';
+  String get octaveRepresentation => '八度记谱符号体系';
 
   @override
-  String get language => 'Language';
+  String get language => '语言';
 
   @override
-  String get english => 'English';
+  String get english => 'English (英文)';
 
   @override
-  String get german => 'Deutsch';
+  String get german => 'Deutsch (德文)';
 
   @override
-  String get systemDefault => 'System default';
+  String get systemDefault => '跟随系统默认';
 
   @override
-  String get french => 'Français';
+  String get french => 'Français (法文)';
 
   @override
-  String get hungarian => 'Magyar';
+  String get hungarian => 'Magyar (匈牙利文)';
 
   @override
-  String get polish => 'Polski';
+  String get polish => 'Polski (波兰文)';
 
   @override
   String get ukrainian => 'Українська';
@@ -1088,7 +1082,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get simplifiedChinese => '简体中文';
 
   @override
-  String get romanian => 'Română';
+  String get romanian => 'Română (罗马尼亚文)';
 
   @override
   String get advancedAcousticDsp => '进阶声学实验室 (DSP)';
