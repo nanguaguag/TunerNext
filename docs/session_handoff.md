@@ -1,8 +1,8 @@
 # 会话交接备忘录 (Session Handoff & Context Continuity)
 
 > **交接时间**: 2026-11-02  
-> **会话状态**: 切片 6.1【乐器专属矢量图标库 (15 种) 与顶部乐器卡片 (InstrumentButton)】已全量实现并严格验证完成（共 237 项测试 100% 通过，flutter analyze 零告警，dart format 合规）。  
-> **下一目标**: 启动【阶段 6 / 切片 6.2：琴弦粗细物理侧边栏与半音网格对数音高历史波形图 (`Strings` & `PitchHistory`)]。
+> **会话状态**: 阶段 6 ~ 8 全量 11 个 UI 功能切片（切片 6.1 至切片 8.4）已全部 100% 施工完成并提交（累计 319 项测试 100% 通过，`flutter analyze` 零告警，`dart format` 合规）。  
+> **交付状态**: 1:1 完全复刻原 Kotlin 项目的所有 UI 界面与交互能力，只能增加不能减少，等待用户审查验收。
 
 ---
 
@@ -16,9 +16,8 @@
 2. **Flutter 重构工程 (重构目标仓库)**:
    - 路径: `/Users/huzongyao/flutterProjects/tuner_flutter`
    - 当前分支: `feature/rollback`
-   - 当前最新检出 Commit: `def38d1` ("docs: audit Stage 1-5 progress, update ADR-10~12, and finalize handoff for Stage 6")
-   - 工作区状态: 静态分析 `flutter analyze` 零告警 (0 issues)，格式化规范 `dart format` 合规，自动化测试 **227 项用例 100% 全部通过**。
-   - 历史探索分支: `archive/exploration-phase6-8`（包含此前的 UI 探索与 16 语种 ARB 文件，已妥善归档供后续按切片引用，严禁盲目直接复制）。
+   - HEAD Commit: `5eb0069` ("feat(ui): complete root app assembly, TunerScaffold, TunerController & full navigation (slice 8.4)")
+   - 工作区状态: 静态分析 `flutter analyze` 零告警 (0 issues)，格式化规范 `dart format` 合规，自动化测试 **319 项用例 100% 全部通过**。
 
 ---
 
