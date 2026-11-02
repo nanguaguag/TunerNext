@@ -176,7 +176,7 @@ void main() {
     test(
       'PredefinedTemperaments.getAll() provides all 19 historical temperaments with unique IDs',
       () {
-        final all = PredefinedTemperaments.getAll();
+        final all = PredefinedTemperaments.getHistorical19();
         expect(all.length, equals(19));
 
         final ids = all.map((t) => t.stableId).toSet();

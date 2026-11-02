@@ -30,6 +30,7 @@ class TemperamentDialog extends StatefulWidget {
 }
 
 class _TemperamentDialogState extends State<TemperamentDialog> {
+  late final Temperament _edo12;
   late final List<Temperament> _edoTemperaments;
   late final List<Temperament> _historicalTemperaments;
   late final List<Temperament> _customTemperaments;
@@ -42,22 +43,26 @@ class _TemperamentDialogState extends State<TemperamentDialog> {
   void initState() {
     super.initState();
     final root = widget.selectedTemperament.rootNote;
+    _edo12 = PredefinedTemperaments.edo12(rootNote: root);
     _edoTemperaments = PredefinedTemperaments.getEdoTemperaments(
       rootNote: root,
-    );
+    ).where((t) => t.equalOctaveDivision != 12).toList();
     _historicalTemperaments = PredefinedTemperaments.getHistoricalTemperaments(
       rootNote: root,
     );
     _customTemperaments = widget.customTemperaments;
   }
 
+  bool _matches(Temperament t, String query) {
+    if (query.isEmpty) return true;
+    return t.name.toLowerCase().contains(query) ||
+        t.abbreviation.toLowerCase().contains(query) ||
+        t.description.toLowerCase().contains(query);
+  }
+
   List<Temperament> _filter(List<Temperament> list, String query) {
     if (query.isEmpty) return list;
-    return list.where((t) {
-      return t.name.toLowerCase().contains(query) ||
-          t.abbreviation.toLowerCase().contains(query) ||
-          t.description.toLowerCase().contains(query);
-    }).toList();
+    return list.where((t) => _matches(t, query)).toList();
   }
 
   @override
@@ -130,6 +135,10 @@ class _TemperamentDialogState extends State<TemperamentDialog> {
             Expanded(
               child: ListView(
                 children: [
+                  if (_matches(_edo12, q)) ...[
+                    _buildItem(context, _edo12),
+                    const Divider(height: 1),
+                  ],
                   if (_customTemperaments.isNotEmpty)
                     _buildSection(
                       context,
@@ -142,6 +151,16 @@ class _TemperamentDialogState extends State<TemperamentDialog> {
                     ),
                   _buildSection(
                     context,
+                    title: l10n?.otherTemperaments ?? 'Historical Temperaments',
+                    items: filteredHistorical,
+                    isExpanded: _historicalExpanded,
+                    isSearching: isSearching,
+                    onToggle: () => setState(
+                      () => _historicalExpanded = !_historicalExpanded,
+                    ),
+                  ),
+                  _buildSection(
+                    context,
                     title:
                         l10n?.edoTemperaments ??
                         'Equal Temperaments (5 - 72 EDO)',
@@ -150,16 +169,6 @@ class _TemperamentDialogState extends State<TemperamentDialog> {
                     isSearching: isSearching,
                     onToggle: () =>
                         setState(() => _edoExpanded = !_edoExpanded),
-                  ),
-                  _buildSection(
-                    context,
-                    title: l10n?.otherTemperaments ?? 'Historical Temperaments',
-                    items: filteredHistorical,
-                    isExpanded: _historicalExpanded,
-                    isSearching: isSearching,
-                    onToggle: () => setState(
-                      () => _historicalExpanded = !_historicalExpanded,
-                    ),
                   ),
                 ],
               ),
@@ -217,46 +226,46 @@ class _TemperamentDialogState extends State<TemperamentDialog> {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: items.length,
             separatorBuilder: (context, index) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final item = items[index];
-              final isSelected = item.name == widget.selectedTemperament.name;
-
-              return ListTile(
-                leading: isSelected
-                    ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
-                    : const Icon(Icons.radio_button_unchecked),
-                title: Text(
-                  item.name,
-                  style: TextStyle(
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                  ),
-                ),
-                subtitle: Text(
-                  item.abbreviation.isNotEmpty
-                      ? '${item.abbreviation} • ${item.description}'
-                      : item.description,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.info_outline, size: 20),
-                  onPressed: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (_) => TemperamentInfoDialog(temperament: item),
-                    );
-                  },
-                ),
-                onTap: () {
-                  widget.onSelectTemperament(item);
-                  Navigator.of(context, rootNavigator: true).pop();
-                },
-              );
-            },
+            itemBuilder: (context, index) => _buildItem(context, items[index]),
           ),
       ],
+    );
+  }
+
+  Widget _buildItem(BuildContext context, Temperament item) {
+    final theme = Theme.of(context);
+    final isSelected = item.name == widget.selectedTemperament.name;
+
+    return ListTile(
+      leading: isSelected
+          ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
+          : const Icon(Icons.radio_button_unchecked),
+      title: Text(
+        item.name,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      subtitle: Text(
+        item.abbreviation.isNotEmpty
+            ? '${item.abbreviation} • ${item.description}'
+            : item.description,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: IconButton(
+        icon: const Icon(Icons.info_outline, size: 20),
+        onPressed: () {
+          showDialog<void>(
+            context: context,
+            builder: (_) => TemperamentInfoDialog(temperament: item),
+          );
+        },
+      ),
+      onTap: () {
+        widget.onSelectTemperament(item);
+        Navigator.of(context, rootNavigator: true).pop();
+      },
     );
   }
 }
