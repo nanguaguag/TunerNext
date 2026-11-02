@@ -613,6 +613,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get referenceFrequency => 'Referenciafrekvencia';
 
   @override
+  String get referenceNote => 'Reference note';
+
+  @override
   String get frequency => 'Frekvencia';
 
   @override

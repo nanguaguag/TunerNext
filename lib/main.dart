@@ -81,7 +81,10 @@ class TunerHomeScreen extends ConsumerWidget {
   void _openPreferences(BuildContext context, TunerAppState state) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => PreferencesScreen(preferences: state.preferences),
+        builder: (_) => PreferencesScreen(
+          preferences: state.preferences,
+          currentFrequency: state.currentFrequency,
+        ),
       ),
     );
   }

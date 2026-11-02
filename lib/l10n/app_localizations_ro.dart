@@ -612,6 +612,9 @@ class AppLocalizationsRo extends AppLocalizations {
   String get referenceFrequency => 'Frecvență de referință';
 
   @override
+  String get referenceNote => 'Reference note';
+
+  @override
   String get frequency => 'Frecvență';
 
   @override

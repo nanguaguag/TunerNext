@@ -167,6 +167,7 @@
   "young2": "杨氏第 2 律制",
   "young2Abbr": "杨氏 2",
   "referenceFrequency": "基准频率",
+  "referenceNote": "基准音符",
   "frequency": "频率",
   "temperament": "调律",
   "rootNote": "主音",

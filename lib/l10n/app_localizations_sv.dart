@@ -613,6 +613,9 @@ class AppLocalizationsSv extends AppLocalizations {
   String get referenceFrequency => 'Referensfrekvens';
 
   @override
+  String get referenceNote => 'Reference note';
+
+  @override
   String get frequency => 'Frekvens';
 
   @override

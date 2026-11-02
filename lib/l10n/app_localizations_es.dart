@@ -614,6 +614,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get referenceFrequency => 'Frecuencia de referencia';
 
   @override
+  String get referenceNote => 'Reference note';
+
+  @override
   String get frequency => 'Frecuencia';
 
   @override

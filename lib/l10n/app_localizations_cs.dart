@@ -613,6 +613,9 @@ class AppLocalizationsCs extends AppLocalizations {
   String get referenceFrequency => 'Referenční frekvence';
 
   @override
+  String get referenceNote => 'Reference note';
+
+  @override
   String get frequency => 'Frekvence';
 
   @override

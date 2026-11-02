@@ -612,6 +612,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get referenceFrequency => '基准频率';
 
   @override
+  String get referenceNote => '基准音符';
+
+  @override
   String get frequency => '频率';
 
   @override

@@ -613,6 +613,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get referenceFrequency => 'Częstotliwość odniesienia';
 
   @override
+  String get referenceNote => 'Reference note';
+
+  @override
   String get frequency => 'Częstotliwość';
 
   @override

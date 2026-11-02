@@ -612,6 +612,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get referenceFrequency => 'Reference frequency';
 
   @override
+  String get referenceNote => 'Reference note';
+
+  @override
   String get frequency => 'Frequency';
 
   @override

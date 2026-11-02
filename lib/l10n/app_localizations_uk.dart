@@ -613,6 +613,9 @@ class AppLocalizationsUk extends AppLocalizations {
   String get referenceFrequency => 'Еталонна частота';
 
   @override
+  String get referenceNote => 'Reference note';
+
+  @override
   String get frequency => 'Частота';
 
   @override

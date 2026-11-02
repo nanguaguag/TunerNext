@@ -19,10 +19,12 @@ class PreferencesScreen extends StatefulWidget {
   const PreferencesScreen({
     super.key,
     required this.preferences,
+    this.currentFrequency,
     this.onPreferencesChanged,
   });
 
   final AppPreferences preferences;
+  final double? currentFrequency;
   final VoidCallback? onPreferencesChanged;
 
   @override
@@ -111,7 +113,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           SimplePreference(
             title: l10n?.referenceFrequency ?? 'Reference Pitch',
             subtitle:
-                '${_pref.referenceNote.name}${_pref.referenceNote.octave} = ${_pref.referenceFrequency.toStringAsFixed(1)} Hz',
+                '${_pref.referenceNote.name} = ${_pref.referenceFrequency.toStringAsFixed(1)} Hz',
             icon: Icons.music_note,
             onTap: () {
               showDialog<void>(
@@ -119,6 +121,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
                 builder: (ctx) => ReferenceNoteDialog(
                   initialNote: _pref.referenceNote,
                   initialFrequency: _pref.referenceFrequency,
+                  detectedFrequency: widget.currentFrequency,
                   onConfirm: (n, f) {
                     _pref.setReferenceNote(n);
                     _pref.setReferenceFrequency(f);

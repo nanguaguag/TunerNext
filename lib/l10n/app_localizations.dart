@@ -1128,6 +1128,12 @@ abstract class AppLocalizations {
   /// **'Reference frequency'**
   String get referenceFrequency;
 
+  /// No description provided for @referenceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference note'**
+  String get referenceNote;
+
   /// No description provided for @frequency.
   ///
   /// In en, this message translates to:
