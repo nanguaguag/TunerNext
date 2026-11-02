@@ -34,6 +34,22 @@ class TunerColors extends ThemeExtension<TunerColors> {
   /// Color used for the dashed tolerance band boundary lines.
   final Color toleranceBand;
 
+  /// Semantic alias for [inTune] to align with Kotlin tunerColors.positive.
+  Color get positive => inTune;
+
+  /// Semantic alias for [onInTune] to align with Kotlin tunerColors.onPositive.
+  Color get onPositive => onInTune;
+
+  /// Semantic alias for [outOfTune] to align with Kotlin tunerColors.negative.
+  Color get negative => outOfTune;
+
+  /// Semantic alias for [onOutOfTune] to align with Kotlin tunerColors.onNegative.
+  Color get onNegative => onOutOfTune;
+
+  /// Convenience lookup method matching Flutter convention.
+  static TunerColors of(BuildContext context) =>
+      Theme.of(context).extension<TunerColors>() ?? TunerColors.light;
+
   /// Light theme default tuner semantic colors.
   static const light = TunerColors(
     inTune: Color(0xFF2E7D32), // Material Green 800
