@@ -75,7 +75,9 @@ void main() {
       expect(find.text('E4'), findsOneWidget);
     });
 
-    testWidgets('tap on string triggers onStringClicked callback', (tester) async {
+    testWidgets('tap on string triggers onStringClicked callback', (
+      tester,
+    ) async {
       int? selectedKey;
       MusicalNote? selectedNote;
       await tester.pumpWidget(
@@ -95,7 +97,9 @@ void main() {
       expect(selectedNote?.name, equals('D3'));
     });
 
-    testWidgets('highlights active string with inTune or outOfTune color', (tester) async {
+    testWidgets('highlights active string with inTune or outOfTune color', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildTestWidget(
           highlightedNoteKey: 1, // A2
@@ -110,9 +114,7 @@ void main() {
 
     testWidgets('renders properly with sidebarPosition end', (tester) async {
       await tester.pumpWidget(
-        buildTestWidget(
-          sidebarPosition: StringsSidebarPosition.end,
-        ),
+        buildTestWidget(sidebarPosition: StringsSidebarPosition.end),
       );
       expect(find.text('A2'), findsOneWidget);
     });
