@@ -133,10 +133,21 @@ void _audioWorkerEntry(_IsolateInitParams initParams) async {
             fftInstance.fftReal(analysisBuffer, fftOutBuffer!);
             final numBins = currentWindowSize ~/ 2 + 1;
             spectrumAmplitudes = Float32List(numBins);
+            var minVal = double.infinity;
+            var maxVal = double.negativeInfinity;
             for (var i = 0; i < numBins; i++) {
               final re = fftOutBuffer[2 * i];
               final im = fftOutBuffer[2 * i + 1];
-              spectrumAmplitudes[i] = math.sqrt(re * re + im * im);
+              final ampSqr = re * re + im * im;
+              spectrumAmplitudes[i] = ampSqr;
+              if (ampSqr < minVal) minVal = ampSqr;
+              if (ampSqr > maxVal) maxVal = ampSqr;
+            }
+            final range = maxVal - minVal;
+            final scale = (range > 1e-9) ? (1.0 / range) : 1.0;
+            for (var i = 0; i < numBins; i++) {
+              spectrumAmplitudes[i] = ((spectrumAmplitudes[i] - minVal) * scale)
+                  .clamp(0.0, 1.0);
             }
           }
 

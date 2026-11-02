@@ -158,25 +158,24 @@ class AudioPipelineCoordinator {
     Float32List? spectrum, {
     int sampleRate = AcousticConstants.defaultSampleRate,
     int windowSize = 2048,
-    double maxFrequency = 3000.0,
+    double? maxFrequency,
   }) {
     if (spectrum == null || spectrum.isEmpty) return null;
 
     final points = <Offset>[];
     final numBins = spectrum.length;
     final binWidth = sampleRate / windowSize;
+    final cutoffFreq = maxFrequency ?? (sampleRate / 2.0);
 
-    double maxVal = 0.0001;
+    var maxVal = 0.0001;
     for (var i = 0; i < numBins; i++) {
       if (spectrum[i] > maxVal) maxVal = spectrum[i];
     }
 
-    // Step to avoid excessive drawing overhead (aim for ~100-200 points)
-    final step = math.max<int>(1, (numBins / 150).floor());
-
-    for (var i = 0; i < numBins; i += step) {
+    // Preserve full spectral bin resolution so multiple sharp harmonic peaks are clearly rendered
+    for (var i = 0; i < numBins; i++) {
       final freq = i * binWidth;
-      if (freq > maxFrequency) break;
+      if (freq > cutoffFreq) break;
       final normalizedAmp = (spectrum[i] / maxVal).clamp(0.0, 1.0);
       points.add(Offset(freq, normalizedAmp));
     }
@@ -196,10 +195,8 @@ class AudioPipelineCoordinator {
 
     final count = math.min(values.length, times.length);
     final points = <Offset>[];
-    // Decimate slightly if too many points for Canvas rendering (~200 points max)
-    final step = math.max<int>(1, (count / 200).floor());
-
-    for (var i = 0; i < count; i += step) {
+    // Full sample density for smooth continuous autocorrelation curve without jagged polygonal lines
+    for (var i = 0; i < count; i++) {
       points.add(Offset(times[i], values[i]));
     }
 

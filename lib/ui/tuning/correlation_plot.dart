@@ -279,6 +279,7 @@ class _CorrelationPlotPainter extends CustomPainter {
         ..color = lineColor
         ..strokeWidth = lineWidth
         ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round;
 
       final path = Path();
