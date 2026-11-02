@@ -363,5 +363,6 @@
   "swedish": "瑞典语",
   "spanish": "西班牙语",
   "vietnamese": "越南语",
-  "chinese": "简体中文"
+  "chinese": "简体中文",
+  "searchTemperamentsHint": "搜索律制（例如 19-EDO、纯律）..."
 }

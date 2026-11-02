@@ -1752,6 +1752,12 @@ abstract class AppLocalizations {
   /// **'Custom temperaments'**
   String get customTemperaments;
 
+  /// No description provided for @searchTemperamentsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search temperaments (e.g. 19-EDO, Pure)...'**
+  String get searchTemperamentsHint;
+
   /// No description provided for @notationVietnamese.
   ///
   /// In en, this message translates to:

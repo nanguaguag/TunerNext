@@ -941,6 +941,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get customTemperaments => '自定义律制';
 
   @override
+  String get searchTemperamentsHint => '搜索律制（例如 19-EDO、纯律）...';
+
+  @override
   String get notationVietnamese => '越南记谱法';
 
   @override

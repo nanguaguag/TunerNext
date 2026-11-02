@@ -951,6 +951,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get customTemperaments => 'Temperamentos personalizados';
 
   @override
+  String get searchTemperamentsHint =>
+      'Search temperaments (e.g. 19-EDO, Pure)...';
+
+  @override
   String get notationVietnamese => 'Vietnamita';
 
   @override

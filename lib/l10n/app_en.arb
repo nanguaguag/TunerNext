@@ -507,6 +507,7 @@
   "edoTemperaments": "Equal temperaments",
   "otherTemperaments": "Other temperaments",
   "customTemperaments": "Custom temperaments",
+  "searchTemperamentsHint": "Search temperaments (e.g. 19-EDO, Pure)...",
   "notationVietnamese": "Vietnamese",
   "notationVietnameseDescription": "Hò-Xư-Y-…-Phan",
   "cNoteVietnamese": "Hò",

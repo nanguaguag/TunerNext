@@ -504,10 +504,9 @@ class PredefinedTemperaments {
     );
   }
 
-  /// Returns the complete list of all 19 predefined temperaments.
-  static List<Temperament> getAll({MusicalNote? rootNote}) {
+  /// Returns the other 18 historical & non-EDO temperaments (excluding 12-EDO).
+  static List<Temperament> getHistoricalTemperaments({MusicalNote? rootNote}) {
     return [
-      edo12(rootNote: rootNote),
       pythagorean(rootNote: rootNote),
       pure(rootNote: rootNote),
       quarterCommaMeantone(rootNote: rootNote),
@@ -526,6 +525,38 @@ class PredefinedTemperaments {
       neidhardt3(rootNote: rootNote),
       valotti(rootNote: rootNote),
       young2(rootNote: rootNote),
+    ];
+  }
+
+  /// Returns all 68 predefined EDO temperaments from 5-EDO to 72-EDO (matching Kotlin `edoTemperaments`).
+  static List<Temperament> getEdoTemperaments({MusicalNote? rootNote}) {
+    return List<Temperament>.generate(72 - 5 + 1, (i) {
+      final edo = 5 + i;
+      return EqualTemperament.edo(
+        edo,
+        rootNote: rootNote,
+        stableId: (edo == 12) ? 1 : (1000 + edo),
+      );
+    });
+  }
+
+  /// Returns the classical list of 19 standard and historical temperaments.
+  static List<Temperament> getHistorical19({MusicalNote? rootNote}) {
+    return [
+      edo12(rootNote: rootNote),
+      ...getHistoricalTemperaments(rootNote: rootNote),
+    ];
+  }
+
+  /// Returns the complete comprehensive list of all predefined temperaments (86 distinct temperaments:
+  /// 12-EDO, 18 historical temperaments, and all 5-72 EDO systems).
+  static List<Temperament> getAll({MusicalNote? rootNote}) {
+    final edos = getEdoTemperaments(rootNote: rootNote);
+    final historical = getHistoricalTemperaments(rootNote: rootNote);
+    return [
+      edo12(rootNote: rootNote),
+      ...historical,
+      ...edos.where((t) => t.equalOctaveDivision != 12),
     ];
   }
 }

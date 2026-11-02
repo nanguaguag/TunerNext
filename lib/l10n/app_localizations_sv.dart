@@ -948,6 +948,10 @@ class AppLocalizationsSv extends AppLocalizations {
   String get customTemperaments => 'Anpassade tempereringar';
 
   @override
+  String get searchTemperamentsHint =>
+      'Search temperaments (e.g. 19-EDO, Pure)...';
+
+  @override
   String get notationVietnamese => 'Vietnamesisk';
 
   @override

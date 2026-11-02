@@ -30,6 +30,30 @@ class EqualTemperament extends Temperament {
     );
   }
 
+  /// Factory for arbitrary Equal Division of the Octave (EDO, 5 to 72).
+  factory EqualTemperament.edo(
+    int notesPerOctave, {
+    MusicalNote? rootNote,
+    int? stableId,
+  }) {
+    if (notesPerOctave == 12) {
+      return EqualTemperament.edo12(
+        rootNote: rootNote,
+        stableId: stableId ?? 1,
+      );
+    }
+    final root = rootNote ?? const MusicalNote(base: BaseNote.c, octave: 4);
+    final id = stableId ?? (1000 + notesPerOctave);
+    return EqualTemperament(
+      name: 'Equal temperament $notesPerOctave',
+      abbreviation: 'EDO $notesPerOctave',
+      description: '$notesPerOctave notes per octave',
+      stableId: id,
+      rootNote: root,
+      notesPerOctave: notesPerOctave,
+    );
+  }
+
   /// Number of equal divisions dividing the octave.
   final int notesPerOctave;
 
