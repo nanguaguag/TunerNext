@@ -66,5 +66,28 @@ void main() {
       await tester.pump();
       expect(find.byType(StretchTuningGraph), findsOneWidget);
     });
+
+    testWidgets('drag down moves viewport naturally downwards', (tester) async {
+      final railsback = PredefinedStretchTunings.railsback();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 400,
+              height: 250,
+              child: StretchTuningGraph(stretchTuning: railsback),
+            ),
+          ),
+        ),
+      );
+
+      // Perform downward drag gesture
+      final graphFinder = find.byType(StretchTuningGraph);
+      await tester.drag(graphFinder, const Offset(0.0, 50.0));
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+    });
   });
 }

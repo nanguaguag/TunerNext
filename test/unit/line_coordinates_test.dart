@@ -76,5 +76,18 @@ void main() {
       expect(vp.viewPort?.left, closeTo(25.0, 1e-4));
       expect(vp.viewPort?.right, closeTo(75.0, 1e-4));
     });
+
+    test('Zoom preserves negative height orientation on Cartesian plot', () {
+      final vp = GestureBasedViewPort();
+      // Plot where top is +15 and bottom is -15 (height = -30)
+      const base = Rect.fromLTRB(-100, 15, 100, -15);
+      vp.zoom(1.0, 2.0, 0.5, 0.5, base);
+
+      expect(vp.isActive, isTrue);
+      // Height should remain negative and span halved from -30 to -15 around 0 -> top: 7.5, bottom: -7.5
+      expect(vp.viewPort!.top, closeTo(7.5, 1e-4));
+      expect(vp.viewPort!.bottom, closeTo(-7.5, 1e-4));
+      expect(vp.viewPort!.height, closeTo(-15.0, 1e-4));
+    });
   });
 }

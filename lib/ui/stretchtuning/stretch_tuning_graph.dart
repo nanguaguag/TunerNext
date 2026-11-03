@@ -163,7 +163,7 @@ class _StretchTuningGraphState extends State<StretchTuningGraph> {
         final dyPixels = details.localFocalPoint.dy - _prevFocal.dy;
         final currentVp = _viewPort.viewPort ?? baseViewPort;
         final dxPlot = (dxPixels / size.width) * currentVp.width;
-        final dyPlot = -(dyPixels / size.height) * currentVp.height;
+        final dyPlot = (dyPixels / size.height) * currentVp.height;
 
         final scaleDelta = details.scale / _prevScale;
         _prevScale = details.scale;

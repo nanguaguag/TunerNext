@@ -57,8 +57,11 @@ class GestureBasedViewPort extends ChangeNotifier {
     final curWidth = current.width;
     final curHeight = current.height;
 
-    final newWidth = (curWidth / scaleX).clamp(1e-4, 1e7);
-    final newHeight = (curHeight / scaleY).clamp(1e-4, 1e7);
+    final widthSign = curWidth < 0 ? -1.0 : 1.0;
+    final heightSign = curHeight < 0 ? -1.0 : 1.0;
+
+    final newWidth = widthSign * (curWidth.abs() / scaleX).clamp(1e-4, 1e7);
+    final newHeight = heightSign * (curHeight.abs() / scaleY).clamp(1e-4, 1e7);
 
     final focalX = current.left + curWidth * focalXFactor;
     final focalY = current.top + curHeight * focalYFactor;
