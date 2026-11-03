@@ -4,6 +4,7 @@ import 'package:tuner_flutter/domain/models/musical_note.dart';
 import 'package:tuner_flutter/domain/models/tuning_state.dart';
 import 'package:tuner_flutter/ui/common/quick_settings_bar.dart';
 import 'package:tuner_flutter/ui/screens/scientific_tuner_screen.dart';
+import 'package:tuner_flutter/ui/staff/note_staff.dart';
 import 'package:tuner_flutter/ui/tuning/correlation_plot.dart';
 import 'package:tuner_flutter/ui/tuning/frequency_plot.dart';
 import 'package:tuner_flutter/ui/tuning/pitch_history.dart';
@@ -45,6 +46,7 @@ void main() {
       expect(find.byType(FrequencyPlot), findsOneWidget);
       expect(find.byType(CorrelationPlot), findsOneWidget);
       expect(find.byType(PitchHistory), findsOneWidget);
+      expect(find.byType(NoteStaff), findsOneWidget);
       expect(find.byType(QuickSettingsBar), findsOneWidget);
 
       // Verify FAB
@@ -84,6 +86,7 @@ void main() {
       expect(find.text('Spectrum'), findsOneWidget);
       expect(find.text('Autocorrelation'), findsOneWidget);
       expect(find.text('Pitch History'), findsOneWidget);
+      expect(find.byType(NoteStaff), findsOneWidget);
     });
   });
 }

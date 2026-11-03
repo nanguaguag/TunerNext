@@ -148,6 +148,7 @@ class _CorrelationPlotState extends State<CorrelationPlot> {
           yZeroPosition: widget.correlationPlotDataYZeroPosition,
           viewPort: effectiveViewPort,
           currentFrequency: widget.currentFrequency,
+          targetFrequency: widget.targetFrequency,
           outline: widget.plotWindowOutline,
           lineColor: effectiveLineColor,
           lineWidth: widget.lineWidth,
@@ -171,6 +172,7 @@ class _CorrelationPlotPainter extends CustomPainter {
     required this.yZeroPosition,
     required this.viewPort,
     required this.currentFrequency,
+    this.targetFrequency,
     required this.outline,
     required this.lineColor,
     required this.lineWidth,
@@ -186,6 +188,7 @@ class _CorrelationPlotPainter extends CustomPainter {
   final double yZeroPosition;
   final Rect viewPort;
   final double? currentFrequency;
+  final double? targetFrequency;
   final PlotWindowOutline outline;
   final Color lineColor;
   final double lineWidth;
@@ -298,6 +301,25 @@ class _CorrelationPlotPainter extends CustomPainter {
         }
       }
       canvas.drawPath(path, linePaint);
+    }
+
+    // Draw target period lag line
+    if (targetFrequency != null && targetFrequency! > 0) {
+      final targetLag = 1.0 / targetFrequency!;
+      if (targetLag >= xMin && targetLag <= xMax) {
+        final tx = xToPlot(targetLag);
+        final targetPaint = Paint()
+          ..color = tickLineColor.withValues(alpha: 0.8)
+          ..strokeWidth = 1.5
+          ..style = PaintingStyle.stroke;
+
+        _drawDashedLine(
+          canvas,
+          Offset(tx, plotArea.top),
+          Offset(tx, plotArea.bottom),
+          targetPaint,
+        );
+      }
     }
 
     // Draw current frequency marker at lag tau = 1.0 / f
@@ -422,12 +444,30 @@ class _CorrelationPlotPainter extends CustomPainter {
     }
   }
 
+  void _drawDashedLine(
+    Canvas canvas,
+    Offset p1,
+    Offset p2,
+    Paint paint, {
+    double dashLength = 4.0,
+    double dashSpace = 4.0,
+  }) {
+    final dy = p2.dy - p1.dy;
+    final count = (dy / (dashLength + dashSpace)).abs().ceil();
+    for (var i = 0; i < count; i++) {
+      final startY = p1.dy + i * (dashLength + dashSpace);
+      final endY = math.min(p2.dy, startY + dashLength);
+      canvas.drawLine(Offset(p1.dx, startY), Offset(p1.dx, endY), paint);
+    }
+  }
+
   @override
   bool shouldRepaint(covariant _CorrelationPlotPainter old) {
     return old.data != data ||
         old.yZeroPosition != yZeroPosition ||
         old.viewPort != viewPort ||
         old.currentFrequency != currentFrequency ||
+        old.targetFrequency != targetFrequency ||
         old.isActiveGesture != isActiveGesture ||
         old.lineColor != lineColor ||
         old.outline != outline;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/tuner_colors.dart';
 import '../../domain/models/musical_note.dart';
 import '../../domain/models/tuning_state.dart';
 import '../../l10n/app_localizations.dart';
@@ -7,13 +8,15 @@ import '../common/quick_settings_bar.dart';
 import '../plot/gesture_based_viewport.dart';
 import '../plot/line_coordinates.dart';
 import '../plot/plot_window_outline.dart';
+import '../staff/note_staff.dart';
+import '../staff/staff_models.dart';
 import '../tuning/correlation_plot.dart';
 import '../tuning/frequency_plot.dart';
 import '../tuning/pitch_history.dart';
 import '../tuning/pitch_history_state.dart';
 
 /// Scientific analysis screen displaying synchronized FFT spectrum, autocorrelation,
-/// and log-frequency pitch history with interactive zooming and WAV snapshot export.
+/// log-frequency pitch history with interactive zooming, classical note staff, and WAV snapshot export.
 class ScientificTunerScreen extends StatefulWidget {
   const ScientificTunerScreen({
     super.key,
@@ -34,6 +37,8 @@ class ScientificTunerScreen extends StatefulWidget {
     this.pitchHistoryState,
     this.waveWriterDuration = 1,
     this.canNavigateUp = false,
+    this.initialStaffClef = StaffClef.grand,
+    this.initialKeySignature = 0,
     this.onNavigateUp,
     this.onOpenPreferences,
     this.onOpenInstrumentTunerMode,
@@ -63,6 +68,8 @@ class ScientificTunerScreen extends StatefulWidget {
   final int waveWriterDuration;
 
   final bool canNavigateUp;
+  final StaffClef initialStaffClef;
+  final int initialKeySignature;
   final VoidCallback? onNavigateUp;
   final VoidCallback? onOpenPreferences;
   final VoidCallback? onOpenInstrumentTunerMode;
@@ -80,6 +87,8 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
   late final GestureBasedViewPort _freqViewPort;
   late final GestureBasedViewPort _corrViewPort;
   late final PitchHistoryState _historyState;
+  late StaffClef _staffClef;
+  late int _keySignature;
 
   @override
   void initState() {
@@ -88,6 +97,8 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
     _corrViewPort = GestureBasedViewPort();
     _historyState =
         widget.pitchHistoryState ?? PitchHistoryState(capacity: 120);
+    _staffClef = widget.initialStaffClef;
+    _keySignature = widget.initialKeySignature;
   }
 
   @override
@@ -98,6 +109,61 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
     } else {
       _historyState.addFrequency(null);
     }
+  }
+
+  Widget _buildSectionCard({
+    required String title,
+    String? subtitle,
+    required Widget child,
+    required PlotWindowOutline outline,
+  }) {
+    final theme = Theme.of(context);
+    final tunerColors = TunerColors.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(outline.cornerRadius),
+        border: Border.all(
+          color: outline.color ?? theme.colorScheme.outlineVariant,
+          width: outline.lineWidth,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10.0,
+              vertical: 4.0,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (subtitle != null)
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: tunerColors.positive,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(child: child),
+        ],
+      ),
+    );
   }
 
   @override
@@ -131,7 +197,7 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
     final outline = PlotWindowOutline(
       lineWidth: 1.0,
       cornerRadius: 8.0,
-      color: theme.colorScheme.outline,
+      color: theme.colorScheme.outlineVariant,
     );
 
     final l10n = AppLocalizations.of(context);
@@ -183,18 +249,8 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
           child: orientation == Orientation.landscape
-              ? _buildLandscapeLayout(
-                  freqData,
-                  corrData,
-                  outline,
-                  theme.textTheme,
-                )
-              : _buildPortraitLayout(
-                  freqData,
-                  corrData,
-                  outline,
-                  theme.textTheme,
-                ),
+              ? _buildLandscapeLayout(freqData, corrData, outline)
+              : _buildPortraitLayout(freqData, corrData, outline),
         ),
       ),
     );
@@ -204,93 +260,105 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
     LineCoordinates freqData,
     LineCoordinates corrData,
     PlotWindowOutline outline,
-    TextTheme textTheme,
   ) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final currentFreq = widget.currentFrequency;
+    final hasFreq = currentFreq != null && currentFreq > 0;
+    final currentLagMs = hasFreq ? 1000.0 / currentFreq : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Spectrum section (~22.5%)
+        // 1. Spectrum section (~25%)
         Expanded(
-          flex: 225,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n?.spectrum ?? 'Spectrum',
-                style: textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4.0),
-              Expanded(
-                child: FrequencyPlot(
-                  frequencyPlotData: freqData,
-                  targetNote: widget.targetNote,
-                  targetFrequency: widget.targetFrequency,
-                  gestureBasedViewPort: _freqViewPort,
-                  currentFrequency: widget.currentFrequency,
-                  harmonicFrequencies: widget.harmonicFrequencies,
-                  plotWindowOutline: outline,
-                ),
-              ),
-            ],
+          flex: 25,
+          child: _buildSectionCard(
+            title: l10n?.spectrum ?? 'Spectrum',
+            subtitle: hasFreq ? '${currentFreq.toStringAsFixed(1)} Hz' : null,
+            outline: outline,
+            child: FrequencyPlot(
+              frequencyPlotData: freqData,
+              targetNote: widget.targetNote,
+              targetFrequency: widget.targetFrequency,
+              gestureBasedViewPort: _freqViewPort,
+              currentFrequency: widget.currentFrequency,
+              harmonicFrequencies: widget.harmonicFrequencies,
+              plotWindowOutline: outline,
+            ),
           ),
         ),
-        const SizedBox(height: 8.0),
-        // Autocorrelation section (~22.5%)
+        const SizedBox(height: 6.0),
+
+        // 2. Autocorrelation section (~25%)
         Expanded(
-          flex: 225,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n?.autocorrelation ?? 'Autocorrelation',
-                style: textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4.0),
-              Expanded(
-                child: CorrelationPlot(
-                  correlationPlotData: corrData,
-                  correlationPlotDataYZeroPosition:
-                      widget.correlationPlotDataYZeroPosition,
-                  targetNote: widget.targetNote,
-                  targetFrequency: widget.targetFrequency,
-                  gestureBasedViewPort: _corrViewPort,
-                  currentFrequency: widget.currentFrequency,
-                  plotWindowOutline: outline,
-                ),
-              ),
-            ],
+          flex: 25,
+          child: _buildSectionCard(
+            title: l10n?.autocorrelation ?? 'Autocorrelation',
+            subtitle: currentLagMs != null
+                ? 'τ = ${currentLagMs.toStringAsFixed(2)} ms'
+                : null,
+            outline: outline,
+            child: CorrelationPlot(
+              correlationPlotData: corrData,
+              correlationPlotDataYZeroPosition:
+                  widget.correlationPlotDataYZeroPosition,
+              targetNote: widget.targetNote,
+              targetFrequency: widget.targetFrequency,
+              gestureBasedViewPort: _corrViewPort,
+              currentFrequency: widget.currentFrequency,
+              plotWindowOutline: outline,
+            ),
           ),
         ),
-        const SizedBox(height: 8.0),
-        // Pitch history section (~55%)
+        const SizedBox(height: 6.0),
+
+        // 3. Pitch History section (~25%)
         Expanded(
-          flex: 550,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n?.pitchHistory ?? 'Pitch History',
-                style: textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+          flex: 25,
+          child: _buildSectionCard(
+            title: l10n?.pitchHistory ?? 'Pitch History',
+            outline: outline,
+            child: PitchHistory(
+              state: _historyState,
+              targetNote: widget.targetNote,
+              targetFrequency: widget.targetFrequency,
+              tuningState: widget.tuningState,
+              toleranceInCents: widget.toleranceInCents,
+            ),
+          ),
+        ),
+        const SizedBox(height: 6.0),
+
+        // 4. Classical Note Staff (~25%)
+        Expanded(
+          flex: 25,
+          child: Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(outline.cornerRadius),
+              border: Border.all(
+                color: outline.color ?? theme.colorScheme.outlineVariant,
+                width: outline.lineWidth,
               ),
-              const SizedBox(height: 4.0),
-              Expanded(
-                child: PitchHistory(
-                  state: _historyState,
-                  targetNote: widget.targetNote,
-                  targetFrequency: widget.targetFrequency,
-                  tuningState: widget.tuningState,
-                  toleranceInCents: widget.toleranceInCents,
-                ),
-              ),
-            ],
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: NoteStaff(
+              note: widget.targetNote,
+              tuningState: widget.tuningState,
+              staffClef: _staffClef,
+              onStaffClefChanged: (clef) {
+                setState(() {
+                  _staffClef = clef;
+                });
+              },
+              keySignature: _keySignature,
+              onKeySignatureChanged: (sig) {
+                setState(() {
+                  _keySignature = sig;
+                });
+              },
+            ),
           ),
         ),
       ],
@@ -301,93 +369,110 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
     LineCoordinates freqData,
     LineCoordinates corrData,
     PlotWindowOutline outline,
-    TextTheme textTheme,
   ) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final currentFreq = widget.currentFrequency;
+    final hasFreq = currentFreq != null && currentFreq > 0;
+    final currentLagMs = hasFreq ? 1000.0 / currentFreq : null;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Left column (Spectrum + Autocorrelation)
         Expanded(
-          flex: 50,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Spectrum',
-                      style: textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 2.0),
-                    Expanded(
-                      child: FrequencyPlot(
-                        frequencyPlotData: freqData,
-                        targetNote: widget.targetNote,
-                        targetFrequency: widget.targetFrequency,
-                        gestureBasedViewPort: _freqViewPort,
-                        currentFrequency: widget.currentFrequency,
-                        harmonicFrequencies: widget.harmonicFrequencies,
-                        plotWindowOutline: outline,
-                      ),
-                    ),
-                  ],
+                child: _buildSectionCard(
+                  title: l10n?.spectrum ?? 'Spectrum',
+                  subtitle: hasFreq
+                      ? '${currentFreq.toStringAsFixed(1)} Hz'
+                      : null,
+                  outline: outline,
+                  child: FrequencyPlot(
+                    frequencyPlotData: freqData,
+                    targetNote: widget.targetNote,
+                    targetFrequency: widget.targetFrequency,
+                    gestureBasedViewPort: _freqViewPort,
+                    currentFrequency: widget.currentFrequency,
+                    harmonicFrequencies: widget.harmonicFrequencies,
+                    plotWindowOutline: outline,
+                  ),
                 ),
               ),
               const SizedBox(height: 6.0),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Autocorrelation',
-                      style: textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 2.0),
-                    Expanded(
-                      child: CorrelationPlot(
-                        correlationPlotData: corrData,
-                        correlationPlotDataYZeroPosition:
-                            widget.correlationPlotDataYZeroPosition,
-                        targetNote: widget.targetNote,
-                        targetFrequency: widget.targetFrequency,
-                        gestureBasedViewPort: _corrViewPort,
-                        currentFrequency: widget.currentFrequency,
-                        plotWindowOutline: outline,
-                      ),
-                    ),
-                  ],
+                child: _buildSectionCard(
+                  title: l10n?.autocorrelation ?? 'Autocorrelation',
+                  subtitle: currentLagMs != null
+                      ? 'τ = ${currentLagMs.toStringAsFixed(2)} ms'
+                      : null,
+                  outline: outline,
+                  child: CorrelationPlot(
+                    correlationPlotData: corrData,
+                    correlationPlotDataYZeroPosition:
+                        widget.correlationPlotDataYZeroPosition,
+                    targetNote: widget.targetNote,
+                    targetFrequency: widget.targetFrequency,
+                    gestureBasedViewPort: _corrViewPort,
+                    currentFrequency: widget.currentFrequency,
+                    plotWindowOutline: outline,
+                  ),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 12.0),
-        // Right column (Pitch History)
+        const SizedBox(width: 8.0),
+
+        // Right column (Pitch History + Note Staff)
         Expanded(
-          flex: 50,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Pitch History',
-                style: textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: _buildSectionCard(
+                  title: l10n?.pitchHistory ?? 'Pitch History',
+                  outline: outline,
+                  child: PitchHistory(
+                    state: _historyState,
+                    targetNote: widget.targetNote,
+                    targetFrequency: widget.targetFrequency,
+                    tuningState: widget.tuningState,
+                    toleranceInCents: widget.toleranceInCents,
+                  ),
                 ),
               ),
-              const SizedBox(height: 2.0),
+              const SizedBox(height: 6.0),
               Expanded(
-                child: PitchHistory(
-                  state: _historyState,
-                  targetNote: widget.targetNote,
-                  targetFrequency: widget.targetFrequency,
-                  tuningState: widget.tuningState,
-                  toleranceInCents: widget.toleranceInCents,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(outline.cornerRadius),
+                    border: Border.all(
+                      color: outline.color ?? theme.colorScheme.outlineVariant,
+                      width: outline.lineWidth,
+                    ),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: NoteStaff(
+                    note: widget.targetNote,
+                    tuningState: widget.tuningState,
+                    staffClef: _staffClef,
+                    onStaffClefChanged: (clef) {
+                      setState(() {
+                        _staffClef = clef;
+                      });
+                    },
+                    keySignature: _keySignature,
+                    onKeySignatureChanged: (sig) {
+                      setState(() {
+                        _keySignature = sig;
+                      });
+                    },
+                  ),
                 ),
               ),
             ],

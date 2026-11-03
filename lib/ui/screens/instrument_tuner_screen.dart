@@ -11,12 +11,12 @@ import '../../l10n/app_localizations.dart';
 import '../common/quick_settings_bar.dart';
 import '../dialogs/reference_note_dialog.dart';
 import '../dialogs/temperament_dialog.dart';
-import '../instruments/instrument_button.dart';
 import '../instruments/string_with_info.dart';
 import '../instruments/strings.dart';
 import '../plot/plot_window_outline.dart';
 import '../tuning/pitch_history.dart';
 import '../tuning/pitch_history_state.dart';
+import '../widgets/tuning_indicator_banner.dart';
 
 /// Main interactive Instrument Tuner screen.
 ///
@@ -80,6 +80,7 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
   int? _lockedStringKey;
   MusicalNote? _targetNote;
   double _targetFrequency = 440.0;
+  double _deviationCents = 0.0;
   TuningState _tuningState = TuningState.unknown;
 
   @override
@@ -165,26 +166,22 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
           _targetFrequency,
         );
         final state = _pitchConverter.determineTuningState(cents);
-        if (_tuningState != state) {
-          setState(() {
-            _tuningState = state;
-          });
-        }
+        setState(() {
+          _deviationCents = cents;
+          _tuningState = state;
+        });
       } else {
         // Automatic tracking mode with hysteresis
         final assessment = _pitchConverter.evaluatePitch(
           frequency,
           previousTarget: _targetNote,
         );
-        if (_targetNote != assessment.target.note ||
-            _targetFrequency != assessment.target.frequency ||
-            _tuningState != assessment.tuningState) {
-          setState(() {
-            _targetNote = assessment.target.note;
-            _targetFrequency = assessment.target.frequency;
-            _tuningState = assessment.tuningState;
-          });
-        }
+        setState(() {
+          _targetNote = assessment.target.note;
+          _targetFrequency = assessment.target.frequency;
+          _deviationCents = assessment.centsDeviation;
+          _tuningState = assessment.tuningState;
+        });
       }
     } else {
       // Unvoiced/silent frame: insert mute gap so history timeline advances and lines break cleanly
@@ -192,6 +189,7 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
       if (_tuningState != TuningState.unknown) {
         setState(() {
           _tuningState = TuningState.unknown;
+          _deviationCents = 0.0;
         });
       }
     }
@@ -207,6 +205,31 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
         _lockedStringKey = key;
         _targetNote = note;
         _targetFrequency = _pitchConverter.noteToFrequency(note);
+        final latest = _pitchHistoryState.latestFrequency;
+        if (latest != null && latest > 0) {
+          _deviationCents = _pitchConverter.centsDeviation(
+            latest,
+            _targetFrequency,
+          );
+          _tuningState = _pitchConverter.determineTuningState(_deviationCents);
+        }
+      }
+    });
+  }
+
+  void _toggleLock() {
+    setState(() {
+      if (_lockedStringKey != null) {
+        _lockedStringKey = null;
+      } else if (_targetNote != null) {
+        final idx = _currentInstrument.strings.indexOf(_targetNote!);
+        if (idx != -1) {
+          _lockedStringKey = idx;
+        } else if (_currentInstrument.strings.isNotEmpty) {
+          _lockedStringKey = 0;
+          _targetNote = _currentInstrument.strings.first;
+          _targetFrequency = _pitchConverter.noteToFrequency(_targetNote!);
+        }
       }
     });
   }
@@ -277,55 +300,62 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // 1. Top Instrument Switcher Card
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
-              child: InstrumentButton(
-                icon: _currentInstrument.icon,
-                name: _currentInstrument.name,
-                onClick: widget.onOpenInstrumentList,
-              ),
+            // 1. Top Status & Cent Deviation Banner
+            TuningIndicatorBanner(
+              targetNote: _targetNote ?? _referenceNote,
+              targetFrequency: _targetFrequency,
+              measuredFrequency: _pitchHistoryState.latestFrequency,
+              tuningState: _tuningState,
+              deviationCents: _deviationCents,
+              isLocked: _lockedStringKey != null,
+              onToggleLock: _toggleLock,
+              onSelectInstrument: widget.onOpenInstrumentList,
+              currentInstrumentName: _currentInstrument.name,
+              currentInstrumentIcon: _currentInstrument.icon,
             ),
 
-            // 2. Fretboard Strings View (if instrument has strings)
-            if (strings.isNotEmpty)
-              SizedBox(
-                height: 180,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Strings(
-                    strings: strings,
-                    highlightedNoteKey: _lockedStringKey,
-                    highlightedNote: _targetNote,
-                    tuningState: _tuningState,
-                    onStringClicked: _onStringClicked,
-                    sidebarPosition: StringsSidebarPosition.end,
-                    outline: PlotWindowOutline(
-                      color: theme.colorScheme.outlineVariant,
-                      cornerRadius: 12.0,
-                    ),
-                  ),
-                ),
-              ),
-
-            // 3. Acoustic Pitch History Canvas (Filling available space)
+            // 2. Main Tuner Viewport: Strings Sidebar + Pitch History Canvas
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-                child: PitchHistory(
-                  state: _pitchHistoryState,
-                  targetNote: _targetNote ?? _referenceNote,
-                  targetFrequency: _targetFrequency,
-                  tuningState: _tuningState,
-                  toleranceInCents: 5,
-                  preferSharp: !_preferFlat,
-                  plotWindowOutline: PlotWindowOutline(
-                    color: theme.colorScheme.outlineVariant,
-                    cornerRadius: 12.0,
-                  ),
+                child: Row(
+                  children: [
+                    // Physical Strings Sidebar (if instrument has strings)
+                    if (strings.isNotEmpty) ...[
+                      SizedBox(
+                        width: 76.0,
+                        child: Strings(
+                          strings: strings,
+                          highlightedNoteKey: _lockedStringKey,
+                          highlightedNote: _targetNote,
+                          tuningState: _tuningState,
+                          onStringClicked: _onStringClicked,
+                          sidebarPosition: StringsSidebarPosition.none,
+                          outline: PlotWindowOutline(
+                            color: theme.colorScheme.outlineVariant,
+                            cornerRadius: 12.0,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8.0),
+                    ],
+
+                    // Real-time Pitch History Custom Canvas
+                    Expanded(
+                      child: PitchHistory(
+                        state: _pitchHistoryState,
+                        targetNote: _targetNote ?? _referenceNote,
+                        targetFrequency: _targetFrequency,
+                        tuningState: _tuningState,
+                        toleranceInCents: 5,
+                        preferSharp: !_preferFlat,
+                        plotWindowOutline: PlotWindowOutline(
+                          color: theme.colorScheme.outlineVariant,
+                          cornerRadius: 12.0,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

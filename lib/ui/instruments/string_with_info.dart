@@ -9,6 +9,9 @@ enum StringsSidebarPosition {
 
   /// Sidebar is behind (to the right of) the strings lines.
   end,
+
+  /// No extra sidebar buttons (for compact sidebar column mode).
+  none,
 }
 
 /// Scroll mode for the strings view.

@@ -153,6 +153,7 @@ class _FrequencyPlotState extends State<FrequencyPlot> {
           data: widget.frequencyPlotData,
           viewPort: effectiveViewPort,
           currentFrequency: widget.currentFrequency,
+          targetFrequency: widget.targetFrequency,
           harmonicFrequencies: widget.harmonicFrequencies,
           outline: widget.plotWindowOutline,
           lineColor: effectiveLineColor,
@@ -178,6 +179,7 @@ class _FrequencyPlotPainter extends CustomPainter {
     required this.data,
     required this.viewPort,
     required this.currentFrequency,
+    this.targetFrequency,
     required this.harmonicFrequencies,
     required this.outline,
     required this.lineColor,
@@ -195,6 +197,7 @@ class _FrequencyPlotPainter extends CustomPainter {
   final LineCoordinates data;
   final Rect viewPort;
   final double? currentFrequency;
+  final double? targetFrequency;
   final List<double>? harmonicFrequencies;
   final PlotWindowOutline outline;
   final Color lineColor;
@@ -283,7 +286,8 @@ class _FrequencyPlotPainter extends CustomPainter {
       for (final hFreq in harmonicFrequencies!) {
         if (hFreq >= xMin && hFreq <= xMax) {
           final hx = xToPlot(hFreq);
-          canvas.drawLine(
+          _drawDashedLine(
+            canvas,
             Offset(hx, plotArea.top),
             Offset(hx, plotArea.bottom),
             harmonicPaint,
@@ -294,13 +298,6 @@ class _FrequencyPlotPainter extends CustomPainter {
 
     // Draw spectrum curve
     if (data.size > 1) {
-      final linePaint = Paint()
-        ..color = lineColor
-        ..strokeWidth = lineWidth
-        ..style = PaintingStyle.stroke
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round;
-
       final path = Path();
       var started = false;
 
@@ -316,7 +313,53 @@ class _FrequencyPlotPainter extends CustomPainter {
           path.lineTo(px, py);
         }
       }
+
+      // Draw area gradient under curve
+      final fillPath = Path.from(path)
+        ..lineTo(xToPlot(data[data.size - 1].dx), plotArea.bottom)
+        ..lineTo(xToPlot(data[0].dx), plotArea.bottom)
+        ..close();
+
+      final fillPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            lineColor.withValues(alpha: 0.25),
+            lineColor.withValues(alpha: 0.0),
+          ],
+        ).createShader(plotArea)
+        ..style = PaintingStyle.fill;
+
+      canvas.drawPath(fillPath, fillPaint);
+
+      final linePaint = Paint()
+        ..color = lineColor
+        ..strokeWidth = lineWidth
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round;
+
       canvas.drawPath(path, linePaint);
+    }
+
+    // Draw target frequency dashed line
+    if (targetFrequency != null && targetFrequency! > 0) {
+      final targetF = targetFrequency!;
+      if (targetF >= xMin && targetF <= xMax) {
+        final tx = xToPlot(targetF);
+        final targetPaint = Paint()
+          ..color = harmonicLineColor
+          ..strokeWidth = 1.5
+          ..style = PaintingStyle.stroke;
+
+        _drawDashedLine(
+          canvas,
+          Offset(tx, plotArea.top),
+          Offset(tx, plotArea.bottom),
+          targetPaint,
+        );
+      }
     }
 
     // Draw current frequency marker
@@ -440,11 +483,29 @@ class _FrequencyPlotPainter extends CustomPainter {
     }
   }
 
+  void _drawDashedLine(
+    Canvas canvas,
+    Offset p1,
+    Offset p2,
+    Paint paint, {
+    double dashLength = 4.0,
+    double dashSpace = 4.0,
+  }) {
+    final dy = p2.dy - p1.dy;
+    final count = (dy / (dashLength + dashSpace)).abs().ceil();
+    for (var i = 0; i < count; i++) {
+      final startY = p1.dy + i * (dashLength + dashSpace);
+      final endY = math.min(p2.dy, startY + dashLength);
+      canvas.drawLine(Offset(p1.dx, startY), Offset(p1.dx, endY), paint);
+    }
+  }
+
   @override
   bool shouldRepaint(covariant _FrequencyPlotPainter old) {
     return old.data != data ||
         old.viewPort != viewPort ||
         old.currentFrequency != currentFrequency ||
+        old.targetFrequency != targetFrequency ||
         old.harmonicFrequencies != harmonicFrequencies ||
         old.isActiveGesture != isActiveGesture ||
         old.lineColor != lineColor ||
