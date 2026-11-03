@@ -130,11 +130,20 @@ class TuningIndicatorBanner extends StatelessWidget {
                       : null,
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  targetNote.name,
-                  style: theme.textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: statusColor,
+                child: Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      targetNote.name,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22.0,
+                        color: statusColor,
+                      ),
+                    ),
                   ),
                 ),
               ),

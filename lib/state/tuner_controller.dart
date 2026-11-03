@@ -165,6 +165,7 @@ class TunerController extends Notifier<TunerAppState> {
       clearCurrentFrequency: detectedFreq == null,
       tuningState: stateParam,
       spectrumAmplitudes: result.spectrumAmplitudes,
+      correlationValues: result.correlationValues,
       waveformSnapshot: result.waveformSnapshot,
       frequencyPlotData: freqData,
       correlationPlotData: corrData,

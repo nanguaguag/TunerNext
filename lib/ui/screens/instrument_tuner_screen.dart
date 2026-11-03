@@ -40,6 +40,7 @@ class InstrumentTunerScreen extends StatefulWidget {
     this.onOpenPreferences,
     this.onOpenInstrumentList,
     this.onOpenScientificMode,
+    this.onOpenAudioAnalysis,
     this.onOpenStretchTuning,
     this.onTemperamentChanged,
     this.onReferenceNoteChanged,
@@ -56,6 +57,7 @@ class InstrumentTunerScreen extends StatefulWidget {
   final VoidCallback? onOpenPreferences;
   final VoidCallback? onOpenInstrumentList;
   final VoidCallback? onOpenScientificMode;
+  final VoidCallback? onOpenAudioAnalysis;
   final VoidCallback? onOpenStretchTuning;
   final ValueChanged<Temperament>? onTemperamentChanged;
   final void Function(MusicalNote note, double frequency)?
@@ -283,6 +285,12 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
       appBar: AppBar(
         title: Text(l10n?.appName ?? 'Tuner'),
         actions: [
+          if (widget.onOpenAudioAnalysis != null)
+            IconButton(
+              icon: const Icon(Icons.audio_file_outlined),
+              tooltip: 'Import & Analyze Audio',
+              onPressed: widget.onOpenAudioAnalysis,
+            ),
           if (widget.onOpenScientificMode != null)
             IconButton(
               icon: const Icon(Icons.analytics_outlined),

@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/tuner_colors.dart';
@@ -5,9 +6,11 @@ import '../../domain/models/musical_note.dart';
 import '../../domain/models/tuning_state.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/quick_settings_bar.dart';
+import '../plot/autocorrelation_plot.dart';
 import '../plot/gesture_based_viewport.dart';
 import '../plot/line_coordinates.dart';
 import '../plot/plot_window_outline.dart';
+import '../plot/spectrum_plot.dart';
 import '../staff/note_staff.dart';
 import '../staff/staff_models.dart';
 import '../tuning/correlation_plot.dart';
@@ -30,6 +33,8 @@ class ScientificTunerScreen extends StatefulWidget {
     this.tuningState = TuningState.inTune,
     this.toleranceInCents = 10,
     this.preferFlat = false,
+    this.spectrumAmplitudes,
+    this.correlationValues,
     this.frequencyPlotData,
     this.harmonicFrequencies,
     this.correlationPlotData,
@@ -46,6 +51,7 @@ class ScientificTunerScreen extends StatefulWidget {
     this.onOpenReferenceNote,
     this.onOpenTemperament,
     this.onOpenStretchTuning,
+    this.onOpenAudioAnalysis,
     this.onExportWav,
   });
 
@@ -60,6 +66,8 @@ class ScientificTunerScreen extends StatefulWidget {
   final int toleranceInCents;
   final bool preferFlat;
 
+  final Float32List? spectrumAmplitudes;
+  final Float32List? correlationValues;
   final LineCoordinates? frequencyPlotData;
   final List<double>? harmonicFrequencies;
   final LineCoordinates? correlationPlotData;
@@ -77,6 +85,7 @@ class ScientificTunerScreen extends StatefulWidget {
   final VoidCallback? onOpenReferenceNote;
   final VoidCallback? onOpenTemperament;
   final VoidCallback? onOpenStretchTuning;
+  final VoidCallback? onOpenAudioAnalysis;
   final VoidCallback? onExportWav;
 
   @override
@@ -212,6 +221,18 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
               )
             : null,
         actions: [
+          if (widget.onOpenAudioAnalysis != null)
+            IconButton(
+              icon: const Icon(Icons.audio_file_outlined),
+              tooltip: 'Import & Analyze Audio',
+              onPressed: widget.onOpenAudioAnalysis,
+            ),
+          if (widget.waveWriterDuration > 0 && widget.onExportWav != null)
+            IconButton(
+              icon: const Icon(Icons.file_download_outlined),
+              tooltip: l10n?.exportWav ?? 'Export WAV snapshot',
+              onPressed: widget.onExportWav,
+            ),
           if (widget.onOpenInstrumentTunerMode != null)
             IconButton(
               icon: const Icon(Icons.tune),
@@ -226,14 +247,6 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
             ),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      floatingActionButton: widget.waveWriterDuration > 0
-          ? FloatingActionButton.small(
-              tooltip: l10n?.exportWav ?? 'Export WAV snapshot',
-              onPressed: widget.onExportWav,
-              child: const Icon(Icons.mic),
-            )
-          : null,
       bottomNavigationBar: QuickSettingsBar(
         referenceFrequency: widget.referenceFrequency,
         referenceNote: widget.referenceNote,
@@ -256,6 +269,79 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
     );
   }
 
+  Widget _buildSpectrumWidget({
+    required LineCoordinates freqData,
+    required PlotWindowOutline outline,
+    required AppLocalizations? l10n,
+    required bool hasFreq,
+    required double? currentFreq,
+  }) {
+    if (widget.spectrumAmplitudes != null &&
+        widget.spectrumAmplitudes!.isNotEmpty) {
+      return SpectrumPlot(
+        spectrum: widget.spectrumAmplitudes,
+        sampleRate: 44100,
+        maxFrequency: 4000.0,
+        currentFrequency: hasFreq ? currentFreq : null,
+        targetFrequency: widget.targetFrequency,
+        title: l10n?.spectrum ?? 'Frequency Spectrum (FFT)',
+      );
+    }
+
+    return _buildSectionCard(
+      title: l10n?.spectrum ?? 'Spectrum',
+      subtitle: hasFreq ? '${currentFreq!.toStringAsFixed(1)} Hz' : null,
+      outline: outline,
+      child: FrequencyPlot(
+        frequencyPlotData: freqData,
+        targetNote: widget.targetNote,
+        targetFrequency: widget.targetFrequency,
+        gestureBasedViewPort: _freqViewPort,
+        currentFrequency: widget.currentFrequency,
+        harmonicFrequencies: widget.harmonicFrequencies,
+        plotWindowOutline: outline,
+      ),
+    );
+  }
+
+  Widget _buildAutocorrelationWidget({
+    required LineCoordinates corrData,
+    required PlotWindowOutline outline,
+    required AppLocalizations? l10n,
+    required double? currentLagMs,
+  }) {
+    if (widget.correlationValues != null &&
+        widget.correlationValues!.isNotEmpty) {
+      return AutocorrelationPlot(
+        correlation: widget.correlationValues,
+        zeroPositionNormalized: widget.correlationPlotDataYZeroPosition,
+        sampleRate: 44100,
+        maxLagMs: 25.0,
+        currentFrequency: widget.currentFrequency,
+        targetFrequency: widget.targetFrequency,
+        title: l10n?.autocorrelation ?? 'Autocorrelation R_xx(τ)',
+      );
+    }
+
+    return _buildSectionCard(
+      title: l10n?.autocorrelation ?? 'Autocorrelation',
+      subtitle: currentLagMs != null
+          ? 'τ = ${currentLagMs.toStringAsFixed(2)} ms'
+          : null,
+      outline: outline,
+      child: CorrelationPlot(
+        correlationPlotData: corrData,
+        correlationPlotDataYZeroPosition:
+            widget.correlationPlotDataYZeroPosition,
+        targetNote: widget.targetNote,
+        targetFrequency: widget.targetFrequency,
+        gestureBasedViewPort: _corrViewPort,
+        currentFrequency: widget.currentFrequency,
+        plotWindowOutline: outline,
+      ),
+    );
+  }
+
   Widget _buildPortraitLayout(
     LineCoordinates freqData,
     LineCoordinates corrData,
@@ -273,19 +359,12 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
         // 1. Spectrum section (~25%)
         Expanded(
           flex: 25,
-          child: _buildSectionCard(
-            title: l10n?.spectrum ?? 'Spectrum',
-            subtitle: hasFreq ? '${currentFreq.toStringAsFixed(1)} Hz' : null,
+          child: _buildSpectrumWidget(
+            freqData: freqData,
             outline: outline,
-            child: FrequencyPlot(
-              frequencyPlotData: freqData,
-              targetNote: widget.targetNote,
-              targetFrequency: widget.targetFrequency,
-              gestureBasedViewPort: _freqViewPort,
-              currentFrequency: widget.currentFrequency,
-              harmonicFrequencies: widget.harmonicFrequencies,
-              plotWindowOutline: outline,
-            ),
+            l10n: l10n,
+            hasFreq: hasFreq,
+            currentFreq: currentFreq,
           ),
         ),
         const SizedBox(height: 6.0),
@@ -293,22 +372,11 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
         // 2. Autocorrelation section (~25%)
         Expanded(
           flex: 25,
-          child: _buildSectionCard(
-            title: l10n?.autocorrelation ?? 'Autocorrelation',
-            subtitle: currentLagMs != null
-                ? 'τ = ${currentLagMs.toStringAsFixed(2)} ms'
-                : null,
+          child: _buildAutocorrelationWidget(
+            corrData: corrData,
             outline: outline,
-            child: CorrelationPlot(
-              correlationPlotData: corrData,
-              correlationPlotDataYZeroPosition:
-                  widget.correlationPlotDataYZeroPosition,
-              targetNote: widget.targetNote,
-              targetFrequency: widget.targetFrequency,
-              gestureBasedViewPort: _corrViewPort,
-              currentFrequency: widget.currentFrequency,
-              plotWindowOutline: outline,
-            ),
+            l10n: l10n,
+            currentLagMs: currentLagMs,
           ),
         ),
         const SizedBox(height: 6.0),
@@ -385,41 +453,21 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: _buildSectionCard(
-                  title: l10n?.spectrum ?? 'Spectrum',
-                  subtitle: hasFreq
-                      ? '${currentFreq.toStringAsFixed(1)} Hz'
-                      : null,
+                child: _buildSpectrumWidget(
+                  freqData: freqData,
                   outline: outline,
-                  child: FrequencyPlot(
-                    frequencyPlotData: freqData,
-                    targetNote: widget.targetNote,
-                    targetFrequency: widget.targetFrequency,
-                    gestureBasedViewPort: _freqViewPort,
-                    currentFrequency: widget.currentFrequency,
-                    harmonicFrequencies: widget.harmonicFrequencies,
-                    plotWindowOutline: outline,
-                  ),
+                  l10n: l10n,
+                  hasFreq: hasFreq,
+                  currentFreq: currentFreq,
                 ),
               ),
               const SizedBox(height: 6.0),
               Expanded(
-                child: _buildSectionCard(
-                  title: l10n?.autocorrelation ?? 'Autocorrelation',
-                  subtitle: currentLagMs != null
-                      ? 'τ = ${currentLagMs.toStringAsFixed(2)} ms'
-                      : null,
+                child: _buildAutocorrelationWidget(
+                  corrData: corrData,
                   outline: outline,
-                  child: CorrelationPlot(
-                    correlationPlotData: corrData,
-                    correlationPlotDataYZeroPosition:
-                        widget.correlationPlotDataYZeroPosition,
-                    targetNote: widget.targetNote,
-                    targetFrequency: widget.targetFrequency,
-                    gestureBasedViewPort: _corrViewPort,
-                    currentFrequency: widget.currentFrequency,
-                    plotWindowOutline: outline,
-                  ),
+                  l10n: l10n,
+                  currentLagMs: currentLagMs,
                 ),
               ),
             ],

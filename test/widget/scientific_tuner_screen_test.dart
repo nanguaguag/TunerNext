@@ -1,8 +1,11 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tuner_flutter/domain/models/musical_note.dart';
 import 'package:tuner_flutter/domain/models/tuning_state.dart';
 import 'package:tuner_flutter/ui/common/quick_settings_bar.dart';
+import 'package:tuner_flutter/ui/plot/autocorrelation_plot.dart';
+import 'package:tuner_flutter/ui/plot/spectrum_plot.dart';
 import 'package:tuner_flutter/ui/screens/scientific_tuner_screen.dart';
 import 'package:tuner_flutter/ui/staff/note_staff.dart';
 import 'package:tuner_flutter/ui/tuning/correlation_plot.dart';
@@ -49,10 +52,10 @@ void main() {
       expect(find.byType(NoteStaff), findsOneWidget);
       expect(find.byType(QuickSettingsBar), findsOneWidget);
 
-      // Verify FAB
-      final fab = find.byType(FloatingActionButton);
-      expect(fab, findsOneWidget);
-      await tester.tap(fab);
+      // Verify Export WAV action in AppBar
+      final exportBtn = find.byIcon(Icons.file_download_outlined);
+      expect(exportBtn, findsOneWidget);
+      await tester.tap(exportBtn);
       expect(wavExported, isTrue);
 
       // Verify Settings action
@@ -88,5 +91,32 @@ void main() {
       expect(find.text('Pitch History'), findsOneWidget);
       expect(find.byType(NoteStaff), findsOneWidget);
     });
+
+    testWidgets(
+      'renders dense SpectrumPlot and AutocorrelationPlot when raw buffers provided',
+      (tester) async {
+        await tester.binding.setSurfaceSize(const Size(800, 1200));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+
+        final spectrum = Float32List(1025);
+        spectrum[100] = 1.0;
+        final correlation = Float32List(1024);
+        correlation[0] = 1.0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ScientificTunerScreen(
+              spectrumAmplitudes: spectrum,
+              correlationValues: correlation,
+              currentFrequency: 440.0,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(SpectrumPlot), findsOneWidget);
+        expect(find.byType(AutocorrelationPlot), findsOneWidget);
+      },
+    );
   });
 }

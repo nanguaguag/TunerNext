@@ -28,6 +28,7 @@ class TunerAppState {
     this.currentFrequency,
     this.tuningState = TuningState.unknown,
     this.spectrumAmplitudes,
+    this.correlationValues,
     this.waveformSnapshot,
     this.frequencyPlotData,
     this.correlationPlotData,
@@ -62,6 +63,7 @@ class TunerAppState {
   final double? currentFrequency;
   final TuningState tuningState;
   final Float32List? spectrumAmplitudes;
+  final Float32List? correlationValues;
   final Float32List? waveformSnapshot;
   final LineCoordinates? frequencyPlotData;
   final LineCoordinates? correlationPlotData;
@@ -84,6 +86,7 @@ class TunerAppState {
     bool clearCurrentFrequency = false,
     TuningState? tuningState,
     Float32List? spectrumAmplitudes,
+    Float32List? correlationValues,
     Float32List? waveformSnapshot,
     LineCoordinates? frequencyPlotData,
     LineCoordinates? correlationPlotData,
@@ -107,6 +110,7 @@ class TunerAppState {
           : (currentFrequency ?? this.currentFrequency),
       tuningState: tuningState ?? this.tuningState,
       spectrumAmplitudes: spectrumAmplitudes ?? this.spectrumAmplitudes,
+      correlationValues: correlationValues ?? this.correlationValues,
       waveformSnapshot: waveformSnapshot ?? this.waveformSnapshot,
       frequencyPlotData: frequencyPlotData ?? this.frequencyPlotData,
       correlationPlotData: correlationPlotData ?? this.correlationPlotData,

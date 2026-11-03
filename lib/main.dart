@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'audio/audio_file_loader.dart';
 import 'core/theme/tuner_theme.dart';
 import 'data/preferences/app_preferences.dart';
 import 'domain/instruments/instrument.dart';
 import 'domain/models/musical_note.dart';
 import 'domain/stretch_tuning/stretch_tuning.dart';
 import 'domain/temperaments/temperament.dart';
+import 'dsp/analysis/offline_audio_analyzer.dart';
 import 'l10n/app_localizations.dart';
 import 'state/tuner_controller.dart';
 import 'state/tuner_state.dart';
 import 'ui/dialogs/reference_note_dialog.dart';
 import 'ui/dialogs/temperament_dialog.dart';
 import 'ui/instruments/instruments_screen.dart';
+import 'ui/screens/audio_analysis_screen.dart';
 import 'ui/screens/instrument_tuner_screen.dart';
 import 'ui/screens/preferences_screen.dart';
 import 'ui/screens/scientific_tuner_screen.dart';
@@ -188,6 +191,134 @@ class TunerHomeScreen extends ConsumerWidget {
     );
   }
 
+  void _openAudioAnalysis(BuildContext context, WidgetRef ref) async {
+    final state = ref.read(tunerControllerProvider);
+    final pathController = TextEditingController(text: 'docs/test_music.m4a');
+
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Import Audio for Analysis'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Select an audio source to analyze offline:'),
+              const SizedBox(height: 12),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.music_note, color: Colors.blue),
+                title: const Text('Whistle Audio Sample'),
+                subtitle: const Text('docs/test_music.m4a (18.5s)'),
+                onTap: () => Navigator.of(ctx).pop('docs/test_music.m4a'),
+              ),
+              const Divider(),
+              const SizedBox(height: 8),
+              const Text('Or enter audio file path:'),
+              const SizedBox(height: 6),
+              TextField(
+                controller: pathController,
+                decoration: const InputDecoration(
+                  hintText: 'docs/test_music.m4a',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.of(ctx).pop(pathController.text.trim()),
+              child: const Text('Analyze'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (choice == null || choice.isEmpty || !context.mounted) return;
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Decoding and analyzing audio...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final decoded = await AudioFileLoader.loadFromFile(choice);
+      final result = await OfflineAudioAnalyzer.analyze(
+        samples: decoded.samples,
+        sampleRate: decoded.sampleRate,
+        algorithm: state.preferences.pitchAlgorithm,
+        weightingMode: state.preferences.acousticWeighting,
+      );
+
+      if (context.mounted) {
+        Navigator.of(context).pop(); // dismiss loading
+        final fileName = choice.split('/').last;
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => AudioAnalysisScreen(
+              analysisResult: result,
+              fileName: fileName,
+              initialInstrument: state.currentInstrument,
+              onSelectNewFile: () {
+                Navigator.of(context).pop();
+                _openAudioAnalysis(context, ref);
+              },
+              onReanalyzeWithConfig: (algo, weight) async {
+                final newResult = await OfflineAudioAnalyzer.analyze(
+                  samples: decoded.samples,
+                  sampleRate: decoded.sampleRate,
+                  algorithm: algo,
+                  weightingMode: weight,
+                );
+                if (context.mounted) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute<void>(
+                      builder: (_) => AudioAnalysisScreen(
+                        analysisResult: newResult,
+                        fileName: fileName,
+                        initialInstrument: state.currentInstrument,
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // dismiss loading
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load audio: $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(tunerControllerProvider);
@@ -207,6 +338,8 @@ class TunerHomeScreen extends ConsumerWidget {
         currentFrequency: state.currentFrequency,
         tuningState: state.tuningState,
         toleranceInCents: state.preferences.toleranceInCents,
+        spectrumAmplitudes: state.spectrumAmplitudes,
+        correlationValues: state.correlationValues,
         frequencyPlotData: state.frequencyPlotData,
         correlationPlotData: state.correlationPlotData,
         correlationPlotDataYZeroPosition:
@@ -226,6 +359,7 @@ class TunerHomeScreen extends ConsumerWidget {
             );
           }
         },
+        onOpenAudioAnalysis: () => _openAudioAnalysis(context, ref),
         onOpenInstrumentTunerMode: () => notifier.setScientificMode(false),
         onOpenPreferences: () => _openPreferences(context, state),
         onTogglePreferFlat: notifier.togglePreferFlat,
@@ -245,6 +379,7 @@ class TunerHomeScreen extends ConsumerWidget {
       initialPreferFlat: state.preferFlat,
       currentFrequency: state.currentFrequency,
       onOpenScientificMode: () => notifier.setScientificMode(true),
+      onOpenAudioAnalysis: () => _openAudioAnalysis(context, ref),
       onOpenPreferences: () => _openPreferences(context, state),
       onOpenInstrumentList: () => _openInstruments(context, ref, state),
       onOpenStretchTuning: () => _openStretchTuning(context, ref, state),

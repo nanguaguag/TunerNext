@@ -1,8 +1,8 @@
 # 迁移基线与阶段开发状态 (Migration Status)
 
 > **更新时间**: 2026-11-03  
-> **当前可信 Git 基线**: feature/rollback (HEAD commit `2e15370`)  
-> **工作区状态**: 格式化校验通过，`flutter analyze` 零告警 (0 issues)，自动化测试 100% 通过 (370/370 项)。
+> **当前可信 Git 基线**: feature/rollback (HEAD commit `8d61dc1`)  
+> **工作区状态**: 格式化校验通过，`flutter analyze` 零告警 (0 issues)，自动化测试 100% 通过 (391/391 项)。
 > **最新修复状态**: 
 > - 核心声学与波形图连续性缺陷 P0-01 (`d559380`)、P1-02 (`49d0d53`)、P1-03 (`dfbd11b`) 已依次通过单切片测试与门禁并提交。
 > - 用户反馈缺陷切片 1: 安静状态底噪跳变修复 (`9dbf03a`)，对数能量门控联动动态灵敏度，底噪 100% 滤除为静音。
@@ -25,6 +25,11 @@
 > - UI升级与五线谱移植切片:
 >   - 首页 UI 空间与仪表盘重构: 增加顶部 `TuningIndicatorBanner` 动态音高仪表盘（大音符徽章、音分偏差条、实时频率），琴弦转为紧凑侧边栏（宽度 76dp）与全尺寸可缩放平移 `PitchHistory` 波形图并列，消除整行横跨浪费。
 >   - 科学模式示波器与五线谱升级: 频谱图与自相关图增加实时顶栏读数、虚线目标/谐波线与平滑渐变填充；引入 Gonville 矢量字体 assets 与完整五线谱引擎（`NoteStaff` / `NoteStaffPainter` / `SvgPathParser`），385 项自动化测试 100% 通过。
+> - 科学示波器高密波峰、导出WAV与音频导入分析切片:
+>   - 科学调音频谱波峰重构: 引入 `SpectrumPlot`（0~4000Hz 1024 频点高密度密集波峰图、渐变面积填充）与 `AutocorrelationPlot`，彻底移除 6 点粗糙假折线。
+>   - 导出 WAV 按钮移至右上角 AppBar actions，移除左下角浮动按钮。
+>   - 首页音高徽标字号调整与 FittedBox 单行居中缩放，彻底消除换行现象。
+>   - 音频导入与离线全曲分析器落地 (`AudioFileLoader` + `OfflineAudioAnalyzer` + `AudioAnalysisScreen`)，提供全览静态波形图、时间轴 Scrubber 与播放控制，全量 391 项自动化测试 100% 通过。
 
 ---
 
