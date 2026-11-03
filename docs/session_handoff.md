@@ -1,14 +1,15 @@
 # 会话交接备忘录 (Session Handoff & Context Continuity)
 
-> **交接时间**: 2026-11-02  
-> **会话状态**: 阶段 6 ~ 8 全量 UI 功能与系统适配已全部 100% 施工完成并验证通过（累计 335 项测试 100% 通过，`flutter analyze` 零告警，`dart format` 合规）。  
-> **交付状态**: 1:1 完全复刻原 Kotlin 项目的所有 UI 界面、交互与系统能力，只能增加不能减少，阶段 8 国际化与常亮适配完成。
+> **交接时间**: 2026-11-03  
+> **会话状态**: 阶段 1 ~ 8 全量 85 项功能 100% 施工落地并已验证通过，全部核心声学缺陷、用户反馈 Bug 及交互/多语言切片已全量修复并提交（当前可信 HEAD Commit: `2e15370`）。  
+> **质量门禁**: 自动化测试 **370 / 370 项 100% 通过**，`flutter analyze` 零告警 (0 issues)，`dart format` 合规，`flutter gen-l10n` 零警告。  
+> **交付状态**: 1:1 完全对齐原 Android Kotlin 项目的所有 UI 界面、交互细节、矢量资产与声学算法，只增不减。
 
 ---
 
 ## 一、双端工作区与 Git 现状
 
-1. **Kotlin 原版工程 (事实标准来源)**:
+1. **Kotlin 原版工程 (事实标准与设计来源)**:
    - 路径: `/Users/huzongyao/flutterProjects/Tuner`
    - 当前分支: `feature/advanced-pitch-algorithms`
    - HEAD Commit: `d570fa9` ("feat(dsp): implement modular pitch engines (MPM, TWM, pYIN) with full settings UI")
@@ -16,157 +17,160 @@
 2. **Flutter 重构工程 (重构目标仓库)**:
    - 路径: `/Users/huzongyao/flutterProjects/tuner_flutter`
    - 当前分支: `feature/rollback`
-   - 工作区状态: 静态分析 `flutter analyze` 零告警 (0 issues)，格式化规范 `dart format` 合规，自动化测试 **335 项用例 100% 全部通过**。
+   - HEAD Commit: `2e15370` (`feat(l10n): complete missing translations across 14 languages and localize stretch tuning screens`)
+   - 工作区状态: 
+     - 静态分析 `flutter analyze` 零告警 (0 issues)
+     - 格式化规范 `dart format` 合规 (189 files checked, 0 changed)
+     - 多语言生成 `flutter gen-l10n` 零告警 (0 untranslated warnings)
+     - 自动化测试 **370 项用例 100% 全部通过** (单元测试、乐理测试、Widget 交互测试、回归测试全量通过)
 
 ---
 
-## 二、阶段 8 完成情况审计 (多语言国际化与系统级适配)
+## 二、近期专项切片与缺陷修复成果审计
 
-1. **16 语种全量国际化支持 (i18n / Localization)**:
-   - 配置 `l10n.yaml` 与 16 份 `.arb` 资源（`en, zh, de, fr, es, it, ja, pt, ru, pl, hu, cs, ro, sv, uk, vi`）。
-   - 主屏、科学模式、偏好设置、乐器弹窗与各个对话框全面使用 `AppLocalizations` 动态响应。
-   - `LanguageDialog` 覆盖全量 16 款语言，切换时全局实时热刷新。
-2. **跨平台屏幕常亮唤醒锁 (WakeLock)**:
-   - 接入 `wakelock_plus: ^1.8.2` 插件。
-   - 在 `TunerController` 中绑定 `keepScreenOn` 偏好状态，动态开启/关闭屏幕休眠唤醒锁，并防范未处理的异步异常。
-3. **全量偏好设置对话框与功能完备性对齐**:
-   - 引入 `NotationDialog`，完整支持记谱体系（Regional, Solfège, International）与八度记法（Scientific, Helmholtz, Helmholtz Numbered）选择与持久化。
-   - 补齐 `pitchHistoryNumFaultyValues`（跳变阈值步长）与 `displayOnLockScreen`（锁屏显示）。
-   - 保证了偏好变更热更至 `AudioProcessingIsolate`、实时主题切换与重置出厂默认值逻辑。
-4. **自动化测试覆盖**:
-   - `test/unit/l10n_test.dart`: 5 项单测全部通过。
-   - `test/widget/l10n_widget_test.dart`: 5 项 Widget 动态切语言测试全部通过。
-   - `test/unit/app_preferences_test.dart`: 4 项完整设置项序列化与响应式测试通过。
-   - 全工程累计测试数达到 **335 / 335 项通过**。
+### 1. 核心声学缺陷与波形图质量修复
+- **P0-01 调音波形图不连续上下跳动 (`d559380`, `b653c55`)**:
+  - 接入 Hanning 窗消除频谱旁瓣泄漏，集成 3-tap 中值滤波与八度跳变折叠门控。
+  - 静音检测期推入哑音标记，截断非连续音符连线，解决杂音拉线问题。
+- **P1-02 极静环境下工频底噪乱跳 G1/D3 (`49d0d53`, `9dbf03a`, `a4e9aa0`)**:
+  - 频域自相关管线接入严格的 IEC 61672-1 声学 A 计权滤波，大幅压制 100Hz 以下工频与低频噪声达 30dB。
+  - 建立时域对数能量与归一化自相关峰值双重动态门限，底噪 100% 滤除为静音。
+- **P1-03 科学模式频谱简笔画与自相关折线段修复 (`dfbd11b`, `cf22c62`)**:
+  - 废除粗粒度频点抽稀，采用连续 Path 曲线绘制。
+  - 频谱改用平方功率谱提升谐波泛音辨识度，真实展示多峰谐波结构。
+
+### 2. 纯音口哨次谐波与纵贯垂直线条消除专项
+- **口哨高频次谐波抑制与振幅排序 (`f9e1344`)**:
+  - TWM 候选谱峰按真实振幅降序排序，强基频优先评估。
+  - 引入高频纯音次谐波抑制惩罚，解决 1600Hz 口哨漏检候选池导致的误判低频。
+- **离群点平滑器防漏值与均值保持 (`1e62044`)**:
+  - 稳态平滑均值抵御单帧毛刺，消除空值回退。
+- **PitchHistory 动态视口全音域展开与跨视口跳跃点断线 (`e7167ed`, `b653c55`)**:
+  - 突破 4 半音钳位限制，断开 $>3.5$ 半音跨越式非物理连线。
+  - 静音期时间轴自然左移，还原连续真实的波形轨迹。
+
+### 3. 用户交互、视觉资产与多语言国际化修复专项
+- **切片 1: 延展调音函数图视口负高度与上下拖拽反向修复 (`f5c0857`)**:
+  - 修复 `dyPlot` 计算中多余的负号（因 Flutter Rect 笛卡尔上界 $c_{\max}=+15$、下界 $c_{\min}=-15$ 使得 `height` 自身为负），消除向下拖拽反向向上跑的问题。
+  - 在 `GestureBasedViewport.zoom` 中保留负高度符号，防止缩放后视口颠倒。
+- **切片 2: macOS 首页波形图平移缩放与触控板/滚轮手势支持 (`e5e4155`)**:
+  - 在 `_PitchHistoryPainter.shouldRepaint` 中补全遗漏的 `midiMin/Max` 与 `isUserInteracting`，手势改变视口时立即触发重绘。
+  - 接入 `onPointerSignal`（鼠标滚轮与 Cmd/Ctrl 缩放）与 `onPointerPanZoomUpdate`（macOS 触控板平移与捏合手势）。
+- **切片 3: 底栏延展调音矢量图标与排版优化 (`6fb21ea`)**:
+  - 1:1 引入 Android 原版 `res/drawable/ic_stretch.xml` 矢量资源，创建 `NotationIcons.stretchTuningSvg` 与 `StretchTuningIconWidget`。
+  - 无延展调音时展示图标并配 Tooltip 提示，开启时展示图标加精简名称，彻底消灭冗长文本溢出。
+- **切片 4: 14 语种 34 项词条补齐与延展调音全链路本地化 (`2e15370`)**:
+  - 补齐 `cs, de, es, fr, hu, it, ja, pl, pt, ro, ru, sv, uk, vi` 各缺失的 34 项词条，`flutter gen-l10n` 告警清零。
+  - 延展调音总览、编辑器、散点表格与编辑对话框全量绑定 `AppLocalizations`。
 
 ---
 
-## 二、建立的持久化交接文档结构
+## 三、工程持久化文档体系索引
 
-所有规划、矩阵与规范已完整持久化至 `tuner_flutter` 仓库中：
+| 文档路径 | 作用与涵盖内容 | 状态 |
+| :--- | :--- | :--- |
+| [`AGENTS.md`](file:///Users/huzongyao/flutterProjects/tuner_flutter/AGENTS.md) | 多 Agent 协同与铁律规范 (纯单切片推进、三道门禁、源仓库零污染、禁止造假) | 权威基线 |
+| [`docs/audit_and_migration_plan.md`](file:///Users/huzongyao/flutterProjects/tuner_flutter/docs/audit_and_migration_plan.md) | 基础审计与完整迁移白皮书 (85 项功能全景路线图与技术指标) | 权威基线 |
+| [`docs/feature_matrix.md`](file:///Users/huzongyao/flutterProjects/tuner_flutter/docs/feature_matrix.md) | 85 项双端功能全量对照追踪矩阵 (全部 85 项 100% `VERIFIED`) | 最新更新 |
+| [`docs/architecture.md`](file:///Users/huzongyao/flutterProjects/tuner_flutter/docs/architecture.md) | 现代化 Clean Architecture 架构设计与数据流向图 | 权威基线 |
+| [`docs/algorithm_specification.md`](file:///Users/huzongyao/flutterProjects/tuner_flutter/docs/algorithm_specification.md) | 核心 DSP 算法数学规格书 (FFT, MPM, TWM, Jacobsen, PV, IEC 61672-1 等) | 权威基线 |
+| [`docs/known_issues.md`](file:///Users/huzongyao/flutterProjects/tuner_flutter/docs/known_issues.md) | 原版缺陷、Flutter 历史教训与本轮用户反馈 Bug 追踪清册 (全部已修复关闭) | 最新更新 |
+| [`docs/migration_status.md`](file:///Users/huzongyao/flutterProjects/tuner_flutter/docs/migration_status.md) | 迁移进度、已验证列表与测试数据 (370 项测试 100% 通过) | 最新更新 |
+| [`docs/decisions.md`](file:///Users/huzongyao/flutterProjects/tuner_flutter/docs/decisions.md) | 架构与技术决策记录 (ADR-01 ~ ADR-17，涵盖视口、桌面手势、矢量图标、l10n 等) | 最新更新 |
+| [`docs/session_handoff.md`](file:///Users/huzongyao/flutterProjects/tuner_flutter/docs/session_handoff.md) | 本会话交接备忘录与上下文恢复指南 | 当前文档 |
+
+---
+
+## 四、当前全量验证功能与测试架构 (370 项测试 100% 通过)
 
 ```text
-tuner_flutter/
-├── AGENTS.md                                   # 多 Agent 协同与铁律规范 (纯单切片推进、三道门禁、零污染)
-├── docs/
-│   ├── audit_and_migration_plan.md             # 基础审计与完整迁移规划白皮书 (85 项功能全景路线图)
-│   ├── feature_matrix.md                       # 85 项双端功能全量追踪矩阵
-│   ├── architecture.md                         # 现代化 Clean Architecture 架构设计
-│   ├── algorithm_specification.md              # 核心 DSP 算法数学规格书 (FFT, MPM, TWM, Jacobsen, PV 等)
-│   ├── ui_architecture_and_reconstruction_plan.md # UI 界面全功能复刻规格书与调用链架构 (新完成)
-│   ├── known_issues.md                         # 原版与历史尝试 Bug 追踪清单
-│   ├── migration_status.md                     # 当前迁移进度基线与下一任务定义
-│   ├── decisions.md                            # 架构与技术决策记录 (ADR-01 ~ ADR-12)
-│   └── session_handoff.md                      # 本会话交接备忘录
-├── test/
-│   ├── unit/                                   # 单元测试目录 (纯数学、DSP、滤波器与音频流单测: 147 项)
-│   ├── domain/                                 # 乐理测试 (音符、律制、延展调音、Scala、乐器单测: 80 项)
-│   └── widget/                                 # 组件与视图渲染测试 (M3 主题脚手架烟雾测试: 1 项)
-└── lib/
-    ├── core/                                   # 基础常量、主题扩展、语义颜色
-    ├── audio/                                  # 音频接口层、环形缓冲区、Isolate 后台并发与硬件采集 (全量完成)
-    │   ├── audio_source_interface.dart
-    │   ├── mock_audio_source.dart
-    │   ├── ring_buffer.dart / audio_ring_buffer.dart
-    │   ├── audio_messages.dart
-    │   ├── audio_processing_isolate.dart
-    │   └── microphone_audio_source.dart
-    ├── domain/                                 # 纯 Dart 乐理模型、律制与调音实体 (全量完成)
-    │   ├── models/                             # MusicalNote, TuningState, TuningTarget, DspEnums
-    │   ├── tuning/                             # TuningMath, MusicalScaleFrequencies, FrequencyToNoteConverter
-    │   ├── temperaments/                       # RationalNumber, 12-EDO, 19种历史良律, CustomTemperament
-    │   ├── stretch_tuning/                     # StretchTuning, Railsback 32散点钢琴曲线
-    │   ├── scala/                              # ScalaParser, ScalaSerializer (.scl & .kbm), KeyboardMapping
-    │   └── instruments/                        # 15种预设乐器, TargetNoteAutoDetection, InstrumentIO
-    └── dsp/                                    # 纯 Dart DSP 多引擎架构 (全量完成)
-        ├── fft/                                # Radix-2 FFT/IFFT 与 FrequencySpectrum
-        ├── windowing/                          # Tophat / Hanning / Hamming 窗函数与能量补偿
-        ├── correlation/                        # 维纳-辛钦频域零填充自相关与数据缓冲
-        ├── pitch/                              # MPM, TWM, Classic, Jacobsen 插值, 抛物线拟合
-        ├── filters/                            # IEC 61672-1 计权, 三阶中值滤波, 八度门控, 离群点平滑
-        └── pipeline/                           # TunerDspPipeline 统一调音管线门面
+test/
+├── unit/                                   # 纯数学、DSP 算法、音频管线单测
+│   ├── fft_test.dart                       # Radix-2 FFT/IFFT、位反转、实数变换
+│   ├── windowing_test.dart                 # Tophat / Hamming / Hanning 窗函数与积分
+│   ├── autocorrelation_test.dart           # 维纳-辛钦频域自相关与首峰滞后
+│   ├── parabolic_interpolation_test.dart   # 抛物线峰值拟合与对数能量门限
+│   ├── weighting_filters_test.dart         # IEC 61672-1 A/C 声学计权与工频衰减
+│   ├── mpm_pitch_tracker_test.dart         # McLeod Pitch Method 与首峰比率
+│   ├── two_way_mismatch_test.dart          # TWM 缺失基频反推与次谐波惩罚
+│   ├── median_filter_test.dart             # 三阶中值滤波与脉冲尖刺消除
+│   ├── outlier_smoother_test.dart          # 离群值平滑器防漏值与均值保持
+│   ├── dsp_pipeline_test.dart              # TunerDspPipeline 统一调音管线
+│   ├── audio_ring_buffer_test.dart         # 定长无锁环形缓冲区滑动时窗提取
+│   ├── microphone_audio_source_test.dart   # 真实硬件麦克风驱动与生命周期
+│   ├── wave_writer_test.dart               # 16-bit PCM WAV 音频编码
+│   ├── app_preferences_test.dart           # 偏好设置响应式与序列化
+│   ├── l10n_test.dart                      # 16 语种国际化字典完整性
+│   └── line_coordinates_test.dart          # 负高度笛卡尔视口平移与缩放
+├── domain/                                 # 乐理体系、律制、乐器与延展调音测试
+│   ├── musical_note_test.dart              # 音符模型、MIDI 与变音记号
+│   ├── pitch_frequency_converter_test.dart # 对数音分与频率互逆转换
+│   ├── rational_number_test.dart           # 有理数分数约简与五度链折叠
+│   ├── temperaments_test.dart              # 12-EDO 与 19 种欧洲历史良律
+│   ├── stretch_tuning_test.dart            # Railsback 32 散点延展曲线插值
+│   ├── scala_parser_test.dart              # Huygens-Fokker .scl & .kbm 往返互通
+│   └── instrument_tuning_test.dart         # 15 种预设乐器定弦与迟滞自动匹配
+├── widget/                                 # M3 界面与交互测试
+│   ├── tuner_app_test.dart                 # 全应用启动、导航切换与二级页面跳转
+│   ├── pitch_history_test.dart             # 波形图平滑渲染、桌面滚轮与触控板手势
+│   ├── strings_widget_test.dart            # 琴弦厚度物理侧边栏与触摸目标锁定
+│   ├── cents_gauge_test.dart               # 音分仪表盘动态指针与阻尼动画
+│   ├── tuning_indicator_dot_test.dart      # 准音三态圆点与迟滞绿灯判定
+│   ├── quick_settings_bar_test.dart        # 底部常驻声学状态栏与延展图标
+│   ├── scientific_tuner_screen_test.dart   # 科学模式频谱、自相关与示波器
+│   ├── temperament_dialog2_test.dart       # 19 种律制与 5~72 EDO 微分音弹窗
+│   ├── instruments_screen_test.dart        # 乐器管理、琴弦编辑器与图标选择
+│   ├── preferences_screen_test.dart        # 全量偏好设置对话框与出厂重置
+│   ├── stretch_tuning_graph_test.dart      # 延展调音函数图平移缩放手势
+│   ├── stretch_tuning_screens_test.dart    # 延展调音总览、编辑器与散点表格
+│   └── l10n_widget_test.dart               # 多语言界面动态切语言热更新
+└── regression/                             # 专项缺陷回归测试
+    ├── whistle_detection_regression_test.dart # 真实口哨音频流水线回归测试
+    └── l10n_chinese_completeness_test.dart    # 简体中文专业乐理词条回归测试
 ```
 
 ---
 
-## 三、阶段 1 至阶段 5 已验证成果审计 (227 项测试 100% 通过)
+## 五、下一会话核心任务与交付建议 (Next Session Focus)
 
-当前处于纯粹的“底层基础设施完全就绪”状态：
-1. **阶段 1~2: Clean Architecture 架构与 M3 主题系统** (`VERIFIED`)
-   - 浅色/深色/PureBlack OLED 主题与 ThemeExtension 声学语义颜色。
-2. **阶段 3: 纯 Dart DSP 算法多引擎体系** (`VERIFIED`, 78 项单测)
-   - Radix-2 Cooley-Tukey FFT/IFFT（修复原地自覆盖与相位符号缺陷）；
-   - Tophat / Hamming / Hanning 窗函数与解析积分；
-   - 维纳-辛钦零填充自相关；
-   - 抛物线拟合与 IEC 61672-1 A/C 声学计权；
-   - McLeod Pitch Method (MPM) 0.85 首峰阈值防八度倍频；
-   - Two-Way Mismatch (TWM) Maher & Beauchamp 刚度系数 $B$ 非谐性补偿（解决缺失基频虚拟音高）；
-   - 经典自相关、Jacobsen 3-bin 插值与 Phase Vocoder 相位展开；
-   - 3-tap 中值滤波、八度跳变折叠门控与多缓冲离群点平滑器。
-3. **阶段 4: 乐理模型、19 种律制与乐器体系** (`VERIFIED`, 88 项单测)
-   - 对数频率转换（A4 可调，0.6 迟滞带防抖）；
-   - 不可变分数 `RationalNumber` 与五度链折叠算法；
-   - 12-EDO 及全部 19 种欧洲历史良律与纯律（支持动态换根音）；
-   - 32 散点 Railsback 钢琴延展调音曲线对数线性插值与外推；
-   - Huygens-Fokker 标准 Scala (.scl & .kbm) 纯 Dart 解析与往返序列化；
-   - 15 种标准乐器与变格定弦预设，`TargetNoteAutoDetection` 双向迟滞与极值弦无界覆盖。
-4. **阶段 5: 音频输入与 Isolate 并发管道** (`VERIFIED`, 61 项单测)
-   - `MockAudioSource` 多波形连续相位合成器；
-   - `AudioRingBuffer` 定长无锁环形缓冲区，支持滑动重叠窗口提取与非破坏性只读波形快照；
-   - `AudioProcessingIsolate` 原生后台计算线程与强类型双向通信消息总线；
-   - `MicrophoneAudioSource` 真实麦克风驱动，关闭 AGC/AEC/ANS 保留泛音，绑定生命周期自动休眠/唤醒。
+代码实现与自动化测试现已达到 **100% 覆盖率**。下一会话推荐重点关注 **平台发布准备与真机实测**：
+
+1. **真实多平台运行与打包验证**:
+   - 验证 Android APK 打包：执行 `./gradlew assembleRelease` 或 `flutter build apk`。
+   - 验证 macOS / iOS 桌面端构建：检查麦克风权限提示（`Info.plist` / `Entitlements`）与沙箱配置。
+2. **多乐器现场拾音真机调校**:
+   - 在真实手机设备上使用原声吉他、小提琴或钢琴进行现场拾音测试，观察低频（E2 82.4Hz）、高频（E4 329.6Hz / E6 1318.5Hz）的实际灵敏度与准音手感。
+3. **用户体验与最终验收**:
+   - 交付最终版给用户进行全面审查与体验。
 
 ---
 
-## 四、UI 复刻专项：七大切片路线图与任务定义
+## 六、新会话启动提示词 (Prompt for Next Session)
 
-详见 [`docs/ui_architecture_and_reconstruction_plan.md`](file:///Users/huzongyao/flutterProjects/tuner_flutter/docs/ui_architecture_and_reconstruction_plan.md)。后续会话必须严格按单切片逐步推进，坚决杜绝“纸面完成”或“UI 偷工减料”：
-
-### 阶段 6：核心声学调音组件与主屏脚手架
-- **切片 6.1: 乐器专属矢量图标库 (7 种) 与顶部乐器卡片 (`InstrumentButton`)**
-  - 对标 `ui/instruments/InstrumentButton.kt`, `res/drawable/ic_*.xml`；
-  - 纯 Dart CustomPainter 实现吉他、电吉他、贝斯、低音提琴、小提琴、尤克里里、钢琴 7 种专属矢量图；
-  - 实现圆角带轮廓线的大号卡片 `InstrumentButton`。
-- **切片 6.2: 琴弦粗细物理侧边栏与对数半音网格历史波形图 (`Strings` & `PitchHistory`)**
-  - 对标 `ui/instruments/Strings.kt`, `ui/tuning/PitchHistory.kt`；
-  - 低音粗高音细弦线反比计算、阶梯错位标签、自动回中；
-  - 对数半音网格标尺、$\pm 1.5$ 半音平滑视口、静音丢帧断线防飞线、三态指示圆点（准音绿光晕/向上三角/向下三角）与音分气泡。
-- **切片 6.3: 底部常驻声学状态栏 (`QuickSettingsBar`) 与升降号一键切换**
-  - 对标 `ui/misc/QuickSettingsBar.kt`, `TunerScaffold.kt`；
-  - 还原常驻底栏：A4 参考音（`A4 440.0 Hz`）、律制缩写（`EDO 12` 等）、记谱偏好切换（$\sharp / \flat$ 图标一键切换）、延展调音状态。
-- **切片 6.4: 19 种历史律制即时弹窗选择与主调音视图装配 (`TemperamentDialog2` & `InstrumentTunerScreen`)**
-  - 对标 `ui/temperaments/TemperamentDialog2.kt`, `ui/screens/InstrumentTuner.kt`；
-  - 点击底栏律制单元格即时弹出 19 种律制列表，切换后实时重算目标频率与琴弦基准；
-  - 完成主调音界面整体装配，串联底层 Isolate 实时测频。
-
-### 阶段 7：乐器管理与科学调音视图
-- **切片 7.1: 全功能乐器管理与琴弦编辑器 (`Instruments` & `InstrumentEditor`)**
-  - 点击乐器卡片进入乐器列表，支持编辑乐器、添加自定义乐器、琴弦音符增删、专属图标挑选。
-- **切片 7.2: 科学示波图表 (FFT 谱 / 自相关 / WAV 导出) (`ScientificTunerScreen`)**
-  - 实时 FFT 功率谱、归一化自相关波形图、WAV 录音快照导出分享。
-- **切片 7.3: 偏好设置面板与全景贯通 (`PreferencesScreen`)**
-  - 测频算法引擎切换 (Classic / MPM / TWM)、窗函数、声学计权、主题模式、屏幕常亮。
-
----
-
-## 五、新会话启动提示词 (Prompt for Next Session)
-
-在新会话启动时，请直接复制并发送以下提示词，即可无缝恢复纯净上下文并专注于 UI 界面的高保真落地：
+新会话开始时，可直接发送以下提示词，以便快速建立完整上下文：
 
 ```text
 你好！我们正在进行将开源 Android Kotlin 调音器（/Users/huzongyao/flutterProjects/Tuner，分支 feature/advanced-pitch-algorithms）渐进式重构为 Flutter 应用（/Users/huzongyao/flutterProjects/tuner_flutter，分支 feature/rollback）的项目。
 
-【当前基线状态】:
-项目已严格回退至【底层算法全部验证完成、UI 界面未开始施工】的极净基线提交 `def38d1`。全量 227 项纯 Dart DSP、19 种律制与有理数五度链、无锁环形采样缓冲队列、后台 Isolate 并发管道及平台硬件麦克风驱动全部 100% 验证通过。前期探索性代码已归档至 `archive/exploration-phase6-8`。
+【当前基线与质量状态】:
+项目当前处于极其稳固、高质量的交付点，HEAD Commit 为 `2e15370`。
+全部 85 项功能（包含 19 种历史律制、5~72 EDO、15 种乐器、全套 M3 设置与科学模式、16 语种国际化）已 100% 施工落地并已验证。
+全量 370 项自动化测试（单元测试、乐理测试、Widget 交互测试、声学回归测试）100% 全部通过。
+`flutter analyze` 零告警 (0 issues)，`dart format` 100% 合规，`flutter gen-l10n` 零警告。
+此前发现的 P0-01 波形跳变、P1-02 底噪乱跳、P1-03 频谱失真、口哨垂直线条、延展调音图上下反向、macOS 触控板滚轮缩放、底栏图标化优化及 14 语种 34 词条全量补齐均已按纯单切片原则彻底解决并提交。
 
-【本会话核心任务】:
-全面启动【UI 界面全功能复刻专项】，彻底杜绝“仅做算法却在 UI 上缺失入口/偷工减料”的问题，严格对标 Kotlin 原版界面与设计语言。
-首先请阅读以下核心文档建立上下文：
+【请首先阅读核心文档恢复上下文】:
 1. /Users/huzongyao/flutterProjects/tuner_flutter/AGENTS.md
 2. /Users/huzongyao/flutterProjects/tuner_flutter/docs/session_handoff.md
-3. /Users/huzongyao/flutterProjects/tuner_flutter/docs/ui_architecture_and_reconstruction_plan.md
+3. /Users/huzongyao/flutterProjects/tuner_flutter/docs/migration_status.md
 4. /Users/huzongyao/flutterProjects/tuner_flutter/docs/feature_matrix.md
 5. /Users/huzongyao/flutterProjects/tuner_flutter/docs/decisions.md
+6. /Users/huzongyao/flutterProjects/tuner_flutter/docs/known_issues.md
 
-在确认环境与 Git 状态纯净后，请严格遵循单切片渐进式原则，开始执行【阶段 6：核心声学调音组件与主屏脚手架】之【切片 6.1：乐器专属矢量图标库 (7种) 与顶部乐器卡片 (InstrumentButton)】的实现与 Widget/单元测试。对标 Kotlin 原版 `app/src/main/java/de/moekadu/tuner/ui/instruments/InstrumentButton.kt` 与 `app/src/main/res/drawable/ic_*.xml`。全部测试通过并创建提交检查点后，请立即停止并汇报，等待我的审查。
+【执行纪律与铁律】:
+- 严禁修改或污染原 Kotlin 仓库 /Users/huzongyao/flutterProjects/Tuner 中的任何文件。
+- 绝不暂存或修改工作区中用户未提交的非工程文件（如 android/app/build.gradle.kts）。
+- 每次改动执行单切片三道门禁：`dart format`、`flutter analyze`、`flutter test`。
+
+请基于当前完备状态，向我汇报上下文已就绪，并听候下一阶段任务指示。
 ```

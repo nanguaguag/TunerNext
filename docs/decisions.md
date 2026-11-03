@@ -153,3 +153,71 @@
   5. 状态机在进入暂停/停止前立即同步变更状态，消灭异步等待间隙的状态竞态。
 - **后果**:
   保证了高保真乐器泛音输入与系统级隐私、能耗规范的完全遵从。
+
+---
+
+## ADR-13: 16 语种全量 ARB 词条同步与延展调音全链路国际化
+
+- **状态**: 已接受 (Accepted)
+- **上下文**:
+  在前期迭代中，部分非核心语言（`cs, de, es, fr, hu, it, ja, pl, pt, ro, ru, sv, uk, vi`）缺少了乐理五线谱、谱号及音分设置等新增词条，导致 `flutter gen-l10n` 频繁输出 untranslated 警告；同时，延展调音系列界面（总览列表、多项式编辑器、散点表格与修改对话框）存在部分未抽取为多语言资源的英文硬编码。
+- **决策**:
+  1. 为全部 16 种语言完整补齐 34 项未翻译词条与 16 项延展调音新增词条，严格对齐 Android 原版 strings.xml 的专业术语；
+  2. 对 `StretchTuningOverviewScreen`、`StretchTuningEditorScreen`、`StretchTuningTable` 及 `ModifyStretchTuningLineDialog` 全量接入 `AppLocalizations` 动态多语言绑定，彻底消除硬编码文本；
+  3. 增加单元测试与回归测试，保证 `flutter gen-l10n` 零警告，并在中英文环境下通过全屏 Widget 渲染校验。
+- **后果**:
+  实现跨平台 16 种语言无死角本地化，消除多语言编译期告警与界面混杂展示。
+
+---
+
+## ADR-14: 延展调音函数图负高度视口变换与手势坐标统一
+
+- **状态**: 已接受 (Accepted)
+- **上下文**:
+  延展调音图（`StretchTuningGraph`）的纵轴为音分偏差，通常取值范围为 $[-15, +15]$ 音分。在数学笛卡尔坐标系中，$y$ 轴向上为正，因此视口上边界 $c_{\max} = +15$，下边界 $c_{\min} = -15$。在 Flutter 中，`Rect.fromLTRB(left, top, right, bottom)` 计算所得 `height = bottom - top = -15 - (+15) = -30` 为负值。在计算像素位移 $\Delta y_{\text{pixel}}$ 映射至视口位移 $\Delta y_{\text{plot}}$ 时，原实现额外乘以了负号，导致“负负得正”，引起向上拖拽手势曲线向下跑、向下拖拽曲线向上跑的上下反向缺陷；同时在缩放时由于 `Rect.fromLTWH` 默认 clamp 高度为正值，导致视口上下翻转颠倒。
+- **决策**:
+  1. 统一视口映射公式：`dyPlot = (dyPixels / size.height) * currentVp.height;`，自然依靠负高度抵消屏幕向下递增的像素坐标系；
+  2. 在 `GestureBasedViewport.zoom` 中提取并显式保留高度符号 `heightSign`，防止在缩放边界钳制时将高度强制转为正值。
+- **后果**:
+  彻底修复了函数图在平移和缩放过程中的颠倒与反向问题，手势追踪精准自然。
+
+---
+
+## ADR-15: CustomPainter 动态重绘条件完备性与桌面端触控板/滚轮手势接入
+
+- **状态**: 已接受 (Accepted)
+- **上下文**:
+  首页波形图（`PitchHistory`）与科学模式波形图需要支持平移（Pan）与缩放（Zoom）。在移动端依靠触摸双指捏合，而在 macOS / Windows / Linux 桌面端，用户主要依赖触控板双指滑动、捏合（`PointerPanZoomUpdateEvent`）或鼠标滚轮配合修饰键（`PointerScrollEvent`）。此前首页波形图在桌面端完全无法交互，且 `_PitchHistoryPainter.shouldRepaint` 遗漏了动态视口 `midiMin/Max` 与 `isUserInteracting` 的比较，导致状态变更时 Canvas 误判无需重绘。
+- **决策**:
+  1. 在 `_PitchHistoryPainter.shouldRepaint` 中补全所有影响几何变换与视口标尺的属性对比；
+  2. 使用 `Listener` 包装交互区域，同时监听 `onPointerSignal`（处理滚轮垂直平移及带 Cmd/Ctrl 键的视口缩放）与 `onPointerPanZoomUpdate`（处理 macOS 原生触摸板平移与捏合缩放）。
+- **后果**:
+  实现跨平台（移动触摸 + 桌面触摸板/滚轮）无缝统一的平滑交互体验。
+
+---
+
+## ADR-16: 底栏常驻状态项自适应图标化与原版矢量资源 1:1 引入
+
+- **状态**: 已接受 (Accepted)
+- **上下文**:
+  底部常驻快速状态栏（`QuickSettingsBar`）包含 4 个核心声学单元格（A4 基准音、律制、变音记号、延展调音）。在原版 Android 中，当未配置延展调音时，底栏空间紧张，如果渲染冗长文本 `"No Stretch Tuning"`，在小屏设备或多语言长文本下极易发生组件溢出（Overflow）与截断。
+- **决策**:
+  1. 1:1 提取 Android 原版 `res/drawable/ic_stretch.xml` 矢量资源，创建纯 Dart SVG 图标 `NotationIcons.stretchTuningSvg` 与专用组件 `StretchTuningIconWidget`；
+  2. 当无延展调音时，渲染简洁的矢量图标，并配置 Tooltip 悬浮提示；当启用延展调音（如 Railsback 或自定义曲线）时，紧凑展示图标加曲线简名。
+- **后果**:
+  彻底消除了底部状态栏的文本过长拥挤与排版溢出问题，视觉语言严格对齐 Android 原版。
+
+---
+
+## ADR-17: 纯音口哨高频次谐波抑制与视口音高跳变平滑断点机制
+
+- **状态**: 已接受 (Accepted)
+- **上下文**:
+  在吹口哨（单频纯正弦波，约 1000Hz~2000Hz）测试时，传统 TWM 算法在没有高次泛音支撑的纯音场景下容易产生次谐波陷阱（Subharmonic Trap），错误将 $f_0/2$ 或 $f_0/3$ 判定为基频；此外，音高历史波形图在遇到跳频杂音时将离散散点直接相连，导致画面出现贯穿上下的垂直虚假线条。
+- **决策**:
+  1. TWM 候选池按真实频谱振幅降序排序，确保真实高振幅主峰获得优先匹配与评估；
+  2. 针对高频纯音引入次谐波惩罚项，当低频候选点缺少泛音能量支持时施加失配惩罚；
+  3. 离群点平滑器增加均值保持与防漏值保护；
+  4. 历史波形图突破 4 半音钳位限制，并在检测到静音帧或跨越 $>3.5$ 半音的突发不连续跃迁时主动断开连线，平滑时间轴自然推进。
+- **后果**:
+  彻底解决了吹口哨时波形图垂直拉线与基频翻倍/减半的物理声学顽疾，波形轨迹连续平滑。
