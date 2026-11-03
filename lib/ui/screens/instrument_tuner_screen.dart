@@ -187,7 +187,8 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
         }
       }
     } else {
-      // Unvoiced/silent frame: mark tuning state unknown without polluting history with nulls
+      // Unvoiced/silent frame: insert mute gap so history timeline advances and lines break cleanly
+      _pitchHistoryState.addFrequency(null);
       if (_tuningState != TuningState.unknown) {
         setState(() {
           _tuningState = TuningState.unknown;

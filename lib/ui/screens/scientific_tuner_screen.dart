@@ -95,6 +95,8 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
     super.didUpdateWidget(oldWidget);
     if (widget.currentFrequency != null && widget.currentFrequency! > 0) {
       _historyState.addFrequency(widget.currentFrequency);
+    } else {
+      _historyState.addFrequency(null);
     }
   }
 
