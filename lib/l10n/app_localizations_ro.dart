@@ -612,7 +612,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get referenceFrequency => 'Frecvență de referință';
 
   @override
-  String get referenceNote => 'Reference note';
+  String get referenceNote => 'Notă de referință';
 
   @override
   String get frequency => 'Frecvență';
@@ -952,7 +952,7 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get searchTemperamentsHint =>
-      'Search temperaments (e.g. 19-EDO, Pure)...';
+      'Caută temperamente (ex. 19-EDO, Pur)...';
 
   @override
   String get notationVietnamese => 'Vietnameză';
@@ -1260,118 +1260,173 @@ class AppLocalizationsRo extends AppLocalizations {
   String get vietnamese => 'Vietnameză';
 
   @override
-  String get keepScreenOnDesc => 'Prevents display from sleeping while tuning';
+  String get keepScreenOnDesc =>
+      'Previne stingerea ecranului în timpul acordării';
 
   @override
-  String get toleranceDesc => 'Threshold for green pitch accuracy indicator';
+  String get toleranceDesc =>
+      'Prag de toleranță pentru indicatorul verde de acordaj';
 
   @override
   String get preferFlatDesc =>
-      'Display accidentals as flat instead of sharp (♭)';
+      'Afișează alterațiile ca bemol în loc de diez (♭)';
 
   @override
-  String get chromaticAsStaffDesc =>
-      'Display musical stave in chromatic instrument mode';
+  String get chromaticAsStaffDesc => 'Afișează portativul în modul cromatic';
 
   @override
-  String get sensitivityDesc => 'Input gain threshold for pitch detection';
+  String get sensitivityDesc =>
+      'Prag de sensibilitate la intrare pentru detecție';
 
   @override
   String get octaveJumpGateDesc =>
-      'Eliminates transient harmonic doubling attacks';
+      'Elimină atacurile tranzitorii de dublare armonică';
 
   @override
-  String get medianFilterDesc => 'Filters anomalous single-frame pitch spikes';
+  String get medianFilterDesc =>
+      'Filtrează vârfurile anomale izolate de frecvență';
 
   @override
   String get scientificModeDesc =>
-      'Enable FFT spectrum and correlation analysis views';
+      'Activează spectrul FFT și analizele de corelație';
 
   @override
   String get numMovingAverageDesc =>
-      'Taps for outlier-removing smoothing buffer';
+      'Puncte de medie mobilă pentru eliminarea valorilor aberante';
 
   @override
-  String get windowSizeDesc => 'Analysis buffer sample length';
+  String get windowSizeDesc => 'Dimensiunea eșantionului bufferului de analiză';
 
   @override
-  String get overlapDesc => 'Consecutive analysis frame overlap';
+  String get overlapDesc => 'Suprapunerea cadrelor consecutive de analiză';
 
   @override
   String get pitchHistoryDurationDesc =>
-      'Time window shown on pitch history plot';
+      'Fereastra de timp afișată pe graficul istoricului';
 
   @override
-  String get jumpToNewPitchDirect => 'Directly jump to new pitch result';
+  String get jumpToNewPitchDirect =>
+      'Trecere directă la noua frecvență detectată';
 
   @override
   String jumpToNewPitchMultiple(int count) {
-    return 'After $count similar pitch results';
+    return 'După $count frecvențe similare';
   }
 
   @override
   String get audioCaptureDesc =>
-      'WAV export buffer capacity (0s disables export button)';
+      'Capacitate buffer export WAV (0s dezactivează butonul)';
 
   @override
-  String get audioCaptureDisabled => 'Disabled';
+  String get audioCaptureDisabled => 'Dezactivat';
 
   @override
   String get displayOnLockScreenDesc =>
-      'Allows tuner to be active over device lock screen';
+      'Permite acordorului să rămână activ pe ecranul blocat';
 
   @override
-  String get resetAllSettingsDesc => 'Restore factory default parameters';
+  String get resetAllSettingsDesc =>
+      'Restabilește parametrii impliciți din fabrică';
 
   @override
-  String get aboutTunerDesc => 'Version and architectural specifications';
+  String get aboutTunerDesc => 'Specificații despre versiune și arhitectură';
 
   @override
-  String get resetSettingsConfirmTitle => 'Reset Settings';
+  String get resetSettingsConfirmTitle => 'Resetare setări';
 
   @override
   String get resetSettingsConfirmMessage =>
-      'Are you sure you want to restore all settings to default factory values? This cannot be undone.';
+      'Sigur doriți să resetați toate setările la valorile din fabrică? Această acțiune este ireversibilă.';
 
   @override
   String get algorithmMpmDesc =>
-      'High precision, robust octave-jump suppression for strings.';
+      'Precizie înaltă, suprimare robustă a salturilor de octavă.';
 
   @override
   String get algorithmTwmDesc =>
-      'Harmonic spectral matching for rich/inharmonic overtones.';
+      'Potrivire spectrală armonică pentru armonice bogate/inarmonice.';
 
   @override
   String get algorithmClassicDesc =>
-      'FFT-based autocorrelation with parabolic peak fitting.';
+      'Autocorelație bazată pe FFT cu ajustare parabolică a vârfurilor.';
 
   @override
   String get algorithmJacobsenDesc =>
-      'Enhanced complex 3-bin phase vocoder interpolation.';
+      'Interpolare avansată vocoder de fază cu 3 bin-uri complexe.';
 
   @override
   String get algorithmPyinDesc =>
-      'Viterbi path candidate tracking over time frames.';
+      'Urmărire a candidaților prin algoritmul Viterbi în timp.';
 
   @override
-  String get weightingNone => 'None (Flat)';
+  String get weightingNone => 'Fără (Liniar)';
 
   @override
-  String get weightingNoneDesc =>
-      'Raw unweighted linear audio frequency spectrum.';
+  String get weightingNoneDesc => 'Spectru audio liniar neponderat.';
 
   @override
   String get windowingTophatDesc =>
-      'No windowing attenuation (highest frequency resolution).';
+      'Fără atenuare (rezoluție maximă în frecvență).';
 
   @override
   String get windowingHammingDesc =>
-      'Moderate sidelobe suppression (-42 dB attenuation).';
+      'Atenuare moderată a lobilor laterali (-42 dB).';
 
   @override
   String get windowingHanningDesc =>
-      'Smooth cos^2 window with strong sidelobe drop-off.';
+      'Fereastră cos² lină cu atenuare puternică a lobilor.';
 
   @override
-  String get pureBlackOled => 'Pure Black (OLED)';
+  String get pureBlackOled => 'Negru Pur (OLED)';
+
+  @override
+  String get cancel => 'Anulare';
+
+  @override
+  String get confirm => 'Confirmare';
+
+  @override
+  String get actions => 'Acțiuni';
+
+  @override
+  String get searchStretchTuningsHint => 'Caută acordaje întinse...';
+
+  @override
+  String get deleteStretchTuning => 'Șterge acordajul întins';
+
+  @override
+  String deleteStretchTuningConfirm(String name) {
+    return 'Sigur doriți să ștergeți \"$name\"?';
+  }
+
+  @override
+  String get newStretchTuning => 'Acordaj întins nou';
+
+  @override
+  String get noStretchPointsDefined =>
+      'Niciun punct de întindere definit.\nApasă + pentru a adăuga.';
+
+  @override
+  String get editStretchPoint => 'Editează punctul de întindere';
+
+  @override
+  String get addStretchPoint => 'Adaugă punct de întindere';
+
+  @override
+  String get frequencyHz => 'Frecvență (Hz)';
+
+  @override
+  String get stretchCents => 'Întindere (Cenți)';
+
+  @override
+  String get frequencyMustBeIncreasing => 'Trebuie să fie > decât precedenta';
+
+  @override
+  String get createNewStretchTuning => 'Creează acordaj întins';
+
+  @override
+  String get predefinedSection => 'PREDEFINIT';
+
+  @override
+  String get customSection => 'PERSONALIZAT';
 }

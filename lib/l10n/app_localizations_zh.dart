@@ -980,16 +980,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get detectFrequency => '检测基频';
 
   @override
-  String get stretch => '延展调音';
+  String get stretch => '延展';
 
   @override
-  String get stretchTuning => '拉伸调音';
+  String get stretchTuning => '延展调音';
 
   @override
-  String get noStretchTuning => '不使用拉伸调音';
+  String get noStretchTuning => '无延展调音';
 
   @override
-  String get stretchTuningOff => '拉伸调音已关闭。';
+  String get stretchTuningOff => '延展调音已关闭。';
 
   @override
   String get railsback => '雷尔斯贝克曲线 (Railsback)';
@@ -1004,13 +1004,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get description => '说明描述';
 
   @override
-  String get stretchTuningEditor => '编辑拉伸调音';
+  String get stretchTuningEditor => '延展调音编辑器';
 
   @override
-  String get stretchTuningInfo => '拉伸调音信息';
+  String get stretchTuningInfo => '延展调音信息';
 
   @override
-  String get stretchedFrequency => '拉伸的频率';
+  String get stretchedFrequency => '延展后频率';
 
   @override
   String get inputIsNoNumber => '输入内容非有效数字格式。';
@@ -1342,4 +1342,54 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pureBlackOled => '纯黑 (OLED 省电)';
+
+  @override
+  String get cancel => '取消';
+
+  @override
+  String get confirm => '确定';
+
+  @override
+  String get actions => '操作';
+
+  @override
+  String get searchStretchTuningsHint => '搜索延展调音...';
+
+  @override
+  String get deleteStretchTuning => '删除延展调音';
+
+  @override
+  String deleteStretchTuningConfirm(String name) {
+    return '确定要删除“$name”吗？';
+  }
+
+  @override
+  String get newStretchTuning => '新建延展调音';
+
+  @override
+  String get noStretchPointsDefined => '尚未定义延展点。\n点击 + 添加点。';
+
+  @override
+  String get editStretchPoint => '编辑延展点';
+
+  @override
+  String get addStretchPoint => '添加延展点';
+
+  @override
+  String get frequencyHz => '频率 (Hz)';
+
+  @override
+  String get stretchCents => '延展 (音分)';
+
+  @override
+  String get frequencyMustBeIncreasing => '必须大于前一个频率';
+
+  @override
+  String get createNewStretchTuning => '新建延展调音';
+
+  @override
+  String get predefinedSection => '预设';
+
+  @override
+  String get customSection => '自定义';
 }

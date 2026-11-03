@@ -612,7 +612,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get referenceFrequency => 'Reference frequency';
 
   @override
-  String get referenceNote => 'Reference note';
+  String get referenceNote => 'Nốt tham chiếu';
 
   @override
   String get frequency => 'Frequency';
@@ -952,7 +952,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get searchTemperamentsHint =>
-      'Search temperaments (e.g. 19-EDO, Pure)...';
+      'Tìm kiếm hệ thống âm luật (ví dụ: 19-EDO, Thuần luật)...';
 
   @override
   String get notationVietnamese => 'Vietnamese';
@@ -1259,118 +1259,170 @@ class AppLocalizationsVi extends AppLocalizations {
   String get vietnamese => 'Tiếng Việt';
 
   @override
-  String get keepScreenOnDesc => 'Prevents display from sleeping while tuning';
+  String get keepScreenOnDesc => 'Ngăn màn hình tắt trong khi đang chỉnh âm';
 
   @override
-  String get toleranceDesc => 'Threshold for green pitch accuracy indicator';
+  String get toleranceDesc =>
+      'Ngưỡng chỉ báo màu xanh lá cho độ chính xác cao độ';
 
   @override
   String get preferFlatDesc =>
-      'Display accidentals as flat instead of sharp (♭)';
+      'Hiển thị dấu hóa thành dấu giáng thay vì dấu thăng (♭)';
 
   @override
   String get chromaticAsStaffDesc =>
-      'Display musical stave in chromatic instrument mode';
+      'Hiển thị khuông nhạc ở chế độ nhạc cụ nửa cung';
 
   @override
-  String get sensitivityDesc => 'Input gain threshold for pitch detection';
+  String get sensitivityDesc => 'Ngưỡng độ nhạy đầu vào để phát hiện cao độ';
 
   @override
   String get octaveJumpGateDesc =>
-      'Eliminates transient harmonic doubling attacks';
+      'Loại bỏ các đợt nhân đôi âm bội tức thời khi gảy';
 
   @override
-  String get medianFilterDesc => 'Filters anomalous single-frame pitch spikes';
+  String get medianFilterDesc =>
+      'Lọc các đột biến cao độ bất thường trong một khung hình';
 
   @override
   String get scientificModeDesc =>
-      'Enable FFT spectrum and correlation analysis views';
+      'Bật phổ FFT và các chế độ xem phân tích tương quan';
 
   @override
   String get numMovingAverageDesc =>
-      'Taps for outlier-removing smoothing buffer';
+      'Số điểm trung bình trượt để làm mịn giá trị ngoại lai';
 
   @override
-  String get windowSizeDesc => 'Analysis buffer sample length';
+  String get windowSizeDesc => 'Độ dài mẫu của bộ đệm phân tích';
 
   @override
-  String get overlapDesc => 'Consecutive analysis frame overlap';
+  String get overlapDesc => 'Độ chồng lấp giữa các khung phân tích liên tiếp';
 
   @override
   String get pitchHistoryDurationDesc =>
-      'Time window shown on pitch history plot';
+      'Khoảng thời gian hiển thị trên biểu đồ lịch sử cao độ';
 
   @override
-  String get jumpToNewPitchDirect => 'Directly jump to new pitch result';
+  String get jumpToNewPitchDirect => 'Chuyển ngay sang cao độ mới phát hiện';
 
   @override
   String jumpToNewPitchMultiple(int count) {
-    return 'After $count similar pitch results';
+    return 'Sau $count kết quả cao độ tương tự';
   }
 
   @override
-  String get audioCaptureDesc =>
-      'WAV export buffer capacity (0s disables export button)';
+  String get audioCaptureDesc => 'Dung lượng bộ đệm xuất WAV (0s tắt nút xuất)';
 
   @override
-  String get audioCaptureDisabled => 'Disabled';
+  String get audioCaptureDisabled => 'Đã tắt';
 
   @override
   String get displayOnLockScreenDesc =>
-      'Allows tuner to be active over device lock screen';
+      'Cho phép bộ chỉnh âm hoạt động trên màn hình khóa';
 
   @override
-  String get resetAllSettingsDesc => 'Restore factory default parameters';
+  String get resetAllSettingsDesc => 'Khôi phục các thông số mặc định ban đầu';
 
   @override
-  String get aboutTunerDesc => 'Version and architectural specifications';
+  String get aboutTunerDesc => 'Thông số kỹ thuật phiên bản và kiến trúc';
 
   @override
-  String get resetSettingsConfirmTitle => 'Reset Settings';
+  String get resetSettingsConfirmTitle => 'Đặt lại cài đặt';
 
   @override
   String get resetSettingsConfirmMessage =>
-      'Are you sure you want to restore all settings to default factory values? This cannot be undone.';
+      'Bạn có chắc chắn muốn khôi phục tất cả cài đặt về mặc định của nhà sản xuất? Thao tác này không thể hoàn tác.';
 
   @override
   String get algorithmMpmDesc =>
-      'High precision, robust octave-jump suppression for strings.';
+      'Độ chính xác cao, khử nhảy quãng tám mạnh mẽ cho đàn dây.';
 
   @override
   String get algorithmTwmDesc =>
-      'Harmonic spectral matching for rich/inharmonic overtones.';
+      'Khớp phổ sóng hài cho các âm bội phong phú/không hài.';
 
   @override
   String get algorithmClassicDesc =>
-      'FFT-based autocorrelation with parabolic peak fitting.';
+      'Tự tương quan dựa trên FFT với khớp đỉnh parabol.';
 
   @override
   String get algorithmJacobsenDesc =>
-      'Enhanced complex 3-bin phase vocoder interpolation.';
+      'Nội suy bộ mã hóa pha 3-bin phức tạp nâng cao.';
 
   @override
   String get algorithmPyinDesc =>
-      'Viterbi path candidate tracking over time frames.';
+      'Theo dõi ứng viên đường dẫn Viterbi qua các khung thời gian.';
 
   @override
-  String get weightingNone => 'None (Flat)';
+  String get weightingNone => 'Không (Phẳng)';
 
   @override
   String get weightingNoneDesc =>
-      'Raw unweighted linear audio frequency spectrum.';
+      'Phổ tần số âm thanh tuyến tính nguyên bản chưa qua xử lý.';
 
   @override
   String get windowingTophatDesc =>
-      'No windowing attenuation (highest frequency resolution).';
+      'Không suy giảm cửa sổ (độ phân giải tần số cao nhất).';
 
   @override
   String get windowingHammingDesc =>
-      'Moderate sidelobe suppression (-42 dB attenuation).';
+      'Triệt tiêu búp sóng phụ vừa phải (suy giảm -42 dB).';
 
   @override
   String get windowingHanningDesc =>
-      'Smooth cos^2 window with strong sidelobe drop-off.';
+      'Cửa sổ cos² mượt mà với độ suy giảm búp sóng phụ mạnh.';
 
   @override
-  String get pureBlackOled => 'Pure Black (OLED)';
+  String get pureBlackOled => 'Đen tuyệt đối (OLED)';
+
+  @override
+  String get cancel => 'Hủy';
+
+  @override
+  String get confirm => 'Xác nhận';
+
+  @override
+  String get actions => 'Hành động';
+
+  @override
+  String get searchStretchTuningsHint => 'Tìm kiếm âm luật giãn...';
+
+  @override
+  String get deleteStretchTuning => 'Xóa âm luật giãn';
+
+  @override
+  String deleteStretchTuningConfirm(String name) {
+    return 'Bạn có chắc chắn muốn xóa \"$name\"?';
+  }
+
+  @override
+  String get newStretchTuning => 'Âm luật giãn mới';
+
+  @override
+  String get noStretchPointsDefined =>
+      'Chưa xác định điểm giãn nào.\nNhấn + để thêm một điểm.';
+
+  @override
+  String get editStretchPoint => 'Sửa điểm giãn';
+
+  @override
+  String get addStretchPoint => 'Thêm điểm giãn';
+
+  @override
+  String get frequencyHz => 'Tần số (Hz)';
+
+  @override
+  String get stretchCents => 'Độ giãn (Cent)';
+
+  @override
+  String get frequencyMustBeIncreasing => 'Phải > giá trị trước';
+
+  @override
+  String get createNewStretchTuning => 'Tạo âm luật giãn mới';
+
+  @override
+  String get predefinedSection => 'MẶC ĐỊNH';
+
+  @override
+  String get customSection => 'TÙY CHỈNH';
 }

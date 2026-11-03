@@ -1373,4 +1373,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pureBlackOled => 'Pure Black (OLED)';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get actions => 'Actions';
+
+  @override
+  String get searchStretchTuningsHint => 'Search stretch tunings...';
+
+  @override
+  String get deleteStretchTuning => 'Delete Stretch Tuning';
+
+  @override
+  String deleteStretchTuningConfirm(String name) {
+    return 'Are you sure you want to delete \"$name\"?';
+  }
+
+  @override
+  String get newStretchTuning => 'New Stretch Tuning';
+
+  @override
+  String get noStretchPointsDefined =>
+      'No stretch points defined.\nTap + to add one.';
+
+  @override
+  String get editStretchPoint => 'Edit Stretch Point';
+
+  @override
+  String get addStretchPoint => 'Add Stretch Point';
+
+  @override
+  String get frequencyHz => 'Frequency (Hz)';
+
+  @override
+  String get stretchCents => 'Stretch (Cents)';
+
+  @override
+  String get frequencyMustBeIncreasing => 'Must be > previous';
+
+  @override
+  String get createNewStretchTuning => 'Create new stretch tuning';
+
+  @override
+  String get predefinedSection => 'PREDEFINED';
+
+  @override
+  String get customSection => 'CUSTOM';
 }

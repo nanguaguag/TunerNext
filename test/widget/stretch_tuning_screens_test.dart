@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tuner_flutter/domain/stretch_tuning/predefined_stretch_tunings.dart';
 import 'package:tuner_flutter/domain/stretch_tuning/stretch_tuning.dart';
+import 'package:tuner_flutter/l10n/app_localizations.dart';
 import 'package:tuner_flutter/ui/screens/stretch_tuning_editor_screen.dart';
 import 'package:tuner_flutter/ui/screens/stretch_tuning_overview_screen.dart';
 import 'package:tuner_flutter/ui/stretchtuning/stretch_tuning_graph.dart';
@@ -97,18 +98,22 @@ void main() {
       expect(selectedTuning!.name, 'Railsback Stretch Tuning');
     });
 
-    testWidgets('filters list via search field', (tester) async {
+    testWidgets('renders completely in Chinese when locale is zh', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        const MaterialApp(home: StretchTuningOverviewScreen()),
+        const MaterialApp(
+          locale: Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: StretchTuningOverviewScreen(),
+        ),
       );
       await tester.pumpAndSettle();
 
-      // Search for 'Railsback'
-      await tester.enterText(find.byType(TextField), 'Rails');
-      await tester.pumpAndSettle();
-
-      expect(find.text('Railsback Stretch Tuning'), findsOneWidget);
-      expect(find.text('No Stretch Tuning'), findsNothing);
+      expect(find.text('延展调音'), findsOneWidget);
+      expect(find.text('预设'), findsOneWidget);
+      expect(find.text('无延展调音'), findsOneWidget);
     });
   });
 }

@@ -612,7 +612,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get referenceFrequency => 'Reference frequency';
 
   @override
-  String get referenceNote => 'Reference note';
+  String get referenceNote => 'Nota de referência';
 
   @override
   String get frequency => 'Frequency';
@@ -952,7 +952,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get searchTemperamentsHint =>
-      'Search temperaments (e.g. 19-EDO, Pure)...';
+      'Pesquisar temperamentos (ex: 19-EDO, Puro)...';
 
   @override
   String get notationVietnamese => 'Vietnamese';
@@ -1259,118 +1259,173 @@ class AppLocalizationsPt extends AppLocalizations {
   String get vietnamese => 'Vietnamita';
 
   @override
-  String get keepScreenOnDesc => 'Prevents display from sleeping while tuning';
+  String get keepScreenOnDesc =>
+      'Impede que a tela desligue durante a afinação';
 
   @override
-  String get toleranceDesc => 'Threshold for green pitch accuracy indicator';
+  String get toleranceDesc =>
+      'Limite para o indicador verde de precisão do tom';
 
   @override
   String get preferFlatDesc =>
-      'Display accidentals as flat instead of sharp (♭)';
+      'Exibir acidentes como bemol em vez de sustenido (♭)';
 
   @override
   String get chromaticAsStaffDesc =>
-      'Display musical stave in chromatic instrument mode';
+      'Exibir pauta musical no modo de instrumento cromático';
 
   @override
-  String get sensitivityDesc => 'Input gain threshold for pitch detection';
+  String get sensitivityDesc =>
+      'Limite de ganho de entrada para detecção de tom';
 
   @override
   String get octaveJumpGateDesc =>
-      'Eliminates transient harmonic doubling attacks';
+      'Elimina ataques transitórios de duplicação harmônica';
 
   @override
-  String get medianFilterDesc => 'Filters anomalous single-frame pitch spikes';
+  String get medianFilterDesc => 'Filtra picos anômalos de tom em quadro único';
 
   @override
   String get scientificModeDesc =>
-      'Enable FFT spectrum and correlation analysis views';
+      'Ativar espectro FFT e visualizações de análise de correlação';
 
   @override
   String get numMovingAverageDesc =>
-      'Taps for outlier-removing smoothing buffer';
+      'Amostras da média móvel para remoção de valores atípicos';
 
   @override
-  String get windowSizeDesc => 'Analysis buffer sample length';
+  String get windowSizeDesc => 'Comprimento da amostra do buffer de análise';
 
   @override
-  String get overlapDesc => 'Consecutive analysis frame overlap';
+  String get overlapDesc => 'Sobreposição consecutiva de quadros de análise';
 
   @override
   String get pitchHistoryDurationDesc =>
-      'Time window shown on pitch history plot';
+      'Janela de tempo exibida no gráfico de histórico de tom';
 
   @override
-  String get jumpToNewPitchDirect => 'Directly jump to new pitch result';
+  String get jumpToNewPitchDirect =>
+      'Pular diretamente para o novo resultado de tom';
 
   @override
   String jumpToNewPitchMultiple(int count) {
-    return 'After $count similar pitch results';
+    return 'Após $count resultados de tom semelhantes';
   }
 
   @override
   String get audioCaptureDesc =>
-      'WAV export buffer capacity (0s disables export button)';
+      'Capacidade do buffer de exportação WAV (0s desativa o botão)';
 
   @override
-  String get audioCaptureDisabled => 'Disabled';
+  String get audioCaptureDisabled => 'Desativado';
 
   @override
   String get displayOnLockScreenDesc =>
-      'Allows tuner to be active over device lock screen';
+      'Permite que o afinador funcione sobre a tela de bloqueio';
 
   @override
-  String get resetAllSettingsDesc => 'Restore factory default parameters';
+  String get resetAllSettingsDesc => 'Restaurar parâmetros padrão de fábrica';
 
   @override
-  String get aboutTunerDesc => 'Version and architectural specifications';
+  String get aboutTunerDesc => 'Especificações de versão e arquitetura';
 
   @override
-  String get resetSettingsConfirmTitle => 'Reset Settings';
+  String get resetSettingsConfirmTitle => 'Redefinir Configurações';
 
   @override
   String get resetSettingsConfirmMessage =>
-      'Are you sure you want to restore all settings to default factory values? This cannot be undone.';
+      'Tem certeza de que deseja restaurar todas as configurações para os padrões de fábrica? Esta ação não pode ser desfeita.';
 
   @override
   String get algorithmMpmDesc =>
-      'High precision, robust octave-jump suppression for strings.';
+      'Alta precisão e supressão robusta de saltos de oitava para cordas.';
 
   @override
   String get algorithmTwmDesc =>
-      'Harmonic spectral matching for rich/inharmonic overtones.';
+      'Correspondência espectral harmônica para sobretons ricos/inarmônicos.';
 
   @override
   String get algorithmClassicDesc =>
-      'FFT-based autocorrelation with parabolic peak fitting.';
+      'Autocorrelação baseada em FFT com ajuste parabólico de picos.';
 
   @override
   String get algorithmJacobsenDesc =>
-      'Enhanced complex 3-bin phase vocoder interpolation.';
+      'Interpolação de vocoder de fase aprimorada de 3 bins complexos.';
 
   @override
   String get algorithmPyinDesc =>
-      'Viterbi path candidate tracking over time frames.';
+      'Rastreamento de candidatos por caminho de Viterbi no tempo.';
 
   @override
-  String get weightingNone => 'None (Flat)';
+  String get weightingNone => 'Nenhuma (Plana)';
 
   @override
   String get weightingNoneDesc =>
-      'Raw unweighted linear audio frequency spectrum.';
+      'Espectro de frequência de áudio linear bruto sem ponderação.';
 
   @override
   String get windowingTophatDesc =>
-      'No windowing attenuation (highest frequency resolution).';
+      'Sem atenuação de janela (resolução de frequência máxima).';
 
   @override
   String get windowingHammingDesc =>
-      'Moderate sidelobe suppression (-42 dB attenuation).';
+      'Supressão moderada de lóbulos laterais (-42 dB atenuação).';
 
   @override
   String get windowingHanningDesc =>
-      'Smooth cos^2 window with strong sidelobe drop-off.';
+      'Janela cos² suave com forte atenuação de lóbulos laterais.';
 
   @override
-  String get pureBlackOled => 'Pure Black (OLED)';
+  String get pureBlackOled => 'Preto Puro (OLED)';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get confirm => 'Confirmar';
+
+  @override
+  String get actions => 'Ações';
+
+  @override
+  String get searchStretchTuningsHint => 'Pesquisar afinações estendidas...';
+
+  @override
+  String get deleteStretchTuning => 'Excluir afinação estendida';
+
+  @override
+  String deleteStretchTuningConfirm(String name) {
+    return 'Tem certeza de que deseja excluir \"$name\"?';
+  }
+
+  @override
+  String get newStretchTuning => 'Nova afinação estendida';
+
+  @override
+  String get noStretchPointsDefined =>
+      'Nenhum ponto de estiramento definido.\nToque em + para adicionar.';
+
+  @override
+  String get editStretchPoint => 'Editar ponto de estiramento';
+
+  @override
+  String get addStretchPoint => 'Adicionar ponto de estiramento';
+
+  @override
+  String get frequencyHz => 'Frequência (Hz)';
+
+  @override
+  String get stretchCents => 'Estiramento (Cents)';
+
+  @override
+  String get frequencyMustBeIncreasing => 'Deve ser > que a anterior';
+
+  @override
+  String get createNewStretchTuning => 'Criar nova afinação estendida';
+
+  @override
+  String get predefinedSection => 'PREDEFINIDO';
+
+  @override
+  String get customSection => 'PERSONALIZADO';
 }

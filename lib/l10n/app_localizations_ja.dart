@@ -612,7 +612,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get referenceFrequency => 'Reference frequency';
 
   @override
-  String get referenceNote => 'Reference note';
+  String get referenceNote => '基準音';
 
   @override
   String get frequency => 'Frequency';
@@ -951,8 +951,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get customTemperaments => 'Custom temperaments';
 
   @override
-  String get searchTemperamentsHint =>
-      'Search temperaments (e.g. 19-EDO, Pure)...';
+  String get searchTemperamentsHint => '音律を検索 (例: 19-EDO, 純正律)...';
 
   @override
   String get notationVietnamese => 'Vietnamese';
@@ -1259,118 +1258,152 @@ class AppLocalizationsJa extends AppLocalizations {
   String get vietnamese => 'ベトナム語';
 
   @override
-  String get keepScreenOnDesc => 'Prevents display from sleeping while tuning';
+  String get keepScreenOnDesc => 'チューニング中に画面が消灯するのを防ぐ';
 
   @override
-  String get toleranceDesc => 'Threshold for green pitch accuracy indicator';
+  String get toleranceDesc => '正確な音程を示す緑色インジケータの許容誤差しきい値';
 
   @override
-  String get preferFlatDesc =>
-      'Display accidentals as flat instead of sharp (♭)';
+  String get preferFlatDesc => '変化記号をシャープではなくフラット（♭）で表示';
 
   @override
-  String get chromaticAsStaffDesc =>
-      'Display musical stave in chromatic instrument mode';
+  String get chromaticAsStaffDesc => '半音階モードで五線譜を表示';
 
   @override
-  String get sensitivityDesc => 'Input gain threshold for pitch detection';
+  String get sensitivityDesc => 'ピッチ検出の入力感度しきい値';
 
   @override
-  String get octaveJumpGateDesc =>
-      'Eliminates transient harmonic doubling attacks';
+  String get octaveJumpGateDesc => '過渡的な倍音立ち上がりアタックを抑制';
 
   @override
-  String get medianFilterDesc => 'Filters anomalous single-frame pitch spikes';
+  String get medianFilterDesc => '単一フレームの異常なピッチスパイクを除去';
 
   @override
-  String get scientificModeDesc =>
-      'Enable FFT spectrum and correlation analysis views';
+  String get scientificModeDesc => 'FFTスペクトルおよび自己相関分析ビューを有効化';
 
   @override
-  String get numMovingAverageDesc =>
-      'Taps for outlier-removing smoothing buffer';
+  String get numMovingAverageDesc => '外れ値除去平滑化バッファの移動平均タップ数';
 
   @override
-  String get windowSizeDesc => 'Analysis buffer sample length';
+  String get windowSizeDesc => '分析バッファのサンプル長';
 
   @override
-  String get overlapDesc => 'Consecutive analysis frame overlap';
+  String get overlapDesc => '連続する分析フレームの重複率';
 
   @override
-  String get pitchHistoryDurationDesc =>
-      'Time window shown on pitch history plot';
+  String get pitchHistoryDurationDesc => 'ピッチ履歴プロットに表示される時間枠';
 
   @override
-  String get jumpToNewPitchDirect => 'Directly jump to new pitch result';
+  String get jumpToNewPitchDirect => '検出された新しいピッチへ直接切り替え';
 
   @override
   String jumpToNewPitchMultiple(int count) {
-    return 'After $count similar pitch results';
+    return '$count 回の類似ピッチ検出後に切り替え';
   }
 
   @override
-  String get audioCaptureDesc =>
-      'WAV export buffer capacity (0s disables export button)';
+  String get audioCaptureDesc => 'WAVエクスポートバッファ容量（0秒でエクスポート無効）';
 
   @override
-  String get audioCaptureDisabled => 'Disabled';
+  String get audioCaptureDisabled => '無効';
 
   @override
-  String get displayOnLockScreenDesc =>
-      'Allows tuner to be active over device lock screen';
+  String get displayOnLockScreenDesc => 'ロック画面上でのチューナー表示を許可';
 
   @override
-  String get resetAllSettingsDesc => 'Restore factory default parameters';
+  String get resetAllSettingsDesc => '出荷時デフォルト設定に復元';
 
   @override
-  String get aboutTunerDesc => 'Version and architectural specifications';
+  String get aboutTunerDesc => 'バージョンおよびアーキテクチャ仕様';
 
   @override
-  String get resetSettingsConfirmTitle => 'Reset Settings';
+  String get resetSettingsConfirmTitle => '設定をリセット';
 
   @override
   String get resetSettingsConfirmMessage =>
-      'Are you sure you want to restore all settings to default factory values? This cannot be undone.';
+      'すべての設定を出荷時デフォルトに復元しますか？この操作は元に戻せません。';
 
   @override
-  String get algorithmMpmDesc =>
-      'High precision, robust octave-jump suppression for strings.';
+  String get algorithmMpmDesc => '弦楽器向けの高精度で堅牢なオクターブジャンプ抑制。';
 
   @override
-  String get algorithmTwmDesc =>
-      'Harmonic spectral matching for rich/inharmonic overtones.';
+  String get algorithmTwmDesc => '倍音/非調和オーバー調のための調和スペクトルマッチング。';
 
   @override
-  String get algorithmClassicDesc =>
-      'FFT-based autocorrelation with parabolic peak fitting.';
+  String get algorithmClassicDesc => '放物線ピークフィッティングを備えたFFTベースの自己相関。';
 
   @override
-  String get algorithmJacobsenDesc =>
-      'Enhanced complex 3-bin phase vocoder interpolation.';
+  String get algorithmJacobsenDesc => '拡張された複素3ビン位相ボコーダー補間。';
 
   @override
-  String get algorithmPyinDesc =>
-      'Viterbi path candidate tracking over time frames.';
+  String get algorithmPyinDesc => '時間フレームにわたるビタビパス候補トラッキング。';
 
   @override
-  String get weightingNone => 'None (Flat)';
+  String get weightingNone => 'なし (フラット)';
 
   @override
-  String get weightingNoneDesc =>
-      'Raw unweighted linear audio frequency spectrum.';
+  String get weightingNoneDesc => '無補正のリニア周波数スペクトル。';
 
   @override
-  String get windowingTophatDesc =>
-      'No windowing attenuation (highest frequency resolution).';
+  String get windowingTophatDesc => '窓関数減衰なし (最高周波数分解能)。';
 
   @override
-  String get windowingHammingDesc =>
-      'Moderate sidelobe suppression (-42 dB attenuation).';
+  String get windowingHammingDesc => '適度なサイドローブ抑制 (-42 dB 減衰)。';
 
   @override
-  String get windowingHanningDesc =>
-      'Smooth cos^2 window with strong sidelobe drop-off.';
+  String get windowingHanningDesc => '急峻なサイドローブ減衰を持つ滑らかな cos² 窓。';
 
   @override
-  String get pureBlackOled => 'Pure Black (OLED)';
+  String get pureBlackOled => 'ピュアブラック (OLED)';
+
+  @override
+  String get cancel => 'キャンセル';
+
+  @override
+  String get confirm => '確認';
+
+  @override
+  String get actions => '操作';
+
+  @override
+  String get searchStretchTuningsHint => 'ストレッチチューニングを検索...';
+
+  @override
+  String get deleteStretchTuning => 'ストレッチチューニングを削除';
+
+  @override
+  String deleteStretchTuningConfirm(String name) {
+    return '本当に \"$name\" を削除しますか？';
+  }
+
+  @override
+  String get newStretchTuning => '新規ストレッチチューニング';
+
+  @override
+  String get noStretchPointsDefined =>
+      'ストレッチポイントが定義されていません。\n+ をタップして追加してください。';
+
+  @override
+  String get editStretchPoint => 'ストレッチポイントを編集';
+
+  @override
+  String get addStretchPoint => 'ストレッチポイントを追加';
+
+  @override
+  String get frequencyHz => '周波数 (Hz)';
+
+  @override
+  String get stretchCents => 'ストレッチ (セント)';
+
+  @override
+  String get frequencyMustBeIncreasing => '前の値より大きい必要があります';
+
+  @override
+  String get createNewStretchTuning => 'ストレッチチューニングを作成';
+
+  @override
+  String get predefinedSection => 'プリセット';
+
+  @override
+  String get customSection => 'カスタム';
 }

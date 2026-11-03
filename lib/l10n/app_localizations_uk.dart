@@ -613,7 +613,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get referenceFrequency => 'Еталонна частота';
 
   @override
-  String get referenceNote => 'Reference note';
+  String get referenceNote => 'Опорна нота';
 
   @override
   String get frequency => 'Частота';
@@ -953,7 +953,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get searchTemperamentsHint =>
-      'Search temperaments (e.g. 19-EDO, Pure)...';
+      'Пошук строю (наприклад, 19-EDO, Чистий стрій)...';
 
   @override
   String get notationVietnamese => 'В’єтнамcька';
@@ -1260,118 +1260,173 @@ class AppLocalizationsUk extends AppLocalizations {
   String get vietnamese => 'В\'єтнамська';
 
   @override
-  String get keepScreenOnDesc => 'Prevents display from sleeping while tuning';
+  String get keepScreenOnDesc =>
+      'Запобігає вимкненню екрана під час налаштування';
 
   @override
-  String get toleranceDesc => 'Threshold for green pitch accuracy indicator';
+  String get toleranceDesc => 'Поріг допуску для зеленого індикатора точності';
 
   @override
-  String get preferFlatDesc =>
-      'Display accidentals as flat instead of sharp (♭)';
+  String get preferFlatDesc => 'Показувати бемолі замість дієзів (♭)';
 
   @override
   String get chromaticAsStaffDesc =>
-      'Display musical stave in chromatic instrument mode';
+      'Показувати нотоносець у хроматичному режимі';
 
   @override
-  String get sensitivityDesc => 'Input gain threshold for pitch detection';
+  String get sensitivityDesc =>
+      'Поріг вхідної чутливості для розпізнавання висоти тону';
 
   @override
   String get octaveJumpGateDesc =>
-      'Eliminates transient harmonic doubling attacks';
+      'Усуває перехідні сплески гармонічного подвоєння';
 
   @override
-  String get medianFilterDesc => 'Filters anomalous single-frame pitch spikes';
+  String get medianFilterDesc =>
+      'Фільтрує аномальні поодинокі стрибки висоти тону';
 
   @override
   String get scientificModeDesc =>
-      'Enable FFT spectrum and correlation analysis views';
+      'Увімкнути спектр БПФ та перегляд аналізу кореляції';
 
   @override
   String get numMovingAverageDesc =>
-      'Taps for outlier-removing smoothing buffer';
+      'Кількість вибірок ковзного середнього для згладжування викидів';
 
   @override
-  String get windowSizeDesc => 'Analysis buffer sample length';
+  String get windowSizeDesc => 'Розмір буфера аналізу у вибірках';
 
   @override
-  String get overlapDesc => 'Consecutive analysis frame overlap';
+  String get overlapDesc => 'Перекриття послідовних вікон аналізу';
 
   @override
   String get pitchHistoryDurationDesc =>
-      'Time window shown on pitch history plot';
+      'Часове вікно, що відображається на графіку історії тону';
 
   @override
-  String get jumpToNewPitchDirect => 'Directly jump to new pitch result';
+  String get jumpToNewPitchDirect =>
+      'Одразу переходити до нової виявленої висоти тону';
 
   @override
   String jumpToNewPitchMultiple(int count) {
-    return 'After $count similar pitch results';
+    return 'Після $count подібних результатів висоти';
   }
 
   @override
   String get audioCaptureDesc =>
-      'WAV export buffer capacity (0s disables export button)';
+      'Місткість буфера експорту WAV (0с вимикає кнопку експорту)';
 
   @override
-  String get audioCaptureDisabled => 'Disabled';
+  String get audioCaptureDisabled => 'Вимкнено';
 
   @override
   String get displayOnLockScreenDesc =>
-      'Allows tuner to be active over device lock screen';
+      'Дозволяє тюнеру працювати поверх екрана блокування';
 
   @override
-  String get resetAllSettingsDesc => 'Restore factory default parameters';
+  String get resetAllSettingsDesc =>
+      'Відновити заводські параметри за замовчуванням';
 
   @override
-  String get aboutTunerDesc => 'Version and architectural specifications';
+  String get aboutTunerDesc => 'Версія та архітектурні характеристики';
 
   @override
-  String get resetSettingsConfirmTitle => 'Reset Settings';
+  String get resetSettingsConfirmTitle => 'Скинути налаштування';
 
   @override
   String get resetSettingsConfirmMessage =>
-      'Are you sure you want to restore all settings to default factory values? This cannot be undone.';
+      'Ви впевнені, що хочете скинути всі налаштування до заводських? Цю дію не можна скасувати.';
 
   @override
   String get algorithmMpmDesc =>
-      'High precision, robust octave-jump suppression for strings.';
+      'Висока точність та надійне придушення октавних стрибків для струн.';
 
   @override
   String get algorithmTwmDesc =>
-      'Harmonic spectral matching for rich/inharmonic overtones.';
+      'Гармонічне узгодження спектра для багатих обертонів.';
 
   @override
   String get algorithmClassicDesc =>
-      'FFT-based autocorrelation with parabolic peak fitting.';
+      'Автокореляція на основі БПФ з параболічною апроксимацією піків.';
 
   @override
   String get algorithmJacobsenDesc =>
-      'Enhanced complex 3-bin phase vocoder interpolation.';
+      'Покращена інтерполяція фазового вокодера на 3 комплексних бінах.';
 
   @override
   String get algorithmPyinDesc =>
-      'Viterbi path candidate tracking over time frames.';
+      'Відстеження кандидатів шляху Вітербі за часовими кадрами.';
 
   @override
-  String get weightingNone => 'None (Flat)';
+  String get weightingNone => 'Немає (Лінійна)';
 
   @override
   String get weightingNoneDesc =>
-      'Raw unweighted linear audio frequency spectrum.';
+      'Необроблений лінійний спектр звукових частот.';
 
   @override
   String get windowingTophatDesc =>
-      'No windowing attenuation (highest frequency resolution).';
+      'Без віконного згасання (максимальна роздільна здатність за частотою).';
 
   @override
   String get windowingHammingDesc =>
-      'Moderate sidelobe suppression (-42 dB attenuation).';
+      'Помірне придушення бічних пелюсток (-42 дБ згасання).';
 
   @override
   String get windowingHanningDesc =>
-      'Smooth cos^2 window with strong sidelobe drop-off.';
+      'Гладке вікно cos² із сильним спадом бічних пелюсток.';
 
   @override
-  String get pureBlackOled => 'Pure Black (OLED)';
+  String get pureBlackOled => 'Чистий чорний (OLED)';
+
+  @override
+  String get cancel => 'Скасувати';
+
+  @override
+  String get confirm => 'Підтвердити';
+
+  @override
+  String get actions => 'Дії';
+
+  @override
+  String get searchStretchTuningsHint => 'Пошук розтягненого строю...';
+
+  @override
+  String get deleteStretchTuning => 'Видалити розтягнений стрій';
+
+  @override
+  String deleteStretchTuningConfirm(String name) {
+    return 'Ви впевнені, що хочете видалити \"$name\"?';
+  }
+
+  @override
+  String get newStretchTuning => 'Новий розтягнений стрій';
+
+  @override
+  String get noStretchPointsDefined =>
+      'Точки розтягування не визначені.\nНатисніть +, щоб додати.';
+
+  @override
+  String get editStretchPoint => 'Редагувати точку розтягування';
+
+  @override
+  String get addStretchPoint => 'Додати точку розтягування';
+
+  @override
+  String get frequencyHz => 'Частота (Гц)';
+
+  @override
+  String get stretchCents => 'Розтягування (Центи)';
+
+  @override
+  String get frequencyMustBeIncreasing => 'Має бути > попередньої';
+
+  @override
+  String get createNewStretchTuning => 'Створити розтягнений стрій';
+
+  @override
+  String get predefinedSection => 'СТАНДАРТНІ';
+
+  @override
+  String get customSection => 'ВЛАСНІ';
 }

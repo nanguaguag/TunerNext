@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuner_flutter/data/preferences/app_preferences.dart';
 import 'package:tuner_flutter/main.dart';
+import 'package:tuner_flutter/ui/common/notation_icons.dart';
 import 'package:tuner_flutter/ui/instruments/instruments_screen.dart';
 import 'package:tuner_flutter/ui/screens/preferences_screen.dart';
 import 'package:tuner_flutter/ui/screens/scientific_tuner_screen.dart';
@@ -104,11 +105,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // 3. Navigate to Stretch Tuning overview
-      await tester.tap(find.text('No Stretch Tuning'));
+      await tester.tap(find.byType(StretchTuningIconWidget));
       await tester.pumpAndSettle();
 
       expect(find.byType(StretchTuningOverviewScreen), findsOneWidget);
-      expect(find.text('Stretch Tuning'), findsOneWidget);
+      expect(find.text('Stretch tuning'), findsOneWidget);
     },
   );
 }

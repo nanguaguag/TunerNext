@@ -613,7 +613,7 @@ class AppLocalizationsCs extends AppLocalizations {
   String get referenceFrequency => 'Referenční frekvence';
 
   @override
-  String get referenceNote => 'Reference note';
+  String get referenceNote => 'Referenční tón';
 
   @override
   String get frequency => 'Frekvence';
@@ -952,8 +952,7 @@ class AppLocalizationsCs extends AppLocalizations {
   String get customTemperaments => 'Custom temperaments';
 
   @override
-  String get searchTemperamentsHint =>
-      'Search temperaments (e.g. 19-EDO, Pure)...';
+  String get searchTemperamentsHint => 'Hledat ladění (např. 19-EDO, Čisté)...';
 
   @override
   String get notationVietnamese => 'Vietnamese';
@@ -1260,118 +1259,172 @@ class AppLocalizationsCs extends AppLocalizations {
   String get vietnamese => 'Vietnamština';
 
   @override
-  String get keepScreenOnDesc => 'Prevents display from sleeping while tuning';
+  String get keepScreenOnDesc => 'Zabraňuje vypnutí obrazovky během ladění';
 
   @override
-  String get toleranceDesc => 'Threshold for green pitch accuracy indicator';
+  String get toleranceDesc =>
+      'Prahová hodnota pro zelený indikátor přesnosti ladění';
 
   @override
-  String get preferFlatDesc =>
-      'Display accidentals as flat instead of sharp (♭)';
+  String get preferFlatDesc => 'Zobrazit posuvky jako béčka namísto křížků (♭)';
 
   @override
   String get chromaticAsStaffDesc =>
-      'Display musical stave in chromatic instrument mode';
+      'Zobrazit notovou osnovu v chromatickém režimu';
 
   @override
-  String get sensitivityDesc => 'Input gain threshold for pitch detection';
+  String get sensitivityDesc =>
+      'Prahová hodnota vstupní citlivosti pro detekci tónu';
 
   @override
   String get octaveJumpGateDesc =>
-      'Eliminates transient harmonic doubling attacks';
+      'Eliminuje přechodové harmonické zdvojení při rozeznění';
 
   @override
-  String get medianFilterDesc => 'Filters anomalous single-frame pitch spikes';
+  String get medianFilterDesc =>
+      'Filtruje anomální jednosnímkové špičky výšky tónu';
 
   @override
   String get scientificModeDesc =>
-      'Enable FFT spectrum and correlation analysis views';
+      'Povolit zobrazení spektra FFT a korelační analýzy';
 
   @override
   String get numMovingAverageDesc =>
-      'Taps for outlier-removing smoothing buffer';
+      'Vzorky klouzavého průměru pro vyhlazení odlehlých hodnot';
 
   @override
-  String get windowSizeDesc => 'Analysis buffer sample length';
+  String get windowSizeDesc => 'Délka vzorku analytické vyrovnávací paměti';
 
   @override
-  String get overlapDesc => 'Consecutive analysis frame overlap';
+  String get overlapDesc => 'Překrytí po sobě jdoucích analytických oken';
 
   @override
   String get pitchHistoryDurationDesc =>
-      'Time window shown on pitch history plot';
+      'Časové okno zobrazené v historii výšky tónu';
 
   @override
-  String get jumpToNewPitchDirect => 'Directly jump to new pitch result';
+  String get jumpToNewPitchDirect =>
+      'Přejít přímo na novou zjištěnou výšku tónu';
 
   @override
   String jumpToNewPitchMultiple(int count) {
-    return 'After $count similar pitch results';
+    return 'Po $count podobných výsledcích výšky';
   }
 
   @override
   String get audioCaptureDesc =>
-      'WAV export buffer capacity (0s disables export button)';
+      'Kapacita vyrovnávací paměti exportu WAV (0s vypne tlačítko)';
 
   @override
-  String get audioCaptureDisabled => 'Disabled';
+  String get audioCaptureDisabled => 'Zakázáno';
 
   @override
   String get displayOnLockScreenDesc =>
-      'Allows tuner to be active over device lock screen';
+      'Umožňuje ladičce běžet přes zamykací obrazovku';
 
   @override
-  String get resetAllSettingsDesc => 'Restore factory default parameters';
+  String get resetAllSettingsDesc => 'Obnovit výchozí tovární nastavení';
 
   @override
-  String get aboutTunerDesc => 'Version and architectural specifications';
+  String get aboutTunerDesc => 'Specifikace verze a architektury';
 
   @override
-  String get resetSettingsConfirmTitle => 'Reset Settings';
+  String get resetSettingsConfirmTitle => 'Obnovit nastavení';
 
   @override
   String get resetSettingsConfirmMessage =>
-      'Are you sure you want to restore all settings to default factory values? This cannot be undone.';
+      'Opravdu chcete obnovit všechna nastavení na tovární hodnoty? Tuto akci nelze vrátit zpět.';
 
   @override
   String get algorithmMpmDesc =>
-      'High precision, robust octave-jump suppression for strings.';
+      'Vysoká přesnost, robustní potlačení oktávových skoků pro struny.';
 
   @override
   String get algorithmTwmDesc =>
-      'Harmonic spectral matching for rich/inharmonic overtones.';
+      'Harmonické spektrální přizpůsobení pro bohaté alikvotní tóny.';
 
   @override
   String get algorithmClassicDesc =>
-      'FFT-based autocorrelation with parabolic peak fitting.';
+      'Autokorelace založená na FFT s parabolickým proložením špiček.';
 
   @override
   String get algorithmJacobsenDesc =>
-      'Enhanced complex 3-bin phase vocoder interpolation.';
+      'Vylepšená komplexní 3-binová fázová vokodérová interpolace.';
 
   @override
   String get algorithmPyinDesc =>
-      'Viterbi path candidate tracking over time frames.';
+      'Sledování kandidátů Viterbiho cesty v časových rámcích.';
 
   @override
-  String get weightingNone => 'None (Flat)';
+  String get weightingNone => 'Žádné (Lineární)';
 
   @override
   String get weightingNoneDesc =>
-      'Raw unweighted linear audio frequency spectrum.';
+      'Nezatížené lineární zvukové frekvenční spektrum.';
 
   @override
   String get windowingTophatDesc =>
-      'No windowing attenuation (highest frequency resolution).';
+      'Bez okenního útlumu (nejvyšší frekvenční rozlišení).';
 
   @override
   String get windowingHammingDesc =>
-      'Moderate sidelobe suppression (-42 dB attenuation).';
+      'Mírné potlačení postranních laloků (-42 dB útlum).';
 
   @override
   String get windowingHanningDesc =>
-      'Smooth cos^2 window with strong sidelobe drop-off.';
+      'Hladké cos² okno se silným poklesem postranních laloků.';
 
   @override
-  String get pureBlackOled => 'Pure Black (OLED)';
+  String get pureBlackOled => 'Čistá černá (OLED)';
+
+  @override
+  String get cancel => 'Zrušit';
+
+  @override
+  String get confirm => 'Potvrdit';
+
+  @override
+  String get actions => 'Akce';
+
+  @override
+  String get searchStretchTuningsHint => 'Hledat roztažená ladění...';
+
+  @override
+  String get deleteStretchTuning => 'Smazat roztažené ladění';
+
+  @override
+  String deleteStretchTuningConfirm(String name) {
+    return 'Opravdu chcete smazat \"$name\"?';
+  }
+
+  @override
+  String get newStretchTuning => 'Nové roztažené ladění';
+
+  @override
+  String get noStretchPointsDefined =>
+      'Nejsou definovány žádné body roztažení.\nKlepnutím na + přidejte bod.';
+
+  @override
+  String get editStretchPoint => 'Upravit bod roztažení';
+
+  @override
+  String get addStretchPoint => 'Přidat bod roztažení';
+
+  @override
+  String get frequencyHz => 'Frekvence (Hz)';
+
+  @override
+  String get stretchCents => 'Roztažení (Centy)';
+
+  @override
+  String get frequencyMustBeIncreasing => 'Musí být > předchozí';
+
+  @override
+  String get createNewStretchTuning => 'Vytvořit roztažené ladění';
+
+  @override
+  String get predefinedSection => 'VÝCHOZÍ';
+
+  @override
+  String get customSection => 'VLASTNÍ';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/stretch_tuning/stretch_tuning.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Data table displaying the control points of a stretch tuning curve.
 ///
@@ -26,6 +27,7 @@ class StretchTuningTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       children: [
@@ -43,7 +45,7 @@ class StretchTuningTable extends StatelessWidget {
               Expanded(
                 flex: 4,
                 child: Text(
-                  'Frequency',
+                  l10n?.frequency ?? 'Frequency',
                   style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -52,7 +54,7 @@ class StretchTuningTable extends StatelessWidget {
               Expanded(
                 flex: 4,
                 child: Text(
-                  'Stretch',
+                  l10n?.stretch ?? 'Stretch',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
@@ -60,12 +62,15 @@ class StretchTuningTable extends StatelessWidget {
                 ),
               ),
               if (showOverflowMenu)
-                const SizedBox(
+                SizedBox(
                   width: 96.0,
                   child: Text(
-                    'Actions',
+                    l10n?.actions ?? 'Actions',
                     textAlign: TextAlign.end,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
                   ),
                 ),
             ],
@@ -77,7 +82,8 @@ class StretchTuningTable extends StatelessWidget {
           child: stretchTuning.isEmpty
               ? Center(
                   child: Text(
-                    'No stretch points defined.\nTap + to add one.',
+                    l10n?.noStretchPointsDefined ??
+                        'No stretch points defined.\nTap + to add one.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.outline,
@@ -135,7 +141,8 @@ class StretchTuningTable extends StatelessWidget {
                                     ),
                                     if (isNonMonotonic)
                                       Text(
-                                        'Must be > previous',
+                                        l10n?.frequencyMustBeIncreasing ??
+                                            'Must be > previous',
                                         style: theme.textTheme.labelSmall
                                             ?.copyWith(
                                               color: theme.colorScheme.error,

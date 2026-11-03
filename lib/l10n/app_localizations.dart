@@ -2510,6 +2510,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pure Black (OLED)'**
   String get pureBlackOled;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get actions;
+
+  /// No description provided for @searchStretchTuningsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search stretch tunings...'**
+  String get searchStretchTuningsHint;
+
+  /// No description provided for @deleteStretchTuning.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Stretch Tuning'**
+  String get deleteStretchTuning;
+
+  /// No description provided for @deleteStretchTuningConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"?'**
+  String deleteStretchTuningConfirm(String name);
+
+  /// No description provided for @newStretchTuning.
+  ///
+  /// In en, this message translates to:
+  /// **'New Stretch Tuning'**
+  String get newStretchTuning;
+
+  /// No description provided for @noStretchPointsDefined.
+  ///
+  /// In en, this message translates to:
+  /// **'No stretch points defined.\nTap + to add one.'**
+  String get noStretchPointsDefined;
+
+  /// No description provided for @editStretchPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Stretch Point'**
+  String get editStretchPoint;
+
+  /// No description provided for @addStretchPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Stretch Point'**
+  String get addStretchPoint;
+
+  /// No description provided for @frequencyHz.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency (Hz)'**
+  String get frequencyHz;
+
+  /// No description provided for @stretchCents.
+  ///
+  /// In en, this message translates to:
+  /// **'Stretch (Cents)'**
+  String get stretchCents;
+
+  /// No description provided for @frequencyMustBeIncreasing.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be > previous'**
+  String get frequencyMustBeIncreasing;
+
+  /// No description provided for @createNewStretchTuning.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new stretch tuning'**
+  String get createNewStretchTuning;
+
+  /// No description provided for @predefinedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'PREDEFINED'**
+  String get predefinedSection;
+
+  /// No description provided for @customSection.
+  ///
+  /// In en, this message translates to:
+  /// **'CUSTOM'**
+  String get customSection;
 }
 
 class _AppLocalizationsDelegate

@@ -51,7 +51,7 @@
   "systemAppearance": "Appearance follows system settings",
   "darkAppearanceShort": "Dark",
   "lightAppearanceShort": "Light",
-  "systemAppearanceShort": "Auto",
+  "systemAppearanceShort": "System Default",
   "settings": "Settings",
   "overlap": "Window overlap",
   "windowSize": "Window size",
@@ -685,7 +685,27 @@
   "windowingHammingDesc": "Moderate sidelobe suppression (-42 dB attenuation).",
   "windowingHanningDesc": "Smooth cos^2 window with strong sidelobe drop-off.",
   "pureBlackOled": "Pure Black (OLED)",
-  "systemAppearanceShort": "System Default",
-  "lightAppearanceShort": "Light",
-  "darkAppearanceShort": "Dark"
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "actions": "Actions",
+  "searchStretchTuningsHint": "Search stretch tunings...",
+  "deleteStretchTuning": "Delete Stretch Tuning",
+  "deleteStretchTuningConfirm": "Are you sure you want to delete \"{name}\"?",
+  "@deleteStretchTuningConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "newStretchTuning": "New Stretch Tuning",
+  "noStretchPointsDefined": "No stretch points defined.\nTap + to add one.",
+  "editStretchPoint": "Edit Stretch Point",
+  "addStretchPoint": "Add Stretch Point",
+  "frequencyHz": "Frequency (Hz)",
+  "stretchCents": "Stretch (Cents)",
+  "frequencyMustBeIncreasing": "Must be > previous",
+  "createNewStretchTuning": "Create new stretch tuning",
+  "predefinedSection": "PREDEFINED",
+  "customSection": "CUSTOM"
 }

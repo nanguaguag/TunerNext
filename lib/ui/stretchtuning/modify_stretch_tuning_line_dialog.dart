@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// Modal dialog for modifying or inserting a stretch tuning control point line.
 ///
 /// 1:1 parity with Kotlin `de.moekadu.tuner.ui.stretchtuning.ModifyStretchTuningLineDialog`.
@@ -64,8 +66,10 @@ class _ModifyStretchTuningLineDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
-      title: const Text('Edit Stretch Point'),
+      title: Text(l10n?.editStretchPoint ?? 'Edit Stretch Point'),
       content: Form(
         key: _formKey,
         child: Column(
@@ -73,8 +77,8 @@ class _ModifyStretchTuningLineDialogState
           children: [
             TextFormField(
               controller: _freqController,
-              decoration: const InputDecoration(
-                labelText: 'Nominal Frequency (Hz)',
+              decoration: InputDecoration(
+                labelText: l10n?.frequencyHz ?? 'Frequency (Hz)',
                 suffixText: 'Hz',
               ),
               keyboardType: const TextInputType.numberWithOptions(
@@ -95,8 +99,8 @@ class _ModifyStretchTuningLineDialogState
             const SizedBox(height: 16.0),
             TextFormField(
               controller: _centsController,
-              decoration: const InputDecoration(
-                labelText: 'Stretch in Cents',
+              decoration: InputDecoration(
+                labelText: l10n?.stretchCents ?? 'Stretch in Cents',
                 suffixText: '¢',
               ),
               keyboardType: const TextInputType.numberWithOptions(
@@ -120,9 +124,12 @@ class _ModifyStretchTuningLineDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n?.cancel ?? 'Cancel'),
         ),
-        FilledButton(onPressed: _submit, child: const Text('Confirm')),
+        FilledButton(
+          onPressed: _submit,
+          child: Text(l10n?.confirm ?? 'Confirm'),
+        ),
       ],
     );
   }

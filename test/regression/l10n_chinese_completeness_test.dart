@@ -36,7 +36,8 @@ void main() {
           expect(l10n.chromaticAsStaff, equals('半音阶调音器五线谱显示'));
 
           // Stretch & Hardware
-          expect(l10n.stretch, equals('延展调音'));
+          expect(l10n.stretch, equals('延展'));
+          expect(l10n.stretchTuning, equals('延展调音'));
           expect(l10n.railsback, contains('雷尔斯贝克'));
           expect(l10n.audioRecordPermissionRationale, contains('麦克风'));
           expect(l10n.soundSourceMicrophoneUnavailable, contains('无法访问麦克风设备'));

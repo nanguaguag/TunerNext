@@ -613,7 +613,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get referenceFrequency => 'Referenciafrekvencia';
 
   @override
-  String get referenceNote => 'Reference note';
+  String get referenceNote => 'Referenciahang';
 
   @override
   String get frequency => 'Frekvencia';
@@ -954,7 +954,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get searchTemperamentsHint =>
-      'Search temperaments (e.g. 19-EDO, Pure)...';
+      'Hangolások keresése (pl. 19-EDO, Tiszta)...';
 
   @override
   String get notationVietnamese => 'Vietnamese';
@@ -1261,118 +1261,174 @@ class AppLocalizationsHu extends AppLocalizations {
   String get vietnamese => 'Vietnámi';
 
   @override
-  String get keepScreenOnDesc => 'Prevents display from sleeping while tuning';
+  String get keepScreenOnDesc =>
+      'Megakadályozza a képernyő kikapcsolását hangolás közben';
 
   @override
-  String get toleranceDesc => 'Threshold for green pitch accuracy indicator';
+  String get toleranceDesc => 'Küszöbérték a zöld hangolási pontosság jelzőhöz';
 
   @override
   String get preferFlatDesc =>
-      'Display accidentals as flat instead of sharp (♭)';
+      'Módosítójelek megjelenítése bé-ként kereszt helyett (♭)';
 
   @override
   String get chromaticAsStaffDesc =>
-      'Display musical stave in chromatic instrument mode';
+      'Kotta megjelenítése kromatikus hangszer módban';
 
   @override
-  String get sensitivityDesc => 'Input gain threshold for pitch detection';
+  String get sensitivityDesc =>
+      'Bemeneti érzékenységi küszöb a hangmagasság észleléséhez';
 
   @override
   String get octaveJumpGateDesc =>
-      'Eliminates transient harmonic doubling attacks';
+      'Kiküszöböli az átmeneti harmonikus megkettőződéseket';
 
   @override
-  String get medianFilterDesc => 'Filters anomalous single-frame pitch spikes';
+  String get medianFilterDesc =>
+      'Kiszűri az anomális egyképkockás hangmagasság-tüskéket';
 
   @override
   String get scientificModeDesc =>
-      'Enable FFT spectrum and correlation analysis views';
+      'FFT-spektrum és korrelációelemzési nézetek engedélyezése';
 
   @override
   String get numMovingAverageDesc =>
-      'Taps for outlier-removing smoothing buffer';
+      'Mozgóátlag-minták a kiugró értékek simításához';
 
   @override
-  String get windowSizeDesc => 'Analysis buffer sample length';
+  String get windowSizeDesc => 'Elemzési pufferminta hossza';
 
   @override
-  String get overlapDesc => 'Consecutive analysis frame overlap';
+  String get overlapDesc => 'Egymást követő elemzési keretek átfedése';
 
   @override
   String get pitchHistoryDurationDesc =>
-      'Time window shown on pitch history plot';
+      'A hangmagasság-előzmények grafikonján látható időablak';
 
   @override
-  String get jumpToNewPitchDirect => 'Directly jump to new pitch result';
+  String get jumpToNewPitchDirect =>
+      'Közvetlen ugrás az új hangmagasság-eredményre';
 
   @override
   String jumpToNewPitchMultiple(int count) {
-    return 'After $count similar pitch results';
+    return '$count hasonló hangmagasság-eredmény után';
   }
 
   @override
   String get audioCaptureDesc =>
-      'WAV export buffer capacity (0s disables export button)';
+      'WAV exportálási pufferméret (0 mp kikapcsolja a gombot)';
 
   @override
-  String get audioCaptureDisabled => 'Disabled';
+  String get audioCaptureDisabled => 'Letiltva';
 
   @override
   String get displayOnLockScreenDesc =>
-      'Allows tuner to be active over device lock screen';
+      'Lehetővé teszi a hangoló futását a zárképernyő felett';
 
   @override
-  String get resetAllSettingsDesc => 'Restore factory default parameters';
+  String get resetAllSettingsDesc =>
+      'Gyári alapértelmezett paraméterek visszaállítása';
 
   @override
-  String get aboutTunerDesc => 'Version and architectural specifications';
+  String get aboutTunerDesc => 'Verzió- és architektúraspecifikációk';
 
   @override
-  String get resetSettingsConfirmTitle => 'Reset Settings';
+  String get resetSettingsConfirmTitle => 'Beállítások visszaállítása';
 
   @override
   String get resetSettingsConfirmMessage =>
-      'Are you sure you want to restore all settings to default factory values? This cannot be undone.';
+      'Biztosan visszaállítja az összes beállítást a gyári értékekre? Ez a művelet nem vonható vissza.';
 
   @override
   String get algorithmMpmDesc =>
-      'High precision, robust octave-jump suppression for strings.';
+      'Nagy pontosság, robusztus oktávugrás-elnyomás húrokhoz.';
 
   @override
   String get algorithmTwmDesc =>
-      'Harmonic spectral matching for rich/inharmonic overtones.';
+      'Harmonikus spektrális illesztés gazdag/inharmonikus felhangokhoz.';
 
   @override
   String get algorithmClassicDesc =>
-      'FFT-based autocorrelation with parabolic peak fitting.';
+      'FFT-alapú autokorreláció parabolikus csúcsillesztéssel.';
 
   @override
   String get algorithmJacobsenDesc =>
-      'Enhanced complex 3-bin phase vocoder interpolation.';
+      'Továbbfejlesztett komplex 3-bin fázis-vokóder interpoláció.';
 
   @override
   String get algorithmPyinDesc =>
-      'Viterbi path candidate tracking over time frames.';
+      'Viterbi-útvonal jelöltek követése időkereteken keresztül.';
 
   @override
-  String get weightingNone => 'None (Flat)';
+  String get weightingNone => 'Nincs (Lineáris)';
 
   @override
   String get weightingNoneDesc =>
-      'Raw unweighted linear audio frequency spectrum.';
+      'Súlyozatlan lineáris hangfrekvencia-spektrum.';
 
   @override
   String get windowingTophatDesc =>
-      'No windowing attenuation (highest frequency resolution).';
+      'Nincs ablakcsillapítás (legmagasabb frekvenciafelbontás).';
 
   @override
   String get windowingHammingDesc =>
-      'Moderate sidelobe suppression (-42 dB attenuation).';
+      'Mérsékelt oldalsó lebeny elnyomás (-42 dB csillapítás).';
 
   @override
   String get windowingHanningDesc =>
-      'Smooth cos^2 window with strong sidelobe drop-off.';
+      'Sima cos² ablak erős oldalsó lebeny csillapítással.';
 
   @override
-  String get pureBlackOled => 'Pure Black (OLED)';
+  String get pureBlackOled => 'Tiszta fekete (OLED)';
+
+  @override
+  String get cancel => 'Mégse';
+
+  @override
+  String get confirm => 'Megerősítés';
+
+  @override
+  String get actions => 'Műveletek';
+
+  @override
+  String get searchStretchTuningsHint => 'Nyújtott hangolások keresése...';
+
+  @override
+  String get deleteStretchTuning => 'Nyújtott hangolás törlése';
+
+  @override
+  String deleteStretchTuningConfirm(String name) {
+    return 'Biztosan törli a(z) \"$name\" hangolást?';
+  }
+
+  @override
+  String get newStretchTuning => 'Új nyújtott hangolás';
+
+  @override
+  String get noStretchPointsDefined =>
+      'Nincsenek nyújtási pontok meghatározva.\nKoppintson a + jelre a hozzáadáshoz.';
+
+  @override
+  String get editStretchPoint => 'Nyújtási pont szerkesztése';
+
+  @override
+  String get addStretchPoint => 'Nyújtási pont hozzáadása';
+
+  @override
+  String get frequencyHz => 'Frekvencia (Hz)';
+
+  @override
+  String get stretchCents => 'Nyújtás (Cent)';
+
+  @override
+  String get frequencyMustBeIncreasing => 'Nagyobbnak kell lennie az előzőnél';
+
+  @override
+  String get createNewStretchTuning => 'Nyújtott hangolás létrehozása';
+
+  @override
+  String get predefinedSection => 'ELŐRE MEGHATÁROZOTT';
+
+  @override
+  String get customSection => 'EGYÉNI';
 }

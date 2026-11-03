@@ -613,7 +613,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get referenceFrequency => 'Referensfrekvens';
 
   @override
-  String get referenceNote => 'Reference note';
+  String get referenceNote => 'Referenston';
 
   @override
   String get frequency => 'Frekvens';
@@ -952,7 +952,7 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get searchTemperamentsHint =>
-      'Search temperaments (e.g. 19-EDO, Pure)...';
+      'Sök stämningar (t.ex. 19-EDO, Ren stämning)...';
 
   @override
   String get notationVietnamese => 'Vietnamesisk';
@@ -1259,118 +1259,171 @@ class AppLocalizationsSv extends AppLocalizations {
   String get vietnamese => 'Vietnamesiska';
 
   @override
-  String get keepScreenOnDesc => 'Prevents display from sleeping while tuning';
+  String get keepScreenOnDesc =>
+      'Förhindrar att skärmen stängs av under stämning';
 
   @override
-  String get toleranceDesc => 'Threshold for green pitch accuracy indicator';
+  String get toleranceDesc => 'Tröskel för grön stämningsindikator';
 
   @override
   String get preferFlatDesc =>
-      'Display accidentals as flat instead of sharp (♭)';
+      'Visa förtecken som b istället för korsförtecken (♭)';
 
   @override
   String get chromaticAsStaffDesc =>
-      'Display musical stave in chromatic instrument mode';
+      'Visa notsystem i kromatiskt instrumentläge';
 
   @override
-  String get sensitivityDesc => 'Input gain threshold for pitch detection';
+  String get sensitivityDesc =>
+      'Ingångskänslighetströskel för tonhöjdsdetektering';
 
   @override
   String get octaveJumpGateDesc =>
-      'Eliminates transient harmonic doubling attacks';
+      'Eliminerar tillfälliga harmoniska dubbleringar';
 
   @override
-  String get medianFilterDesc => 'Filters anomalous single-frame pitch spikes';
+  String get medianFilterDesc =>
+      'Filtrerar bort avvikande tonhöjdstoppar i enstaka bildrutor';
 
   @override
   String get scientificModeDesc =>
-      'Enable FFT spectrum and correlation analysis views';
+      'Aktivera FFT-spektrum och korrelationsanalysvyer';
 
   @override
   String get numMovingAverageDesc =>
-      'Taps for outlier-removing smoothing buffer';
+      'Antal värden för utjämningsbuffert som tar bort avvikelser';
 
   @override
-  String get windowSizeDesc => 'Analysis buffer sample length';
+  String get windowSizeDesc => 'Längd på analysbuffert i samplingar';
 
   @override
-  String get overlapDesc => 'Consecutive analysis frame overlap';
+  String get overlapDesc =>
+      'Överlappning mellan på varandra följande analysramar';
 
   @override
   String get pitchHistoryDurationDesc =>
-      'Time window shown on pitch history plot';
+      'Tidsfönster som visas i tonhöjdshistoriken';
 
   @override
-  String get jumpToNewPitchDirect => 'Directly jump to new pitch result';
+  String get jumpToNewPitchDirect => 'Hoppa direkt till nytt tonhöjdsresultat';
 
   @override
   String jumpToNewPitchMultiple(int count) {
-    return 'After $count similar pitch results';
+    return 'Efter $count liknande tonhöjdsresultat';
   }
 
   @override
   String get audioCaptureDesc =>
-      'WAV export buffer capacity (0s disables export button)';
+      'WAV-exportbuffertkapacitet (0s inaktiverar exportknapp)';
 
   @override
-  String get audioCaptureDisabled => 'Disabled';
+  String get audioCaptureDisabled => 'Inaktiverad';
 
   @override
   String get displayOnLockScreenDesc =>
-      'Allows tuner to be active over device lock screen';
+      'Tillåter stämapparaten att visas ovanpå låsskärmen';
 
   @override
-  String get resetAllSettingsDesc => 'Restore factory default parameters';
+  String get resetAllSettingsDesc => 'Återställ fabriksinställningar';
 
   @override
-  String get aboutTunerDesc => 'Version and architectural specifications';
+  String get aboutTunerDesc => 'Versions- och arkitekturspecifikationer';
 
   @override
-  String get resetSettingsConfirmTitle => 'Reset Settings';
+  String get resetSettingsConfirmTitle => 'Återställ inställningar';
 
   @override
   String get resetSettingsConfirmMessage =>
-      'Are you sure you want to restore all settings to default factory values? This cannot be undone.';
+      'Är du säker på att du vill återställa alla inställningar till standardvärden? Detta kan inte ångras.';
 
   @override
   String get algorithmMpmDesc =>
-      'High precision, robust octave-jump suppression for strings.';
+      'Hög precision och robust undertryckning av oktavhopp för strängar.';
 
   @override
   String get algorithmTwmDesc =>
-      'Harmonic spectral matching for rich/inharmonic overtones.';
+      'Harmonisk spektral matchning för rika/inharmoniska övertoner.';
 
   @override
   String get algorithmClassicDesc =>
-      'FFT-based autocorrelation with parabolic peak fitting.';
+      'FFT-baserad autokorrelation med parabolisk toppanpassning.';
 
   @override
   String get algorithmJacobsenDesc =>
-      'Enhanced complex 3-bin phase vocoder interpolation.';
+      'Förbättrad fasvokoder-interpolering med 3 komplexa bins.';
 
   @override
-  String get algorithmPyinDesc =>
-      'Viterbi path candidate tracking over time frames.';
+  String get algorithmPyinDesc => 'Viterbi-sökvägsspårning över tidsramar.';
 
   @override
-  String get weightingNone => 'None (Flat)';
+  String get weightingNone => 'Ingen (Linjär)';
 
   @override
-  String get weightingNoneDesc =>
-      'Raw unweighted linear audio frequency spectrum.';
+  String get weightingNoneDesc => 'Ovägt linjärt ljudfrekvensspektrum.';
 
   @override
   String get windowingTophatDesc =>
-      'No windowing attenuation (highest frequency resolution).';
+      'Ingen fönsterdämpning (högsta frekvensupplösning).';
 
   @override
   String get windowingHammingDesc =>
-      'Moderate sidelobe suppression (-42 dB attenuation).';
+      'Måttlig sidolobsdämpning (-42 dB dämpning).';
 
   @override
   String get windowingHanningDesc =>
-      'Smooth cos^2 window with strong sidelobe drop-off.';
+      'Jämnt cos²-fönster med stark sidolobsdämpning.';
 
   @override
-  String get pureBlackOled => 'Pure Black (OLED)';
+  String get pureBlackOled => 'Helt svart (OLED)';
+
+  @override
+  String get cancel => 'Avbryt';
+
+  @override
+  String get confirm => 'Bekräfta';
+
+  @override
+  String get actions => 'Åtgärder';
+
+  @override
+  String get searchStretchTuningsHint => 'Sök sträckta stämningar...';
+
+  @override
+  String get deleteStretchTuning => 'Ta bort sträckt stämning';
+
+  @override
+  String deleteStretchTuningConfirm(String name) {
+    return 'Är du säker på att du vill ta bort \"$name\"?';
+  }
+
+  @override
+  String get newStretchTuning => 'Ny sträckt stämning';
+
+  @override
+  String get noStretchPointsDefined =>
+      'Inga sträckningspunkter definierade.\nTryck på + för att lägga till.';
+
+  @override
+  String get editStretchPoint => 'Redigera sträckningspunkt';
+
+  @override
+  String get addStretchPoint => 'Lägg till sträckningspunkt';
+
+  @override
+  String get frequencyHz => 'Frekvens (Hz)';
+
+  @override
+  String get stretchCents => 'Sträckning (Cent)';
+
+  @override
+  String get frequencyMustBeIncreasing => 'Måste vara > föregående';
+
+  @override
+  String get createNewStretchTuning => 'Skapa ny sträckt stämning';
+
+  @override
+  String get predefinedSection => 'FÖRDEFINIERADE';
+
+  @override
+  String get customSection => 'ANPASSADE';
 }

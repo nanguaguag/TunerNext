@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/stretch_tuning/stretch_tuning.dart';
+import '../../l10n/app_localizations.dart';
 import '../plot/gesture_based_viewport.dart';
 import '../plot/plot_window_outline.dart';
 import '../stretchtuning/modify_stretch_tuning_line_dialog.dart';
@@ -153,10 +154,11 @@ class _StretchTuningEditorScreenState extends State<StretchTuningEditorScreen> {
     final isMonotonic = currentTuning.isMonotonic;
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Stretch Tuning Editor'),
+        title: Text(l10n?.stretchTuningEditor ?? 'Stretch Tuning Editor'),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
@@ -175,12 +177,12 @@ class _StretchTuningEditorScreenState extends State<StretchTuningEditorScreen> {
                     Navigator.of(context).pop();
                   }
                 : null,
-            child: const Text('Save'),
+            child: Text(l10n?.save ?? 'Save'),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        tooltip: 'Add stretch point',
+        tooltip: l10n?.addStretchPoint ?? 'Add stretch point',
         onPressed: _onAddLine,
         child: const Icon(Icons.add),
       ),
@@ -268,12 +270,14 @@ class _StretchTuningEditorScreenState extends State<StretchTuningEditorScreen> {
   }
 
   Widget _buildTextFields() {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       children: [
         TextField(
           controller: _nameController,
           decoration: InputDecoration(
-            labelText: 'Name',
+            labelText: l10n?.name ?? 'Name',
             suffixIcon: IconButton(
               icon: const Icon(Icons.clear, size: 18),
               onPressed: () => _nameController.clear(),
@@ -286,7 +290,7 @@ class _StretchTuningEditorScreenState extends State<StretchTuningEditorScreen> {
         TextField(
           controller: _descController,
           decoration: InputDecoration(
-            labelText: 'Description',
+            labelText: l10n?.description ?? 'Description',
             suffixIcon: IconButton(
               icon: const Icon(Icons.clear, size: 18),
               onPressed: () => _descController.clear(),

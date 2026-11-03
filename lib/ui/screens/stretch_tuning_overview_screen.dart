@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/stretch_tuning/predefined_stretch_tunings.dart';
 import '../../domain/stretch_tuning/stretch_tuning.dart';
+import '../../l10n/app_localizations.dart';
 import 'stretch_tuning_editor_screen.dart';
 
 /// Screen listing available stretch tunings (Predefined and Custom) with selection and editing.
@@ -97,15 +98,19 @@ class _StretchTuningOverviewScreenState
   }
 
   void _onDelete(StretchTuning tuning) {
+    final l10n = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Stretch Tuning'),
-        content: Text('Are you sure you want to delete "${tuning.name}"?'),
+        title: Text(l10n?.deleteStretchTuning ?? 'Delete Stretch Tuning'),
+        content: Text(
+          l10n?.deleteStretchTuningConfirm(tuning.name) ??
+              'Are you sure you want to delete "${tuning.name}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n?.cancel ?? 'Cancel'),
           ),
           FilledButton(
             onPressed: () {
@@ -120,7 +125,7 @@ class _StretchTuningOverviewScreenState
               });
               widget.onCustomStretchTuningsChanged?.call(_customTunings);
             },
-            child: const Text('Delete'),
+            child: Text(l10n?.delete ?? 'Delete'),
           ),
         ],
       ),
@@ -130,10 +135,12 @@ class _StretchTuningOverviewScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final filteredPredefined = _predefinedTunings.where((t) {
       if (_searchQuery.isEmpty) return true;
-      return t.name.toLowerCase().contains(_searchQuery.toLowerCase());
+      final name = _localizedTuningName(t, l10n);
+      return name.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
 
     final filteredCustom = _customTunings.where((t) {
@@ -142,9 +149,9 @@ class _StretchTuningOverviewScreenState
     }).toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Stretch Tuning')),
+      appBar: AppBar(title: Text(l10n?.stretchTuning ?? 'Stretch Tuning')),
       floatingActionButton: FloatingActionButton(
-        tooltip: 'Create new stretch tuning',
+        tooltip: l10n?.createNewStretchTuning ?? 'Create new stretch tuning',
         onPressed: _onAddNew,
         child: const Icon(Icons.add),
       ),
@@ -158,7 +165,9 @@ class _StretchTuningOverviewScreenState
             child: TextField(
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.search),
-                hintText: 'Search stretch tunings...',
+                hintText:
+                    l10n?.searchStretchTuningsHint ??
+                    'Search stretch tunings...',
                 isDense: true,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
@@ -174,7 +183,7 @@ class _StretchTuningOverviewScreenState
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 4.0),
                     child: Text(
-                      'PREDEFINED',
+                      l10n?.predefinedSection ?? 'PREDEFINED',
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -189,7 +198,7 @@ class _StretchTuningOverviewScreenState
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 4.0),
                     child: Text(
-                      'CUSTOM',
+                      l10n?.customSection ?? 'CUSTOM',
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -208,26 +217,45 @@ class _StretchTuningOverviewScreenState
     );
   }
 
+  String _localizedTuningName(StretchTuning t, AppLocalizations? l10n) {
+    if (t.stableId == PredefinedStretchTunings.idNoStretch) {
+      return l10n?.noStretchTuning ?? t.name;
+    }
+    if (t.stableId == PredefinedStretchTunings.idRailsback) {
+      return l10n?.railsback ?? t.name;
+    }
+    return t.name;
+  }
+
+  String _localizedTuningDescription(StretchTuning t, AppLocalizations? l10n) {
+    if (t.stableId == PredefinedStretchTunings.idNoStretch) {
+      return l10n?.stretchTuningOff ?? t.description;
+    }
+    if (t.stableId == PredefinedStretchTunings.idRailsback) {
+      return l10n?.railsbackDescription ?? t.description;
+    }
+    return t.description;
+  }
+
   Widget _buildTuningTile(StretchTuning tuning, {required bool isCustom}) {
     final isSelected = tuning.stableId == _selectedId;
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final displayName = _localizedTuningName(tuning, l10n);
+    final displayDesc = _localizedTuningDescription(tuning, l10n);
 
     return ListTile(
       leading: isSelected
           ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
           : const Icon(Icons.radio_button_unchecked),
       title: Text(
-        tuning.name,
+        displayName,
         style: TextStyle(
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
-      subtitle: tuning.description.isNotEmpty
-          ? Text(
-              tuning.description,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            )
+      subtitle: displayDesc.isNotEmpty
+          ? Text(displayDesc, maxLines: 2, overflow: TextOverflow.ellipsis)
           : null,
       trailing: isCustom
           ? Row(
