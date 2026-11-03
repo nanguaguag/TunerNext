@@ -22,6 +22,40 @@ class NotationIcons {
   <path fill="currentColor" stroke="none" stroke-width="0.0797" stroke-linecap="butt" stroke-linejoin="miter" d="m16.129,11.855c-0.131,-0.001 -0.398,0.063 -0.535,0.136 0,0 0.159,8.22 0.17,8.589 0.013,0.435 0.854,0.515 1.145,0.054 0.146,-0.231 0.297,-0.333 0.601,-0.561 0.572,-0.428 2.215,-1.444 1.476,-2.845 -0.934,-1.77 -2.345,-0.444 -2.345,-0.444l0.119,-4.822c-0.127,-0.077 -0.501,-0.108 -0.632,-0.109zM17.869,18.346c-0.158,0.706 -0.449,0.795 -1.069,1.314 -0.031,-0.451 -0.063,-1.007 -0.038,-1.653 0.015,-1.165 1.282,-0.745 1.107,0.338z"/>
   <path fill="none" stroke="currentColor" stroke-width="1.763" stroke-linecap="round" stroke-linejoin="miter" d="m17.619,3.115 l-11.449,17.9"/>
 </svg>''';
+
+  /// 1:1 vector icon for Stretch Tuning, adapted from Android `res/drawable/ic_stretch.xml`.
+  static const String stretchTuningSvg =
+      '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="24" height="24">
+  <path fill="currentColor" stroke="none" d="M9.282,3.49h4.769v18.394h-4.769z"/>
+  <path fill="currentColor" stroke="none" d="M16.216,3.49h4.769v18.394h-4.769z"/>
+  <path fill="none" stroke="currentColor" stroke-width="1.103" d="m11.667,26.935 l0,-5.052"/>
+  <path fill="none" stroke="currentColor" stroke-width="1.103" d="m18.601,26.935 l0,-5.052"/>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.124" d="m23.579,19.681 l4.323,-4.661 -4.323,-4.661"/>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.124" d="m6.768,10.36 l-4.323,4.661 4.323,4.661"/>
+  <path fill="none" stroke="currentColor" stroke-width="1.12" d="M5.492,26.463H25.009"/>
+  <path fill="none" stroke="currentColor" stroke-width="1.136" d="M4.861,3.706H24.956"/>
+</svg>''';
+}
+
+/// Widget rendering the Stretch Tuning icon.
+class StretchTuningIconWidget extends StatelessWidget {
+  const StretchTuningIconWidget({super.key, this.size = 24.0, this.color});
+
+  final double size;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveColor =
+        color ?? Theme.of(context).colorScheme.onSurfaceVariant;
+
+    return SvgPicture.string(
+      NotationIcons.stretchTuningSvg,
+      width: size,
+      height: size,
+      colorFilter: ColorFilter.mode(effectiveColor, BlendMode.srcIn),
+    );
+  }
 }
 
 /// Widget rendering either the Prefer Sharp or Prefer Flat icon.

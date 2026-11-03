@@ -26,9 +26,28 @@ void main() {
       expect(find.text('440.0 Hz'), findsOneWidget);
       expect(find.text('EDO 12'), findsOneWidget);
       expect(find.byType(PreferFlatIconWidget), findsOneWidget);
-      // No stretch tuning cell by default
+      expect(find.byType(StretchTuningIconWidget), findsOneWidget);
       expect(find.text('Piano'), findsNothing);
     });
+
+    testWidgets(
+      'renders StretchTuningIconWidget when stretch tuning is No Stretch Tuning',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: TunerTheme.light(),
+            home: const Scaffold(
+              bottomNavigationBar: QuickSettingsBar(
+                stretchTuningName: 'No Stretch Tuning',
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byType(StretchTuningIconWidget), findsOneWidget);
+        expect(find.text('No Stretch Tuning'), findsNothing);
+      },
+    );
 
     testWidgets(
       'renders stretch tuning cell when stretchTuningName is provided',

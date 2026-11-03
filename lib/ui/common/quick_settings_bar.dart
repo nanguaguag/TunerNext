@@ -123,25 +123,62 @@ class QuickSettingsBar extends StatelessWidget {
             ),
           ),
 
-          // 4. Stretch tuning cell (if stretch tuning active)
-          if (stretchTuningName != null && stretchTuningName!.isNotEmpty)
-            Expanded(
-              child: InkWell(
-                onTap: onStretchTuningClicked,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: Text(
-                      stretchTuningName!,
-                      textAlign: TextAlign.center,
-                      style: textStyle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+          // 4. Stretch tuning cell with icon representation
+          Expanded(
+            child: InkWell(
+              onTap: onStretchTuningClicked,
+              child: Builder(
+                builder: (context) {
+                  final isNoStretch =
+                      stretchTuningName == null ||
+                      stretchTuningName!.isEmpty ||
+                      stretchTuningName == 'No Stretch Tuning' ||
+                      stretchTuningName == '无延展调音';
+
+                  return Tooltip(
+                    message: isNoStretch
+                        ? (stretchTuningName ?? 'Stretch Tuning')
+                        : stretchTuningName!,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: isNoStretch
+                            ? StretchTuningIconWidget(
+                                size: 24.0,
+                                color: colorScheme.onSurfaceVariant.withValues(
+                                  alpha: 0.6,
+                                ),
+                              )
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  StretchTuningIconWidget(
+                                    size: 18.0,
+                                    color: colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 4.0),
+                                  Flexible(
+                                    child: Text(
+                                      stretchTuningName!,
+                                      textAlign: TextAlign.center,
+                                      style: textStyle.copyWith(
+                                        color: colorScheme.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
+          ),
         ],
       ),
     );
