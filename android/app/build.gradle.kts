@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "de.moekadu.tuner_flutter"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
