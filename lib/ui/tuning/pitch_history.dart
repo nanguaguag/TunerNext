@@ -1,5 +1,7 @@
 import 'dart:math' as math;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/theme/tuner_colors.dart';
 import '../../domain/models/musical_note.dart';
@@ -278,85 +280,131 @@ class _PitchHistoryState extends State<PitchHistory>
     final effectiveMidiMin = centerMidi - halfSpan;
     final effectiveMidiMax = centerMidi + halfSpan;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        setState(() {
-          _isUserInteracting = false;
-          _panDeltaMidi = 0.0;
-          _zoomFactor = 1.0;
-        });
-        _checkAnimateRange();
+    return Listener(
+      onPointerSignal: (pointerSignal) {
+        if (pointerSignal is PointerScrollEvent) {
+          final renderBox = context.findRenderObject() as RenderBox?;
+          if (renderBox == null) return;
+          final height = renderBox.size.height;
+          if (height <= 0) return;
+
+          final span = math.max(0.1, _currentMidiMax - _currentMidiMin);
+          final isCmdOrCtrl =
+              HardwareKeyboard.instance.isMetaPressed ||
+              HardwareKeyboard.instance.isControlPressed;
+          if (isCmdOrCtrl) {
+            final scaleChange = pointerSignal.scrollDelta.dy > 0 ? 1.08 : 0.92;
+            setState(() {
+              _isUserInteracting = true;
+              _zoomFactor = (_zoomFactor * scaleChange).clamp(0.2, 5.0);
+            });
+          } else {
+            final deltaMidi = (pointerSignal.scrollDelta.dy / height) * span;
+            setState(() {
+              _isUserInteracting = true;
+              _panDeltaMidi -= deltaMidi;
+            });
+          }
+        }
       },
-      onScaleStart: (details) {
-        _prevScale = 1.0;
-        _prevFocal = details.localFocalPoint;
-      },
-      onScaleUpdate: (details) {
+      onPointerPanZoomUpdate: (event) {
         final renderBox = context.findRenderObject() as RenderBox?;
         if (renderBox == null) return;
         final height = renderBox.size.height;
         if (height <= 0) return;
 
-        final dy = details.localFocalPoint.dy - _prevFocal.dy;
         final span = math.max(0.1, _currentMidiMax - _currentMidiMin);
-        // Drag down reveals higher notes above; drag up reveals lower notes
-        final deltaMidi = (dy / height) * span;
-
-        final scaleDelta = details.scale / _prevScale;
-        _prevScale = details.scale;
-        _prevFocal = details.localFocalPoint;
+        final deltaMidi = (event.panDelta.dy / height) * span;
+        final scaleDelta = event.scale;
 
         setState(() {
           _isUserInteracting = true;
           _panDeltaMidi += deltaMidi;
-          if ((scaleDelta - 1.0).abs() > 0.01) {
+          if ((scaleDelta - 1.0).abs() > 0.005) {
             _zoomFactor = (_zoomFactor / scaleDelta).clamp(0.2, 5.0);
           }
         });
       },
-      child: ListenableBuilder(
-        listenable: widget.state,
-        builder: (context, _) {
-          return CustomPaint(
-            size: Size.infinite,
-            painter: _PitchHistoryPainter(
-              state: widget.state,
-              targetNote: widget.targetNote,
-              targetFrequency: resolvedTargetFreq,
-              tuningState: widget.tuningState,
-              toleranceInCents: widget.toleranceInCents,
-              padding: widget.plotWindowPadding,
-              outline: widget.plotWindowOutline,
-              lineWidth: widget.lineWidth,
-              lineWidthInactive: widget.lineWidthInactive,
-              lineColor: resolvedLineColor,
-              lineColorInactive: resolvedLineColorInactive,
-              pointSize: widget.pointSize,
-              pointSizeInactive: widget.pointSizeInactive,
-              colorInTune: resolvedInTuneColor,
-              colorOutOfTune: resolvedOutOfTuneColor,
-              colorInactive: resolvedInactiveColor,
-              colorOnInTune: resolvedOnInTuneColor,
-              colorOnOutOfTune: resolvedOnOutOfTuneColor,
-              colorOnInactive: resolvedOnInactiveColor,
-              targetNoteLineWidth: widget.targetNoteLineWidth,
-              toleranceLineColor: resolvedToleranceLineColor,
-              toleranceLabelStyle: resolvedToleranceLabelStyle,
-              toleranceLabelColor: resolvedToleranceLabelColor,
-              tickLineWidth: widget.tickLineWidth,
-              tickLineColor: resolvedTickLineColor,
-              tickLabelStyle: resolvedTickLabelStyle,
-              tickLabelColor: resolvedTickLabelColor,
-              centDeviationStyle: resolvedCentDeviationStyle,
-              centDeviationColor: resolvedCentDeviationColor,
-              preferSharp: widget.preferSharp,
-              midiMin: effectiveMidiMin,
-              midiMax: effectiveMidiMax,
-              isUserInteracting: _isUserInteracting,
-            ),
-          );
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          setState(() {
+            _isUserInteracting = false;
+            _panDeltaMidi = 0.0;
+            _zoomFactor = 1.0;
+          });
+          _checkAnimateRange();
         },
+        onScaleStart: (details) {
+          _prevScale = 1.0;
+          _prevFocal = details.localFocalPoint;
+        },
+        onScaleUpdate: (details) {
+          final renderBox = context.findRenderObject() as RenderBox?;
+          if (renderBox == null) return;
+          final height = renderBox.size.height;
+          if (height <= 0) return;
+
+          final dy = details.localFocalPoint.dy - _prevFocal.dy;
+          final span = math.max(0.1, _currentMidiMax - _currentMidiMin);
+          // Drag down reveals higher notes above; drag up reveals lower notes
+          final deltaMidi = (dy / height) * span;
+
+          final scaleDelta = details.scale / _prevScale;
+          _prevScale = details.scale;
+          _prevFocal = details.localFocalPoint;
+
+          setState(() {
+            _isUserInteracting = true;
+            _panDeltaMidi += deltaMidi;
+            if ((scaleDelta - 1.0).abs() > 0.01) {
+              _zoomFactor = (_zoomFactor / scaleDelta).clamp(0.2, 5.0);
+            }
+          });
+        },
+        child: ListenableBuilder(
+          listenable: widget.state,
+          builder: (context, _) {
+            return CustomPaint(
+              size: Size.infinite,
+              painter: _PitchHistoryPainter(
+                state: widget.state,
+                targetNote: widget.targetNote,
+                targetFrequency: resolvedTargetFreq,
+                tuningState: widget.tuningState,
+                toleranceInCents: widget.toleranceInCents,
+                padding: widget.plotWindowPadding,
+                outline: widget.plotWindowOutline,
+                lineWidth: widget.lineWidth,
+                lineWidthInactive: widget.lineWidthInactive,
+                lineColor: resolvedLineColor,
+                lineColorInactive: resolvedLineColorInactive,
+                pointSize: widget.pointSize,
+                pointSizeInactive: widget.pointSizeInactive,
+                colorInTune: resolvedInTuneColor,
+                colorOutOfTune: resolvedOutOfTuneColor,
+                colorInactive: resolvedInactiveColor,
+                colorOnInTune: resolvedOnInTuneColor,
+                colorOnOutOfTune: resolvedOnOutOfTuneColor,
+                colorOnInactive: resolvedOnInactiveColor,
+                targetNoteLineWidth: widget.targetNoteLineWidth,
+                toleranceLineColor: resolvedToleranceLineColor,
+                toleranceLabelStyle: resolvedToleranceLabelStyle,
+                toleranceLabelColor: resolvedToleranceLabelColor,
+                tickLineWidth: widget.tickLineWidth,
+                tickLineColor: resolvedTickLineColor,
+                tickLabelStyle: resolvedTickLabelStyle,
+                tickLabelColor: resolvedTickLabelColor,
+                centDeviationStyle: resolvedCentDeviationStyle,
+                centDeviationColor: resolvedCentDeviationColor,
+                preferSharp: widget.preferSharp,
+                midiMin: effectiveMidiMin,
+                midiMax: effectiveMidiMax,
+                isUserInteracting: _isUserInteracting,
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -815,6 +863,9 @@ class _PitchHistoryPainter extends CustomPainter {
         oldDelegate.preferSharp != preferSharp ||
         oldDelegate.outline != outline ||
         oldDelegate.padding != padding ||
+        oldDelegate.midiMin != midiMin ||
+        oldDelegate.midiMax != midiMax ||
+        oldDelegate.isUserInteracting != isUserInteracting ||
         oldDelegate.state != state;
   }
 }

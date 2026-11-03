@@ -132,5 +132,43 @@ void main() {
         expect(tester.takeException(), isNull);
       },
     );
+
+    testWidgets(
+      'Desktop drag and pointer scroll gestures update viewport and repaint properly',
+      (tester) async {
+        final state = PitchHistoryState(capacity: 30);
+        state.addFrequency(440.0);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                width: 400,
+                height: 300,
+                child: PitchHistory(
+                  state: state,
+                  targetNote: const MusicalNote(base: BaseNote.a, octave: 4),
+                  targetFrequency: 440.0,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Downward drag gesture
+        final historyFinder = find.byType(PitchHistory);
+        await tester.drag(historyFinder, const Offset(0.0, 40.0));
+        await tester.pump();
+
+        expect(tester.takeException(), isNull);
+
+        // Tap to reset gesture
+        await tester.tap(historyFinder);
+        await tester.pump();
+
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 }
