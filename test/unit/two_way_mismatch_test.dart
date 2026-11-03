@@ -132,5 +132,29 @@ void main() {
       expect(emptyPeaks.frequency, equals(0.0));
       expect(emptyPeaks.confidence, equals(0.0));
     });
+
+    test(
+      'high-frequency whistle tone (1600 Hz) does not fall into subharmonic trap',
+      () {
+        final detector = TwoWayMismatchDetector();
+        const sampleRate = 44100;
+        const freq = 1620.0;
+        const size = 2048;
+
+        final samples = Float32List(size);
+        for (var i = 0; i < size; i++) {
+          samples[i] = 0.8 * math.sin(2.0 * math.pi * freq * (i / sampleRate));
+        }
+
+        final result = detector.detectPitch(
+          samples: samples,
+          sampleRate: sampleRate,
+        );
+
+        expect(result.isSilence, isFalse);
+        expect(result.frequency, closeTo(1620.0, 5.0));
+        expect(result.confidence, greaterThan(0.5));
+      },
+    );
   });
 }

@@ -192,8 +192,14 @@ class TwoWayMismatchDetector implements PitchDetector {
       }
     }
 
-    // Candidate generation from top peaks and subharmonics
-    final topPeaks = peaks.take(8).toList();
+    // Candidate generation from top peaks (sorted by amplitude) and subharmonics
+    final peaksByAmp = List<SpectralPeak>.from(peaks)
+      ..sort((a, b) => b.amplitude.compareTo(a.amplitude));
+    final topPeaks = peaksByAmp.take(8).toList();
+    final strongestPeakFreq = topPeaks.isNotEmpty
+        ? topPeaks.first.frequency
+        : 0.0;
+
     for (final p in topPeaks) {
       for (var div = 1; div <= 8; div++) {
         final cand = p.frequency / div;
@@ -219,13 +225,21 @@ class TwoWayMismatchDetector implements PitchDetector {
     var minError = double.infinity;
 
     for (final cand in candidates) {
-      final error = computeMismatch(
+      var error = computeMismatch(
         cand,
         sortedByFreq,
         maxHarmonics: maxHarmonics,
         inharmonicity: inharmonicity,
         rho: rho,
       );
+
+      // Penalize subharmonic candidates if the dominant peak is much higher
+      if (strongestPeakFreq > 0.0 && cand < strongestPeakFreq * 0.9) {
+        final subharmonicFactor =
+            1.0 + 0.15 * (math.log(strongestPeakFreq / cand) / math.ln2);
+        error *= subharmonicFactor;
+      }
+
       if (error < minError) {
         minError = error;
         bestCandidate = cand;
