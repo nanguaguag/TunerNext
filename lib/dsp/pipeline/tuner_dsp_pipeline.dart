@@ -312,19 +312,31 @@ class TunerDspPipeline {
 
     // 3c: Outlier-Removing Smoother
     var smoothed = freq;
+    var isOutlier = false;
     if (useSmoother) {
       final s = _smoother(freq);
       if (s > 0.0) {
         smoothed = s;
       } else if (_smoother.isLastValueOutlier) {
-        // Reject outlier and maintain steady-state mean, strictly preventing outlier spikes
-        smoothed = _smoother.smoothedValue > 0.0
-            ? _smoother.smoothedValue
-            : _smoother.currentMean;
+        // Outlier spike: reject immediately and suppress output to avoid stale ghost pitch
+        isOutlier = true;
+        smoothed = 0.0;
       } else {
         // Buffer is warming up with a valid (non-outlier) sample
         smoothed = _smoother.currentMean > 0.0 ? _smoother.currentMean : freq;
       }
+    }
+
+    if (isOutlier) {
+      return TunerPipelineResult(
+        rawFrequency: detection.frequency,
+        smoothedFrequency: 0.0,
+        confidence: 0.0,
+        rms: rms,
+        isSilence: true,
+        algorithm: algorithm,
+        executionTime: stopwatch.elapsed,
+      );
     }
 
     return TunerPipelineResult(

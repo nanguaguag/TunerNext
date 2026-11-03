@@ -124,5 +124,30 @@ void main() {
       final res = pipeline.process(silence, sampleRate: sampleRate);
       expect(res.isSilence, isTrue);
     });
+
+    test(
+      'Isolated single-frame non-harmonic outlier is suppressed as silence',
+      () {
+        final pipeline = TunerDspPipeline(
+          frameSize: frameSize,
+          algorithm: PitchAlgorithm.mpm,
+          useSmoother: true,
+        );
+
+        final frame440 = generateSine(440.0, 0.05).sublist(0, frameSize);
+        final frameSpike = generateSine(1300.0, 0.05).sublist(0, frameSize);
+
+        // Warm up at 440 Hz (2 consecutive frames)
+        pipeline.process(frame440, sampleRate: sampleRate);
+        final res440 = pipeline.process(frame440, sampleRate: sampleRate);
+        expect(res440.isSilence, isFalse);
+        expect(res440.smoothedFrequency, closeTo(440.0, 0.5));
+
+        // Single frame jump to 1300 Hz: median filter + smoother keep steady 440 Hz
+        final resSpike = pipeline.process(frameSpike, sampleRate: sampleRate);
+        expect(resSpike.isSilence, isFalse);
+        expect(resSpike.smoothedFrequency, closeTo(440.0, 0.5));
+      },
+    );
   });
 }
