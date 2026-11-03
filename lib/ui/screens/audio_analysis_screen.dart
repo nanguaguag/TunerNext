@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
+import '../../audio/audio_file_loader.dart';
 import '../../domain/instruments/instrument.dart';
 import '../../domain/instruments/predefined_instruments.dart';
 import '../../domain/models/dsp_enums.dart';
@@ -9,6 +11,7 @@ import '../../domain/models/musical_note.dart';
 import '../../domain/models/tuning_state.dart';
 import '../../domain/tuning/frequency_to_note_converter.dart';
 import '../../dsp/analysis/offline_audio_analyzer.dart';
+import '../instruments/instruments_screen.dart';
 import '../instruments/string_with_info.dart';
 import '../instruments/strings.dart';
 import '../plot/plot_window_outline.dart';
@@ -23,13 +26,24 @@ class AudioAnalysisScreen extends StatefulWidget {
     super.key,
     required this.analysisResult,
     required this.fileName,
+    this.decodedAudio,
+    this.audioPath,
     this.initialInstrument,
     this.onSelectNewFile,
     this.onReanalyzeWithConfig,
+    this.mpmCutoffClarity = 0.45,
+    this.mpmPeakThresholdRatio = 0.85,
+    this.twmMaxHarmonics = 10,
+    this.twmInharmonicity = 0.0,
+    this.twmMaxMismatchError = 0.40,
+    this.useMedianFilter = true,
+    this.useOctaveJumpGate = true,
   });
 
   final OfflineAnalysisResult analysisResult;
   final String fileName;
+  final DecodedAudio? decodedAudio;
+  final String? audioPath;
   final Instrument? initialInstrument;
   final VoidCallback? onSelectNewFile;
   final void Function(
@@ -37,6 +51,13 @@ class AudioAnalysisScreen extends StatefulWidget {
     AcousticWeightingMode weighting,
   )?
   onReanalyzeWithConfig;
+  final double mpmCutoffClarity;
+  final double mpmPeakThresholdRatio;
+  final int twmMaxHarmonics;
+  final double twmInharmonicity;
+  final double twmMaxMismatchError;
+  final bool useMedianFilter;
+  final bool useOctaveJumpGate;
 
   @override
   State<AudioAnalysisScreen> createState() => _AudioAnalysisScreenState();
@@ -49,7 +70,12 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
 
   double _currentTime = 0.0;
   bool _isPlaying = false;
+  bool _isMuted = false;
+  bool _isAnalyzing = false;
   Timer? _playbackTimer;
+  AudioPlayer? _audioPlayer;
+  StreamSubscription? _posSub;
+  StreamSubscription? _playerCompleteSub;
 
   int? _lockedStringKey;
   MusicalNote _targetNote = const MusicalNote(base: BaseNote.a, octave: 4);
@@ -82,11 +108,41 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
     }
 
     _updateStateAtTime(0.0);
+
+    try {
+      _audioPlayer = AudioPlayer();
+      _posSub = _audioPlayer?.onPositionChanged.listen((pos) {
+        if (_isPlaying && mounted) {
+          setState(() {
+            _currentTime = (pos.inMilliseconds / 1000.0).clamp(
+              0.0,
+              _result.durationSeconds,
+            );
+            _updateStateAtTime(_currentTime);
+          });
+        }
+      });
+      _playerCompleteSub = _audioPlayer?.onPlayerComplete.listen((_) {
+        if (mounted) {
+          setState(() {
+            _isPlaying = false;
+            _currentTime = _result.durationSeconds;
+            _updateStateAtTime(_currentTime);
+          });
+        }
+      });
+    } catch (_) {}
   }
 
   @override
   void dispose() {
     _playbackTimer?.cancel();
+    _posSub?.cancel();
+    _playerCompleteSub?.cancel();
+    try {
+      _audioPlayer?.stop();
+      _audioPlayer?.dispose();
+    } catch (_) {}
     super.dispose();
   }
 
@@ -125,20 +181,58 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
     setState(() {
       _updateStateAtTime(time);
     });
+    try {
+      _audioPlayer?.seek(Duration(milliseconds: (time * 1000).round()));
+    } catch (_) {}
+  }
+
+  void _toggleMute() {
+    setState(() {
+      _isMuted = !_isMuted;
+    });
+    try {
+      _audioPlayer?.setVolume(_isMuted ? 0.0 : 1.0);
+    } catch (_) {}
   }
 
   void _togglePlayback() {
     setState(() {
       _isPlaying = !_isPlaying;
       if (_isPlaying) {
+        if (_currentTime >= _result.durationSeconds - 0.05) {
+          _currentTime = 0.0;
+        }
         _startPlayback();
       } else {
         _playbackTimer?.cancel();
+        try {
+          _audioPlayer?.pause();
+        } catch (_) {}
       }
     });
   }
 
   void _startPlayback() {
+    // 1. Play real audio if audioPath is provided
+    if (widget.audioPath != null && widget.audioPath!.isNotEmpty) {
+      try {
+        final path = widget.audioPath!;
+        _audioPlayer?.setVolume(_isMuted ? 0.0 : 1.0);
+        if (path == 'builtin://whistle' || path.contains('assets/')) {
+          _audioPlayer?.play(
+            AssetSource('audio/test_music.wav'),
+            position: Duration(milliseconds: (_currentTime * 1000).round()),
+          );
+        } else {
+          _audioPlayer?.play(
+            DeviceFileSource(path),
+            position: Duration(milliseconds: (_currentTime * 1000).round()),
+          );
+        }
+      } catch (_) {}
+    }
+
+    // 2. Playback progress ticker
     _playbackTimer?.cancel();
     const intervalMs = 50;
     const stepSec = intervalMs / 1000.0;
@@ -147,18 +241,98 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
       _,
     ) {
       if (!mounted) return;
+      if (!_isPlaying) {
+        _playbackTimer?.cancel();
+        return;
+      }
       setState(() {
         final nextTime = _currentTime + stepSec;
         if (nextTime >= _result.durationSeconds) {
           _currentTime = _result.durationSeconds;
           _isPlaying = false;
           _playbackTimer?.cancel();
+          try {
+            _audioPlayer?.pause();
+          } catch (_) {}
         } else {
           _currentTime = nextTime;
         }
         _updateStateAtTime(_currentTime);
       });
     });
+  }
+
+  void _openInstrumentSelector() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => InstrumentsScreen(
+          selectedInstrument: _currentInstrument,
+          customInstruments: const [],
+          onSelectInstrument: (Instrument inst) {
+            setState(() {
+              _currentInstrument = inst;
+              _lockedStringKey = null;
+              if (inst.strings.isNotEmpty) {
+                _targetNote = inst.strings.first;
+                _targetFrequency = _pitchConverter.noteToFrequency(_targetNote);
+              }
+              _updateStateAtTime(_currentTime);
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _reanalyze(
+    PitchAlgorithm algo,
+    AcousticWeightingMode weight,
+  ) async {
+    setState(() {
+      _selectedAlgorithm = algo;
+      _selectedWeighting = weight;
+      _isAnalyzing = true;
+    });
+
+    if (widget.decodedAudio != null) {
+      try {
+        final newResult = await OfflineAudioAnalyzer.analyze(
+          samples: widget.decodedAudio!.samples,
+          sampleRate: widget.decodedAudio!.sampleRate,
+          algorithm: algo,
+          weightingMode: weight,
+          mpmCutoffClarity: widget.mpmCutoffClarity,
+          mpmPeakThresholdRatio: widget.mpmPeakThresholdRatio,
+          twmMaxHarmonics: widget.twmMaxHarmonics,
+          twmInharmonicity: widget.twmInharmonicity,
+          twmMaxMismatchError: widget.twmMaxMismatchError,
+          useMedianFilter: widget.useMedianFilter,
+          useOctaveJumpGate: widget.useOctaveJumpGate,
+        );
+        if (mounted) {
+          setState(() {
+            _result = newResult;
+            _isAnalyzing = false;
+            _updateStateAtTime(_currentTime);
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isAnalyzing = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to re-analyze audio: $e')),
+          );
+        }
+      }
+    } else {
+      if (mounted) {
+        setState(() => _isAnalyzing = false);
+      }
+    }
+
+    if (widget.onReanalyzeWithConfig != null) {
+      widget.onReanalyzeWithConfig!(algo, weight);
+    }
   }
 
   List<StringWithInfo> get _currentStringInfos {
@@ -258,9 +432,7 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
                 FilledButton(
                   onPressed: () {
                     Navigator.of(ctx).pop();
-                    if (widget.onReanalyzeWithConfig != null) {
-                      widget.onReanalyzeWithConfig!(tempAlgo, tempWeight);
-                    }
+                    _reanalyze(tempAlgo, tempWeight);
                   },
                   child: const Text('Analyze'),
                 ),
@@ -313,6 +485,7 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (_isAnalyzing) const LinearProgressIndicator(),
             // 1. Top Tuning Indicator Banner
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -328,7 +501,7 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
                 deviationCents: _deviationCents,
                 tuningState: _tuningState,
                 isLocked: _lockedStringKey != null,
-                onSelectInstrument: () {},
+                onSelectInstrument: _openInstrumentSelector,
                 onToggleLock: () {
                   setState(() {
                     if (_lockedStringKey != null) {
@@ -439,14 +612,29 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
                     ],
                   ),
 
-                  // Playback button & Config status pill
+                  // Playback button, mute button & Config status pill
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton.filledTonal(
-                        icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                        tooltip: _isPlaying ? 'Pause' : 'Play',
-                        onPressed: _togglePlayback,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton.filledTonal(
+                            icon: Icon(
+                              _isPlaying ? Icons.pause : Icons.play_arrow,
+                            ),
+                            tooltip: _isPlaying ? 'Pause' : 'Play',
+                            onPressed: _togglePlayback,
+                          ),
+                          const SizedBox(width: 8.0),
+                          IconButton(
+                            icon: Icon(
+                              _isMuted ? Icons.volume_off : Icons.volume_up,
+                            ),
+                            tooltip: _isMuted ? 'Unmute' : 'Mute',
+                            onPressed: _toggleMute,
+                          ),
+                        ],
                       ),
                       Chip(
                         avatar: const Icon(Icons.analytics_outlined, size: 16),

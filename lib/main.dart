@@ -297,37 +297,19 @@ class TunerHomeScreen extends ConsumerWidget {
             builder: (_) => AudioAnalysisScreen(
               analysisResult: result,
               fileName: fileName,
+              decodedAudio: decoded,
+              audioPath: choice,
               initialInstrument: state.currentInstrument,
+              mpmCutoffClarity: state.preferences.mpmCutoffClarity,
+              mpmPeakThresholdRatio: state.preferences.mpmPeakThresholdRatio,
+              twmMaxHarmonics: state.preferences.twmMaxHarmonics,
+              twmInharmonicity: state.preferences.twmInharmonicity,
+              twmMaxMismatchError: state.preferences.twmMaxMismatchError,
+              useMedianFilter: state.preferences.medianFilter,
+              useOctaveJumpGate: state.preferences.octaveJumpGate,
               onSelectNewFile: () {
                 Navigator.of(context).pop();
                 _openAudioAnalysis(context, ref);
-              },
-              onReanalyzeWithConfig: (algo, weight) async {
-                final newResult = await OfflineAudioAnalyzer.analyze(
-                  samples: decoded.samples,
-                  sampleRate: decoded.sampleRate,
-                  algorithm: algo,
-                  weightingMode: weight,
-                  mpmCutoffClarity: state.preferences.mpmCutoffClarity,
-                  mpmPeakThresholdRatio:
-                      state.preferences.mpmPeakThresholdRatio,
-                  twmMaxHarmonics: state.preferences.twmMaxHarmonics,
-                  twmInharmonicity: state.preferences.twmInharmonicity,
-                  twmMaxMismatchError: state.preferences.twmMaxMismatchError,
-                  useMedianFilter: state.preferences.medianFilter,
-                  useOctaveJumpGate: state.preferences.octaveJumpGate,
-                );
-                if (context.mounted) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute<void>(
-                      builder: (_) => AudioAnalysisScreen(
-                        analysisResult: newResult,
-                        fileName: fileName,
-                        initialInstrument: state.currentInstrument,
-                      ),
-                    ),
-                  );
-                }
               },
             ),
           ),
