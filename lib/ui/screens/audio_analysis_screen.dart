@@ -76,6 +76,8 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
   AudioPlayer? _audioPlayer;
   StreamSubscription? _posSub;
   StreamSubscription? _playerCompleteSub;
+  bool _isSeeking = false;
+  double? _pendingSeekTime;
 
   int? _lockedStringKey;
   MusicalNote _targetNote = const MusicalNote(base: BaseNote.a, octave: 4);
@@ -131,6 +133,24 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
           });
         }
       });
+      unawaited(_initAudioSource());
+    } catch (_) {}
+  }
+
+  Future<void> _initAudioSource() async {
+    if (widget.audioPath == null || widget.audioPath!.isEmpty) return;
+    try {
+      final path = widget.audioPath!;
+      _audioPlayer?.setVolume(_isMuted ? 0.0 : 1.0).catchError((Object _) {});
+      if (path == 'builtin://whistle' || path.contains('assets/')) {
+        await _audioPlayer
+            ?.setSource(AssetSource('audio/test_music.wav'))
+            .catchError((Object _) {});
+      } else {
+        await _audioPlayer
+            ?.setSource(DeviceFileSource(path))
+            .catchError((Object _) {});
+      }
     } catch (_) {}
   }
 
@@ -139,10 +159,8 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
     _playbackTimer?.cancel();
     _posSub?.cancel();
     _playerCompleteSub?.cancel();
-    try {
-      _audioPlayer?.stop();
-      _audioPlayer?.dispose();
-    } catch (_) {}
+    _audioPlayer?.stop().catchError((Object _) {});
+    _audioPlayer?.dispose().catchError((Object _) {});
     super.dispose();
   }
 
@@ -181,18 +199,41 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
     setState(() {
       _updateStateAtTime(time);
     });
-    try {
-      _audioPlayer?.seek(Duration(milliseconds: (time * 1000).round()));
-    } catch (_) {}
+    _performAudioSeek(time);
+  }
+
+  void _performAudioSeek(double time) {
+    if (_audioPlayer == null) return;
+    if (_isSeeking) {
+      _pendingSeekTime = time;
+      return;
+    }
+    _isSeeking = true;
+    _audioPlayer!
+        .seek(Duration(milliseconds: (time * 1000).round()))
+        .then((_) {
+          _isSeeking = false;
+          if (_pendingSeekTime != null && mounted) {
+            final next = _pendingSeekTime!;
+            _pendingSeekTime = null;
+            _performAudioSeek(next);
+          }
+        })
+        .catchError((Object _) {
+          _isSeeking = false;
+          if (_pendingSeekTime != null && mounted) {
+            final next = _pendingSeekTime!;
+            _pendingSeekTime = null;
+            _performAudioSeek(next);
+          }
+        });
   }
 
   void _toggleMute() {
     setState(() {
       _isMuted = !_isMuted;
     });
-    try {
-      _audioPlayer?.setVolume(_isMuted ? 0.0 : 1.0);
-    } catch (_) {}
+    _audioPlayer?.setVolume(_isMuted ? 0.0 : 1.0).catchError((Object _) {});
   }
 
   void _togglePlayback() {
@@ -205,9 +246,7 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
         _startPlayback();
       } else {
         _playbackTimer?.cancel();
-        try {
-          _audioPlayer?.pause();
-        } catch (_) {}
+        _audioPlayer?.pause().catchError((Object _) {});
       }
     });
   }
@@ -215,21 +254,18 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
   void _startPlayback() {
     // 1. Play real audio if audioPath is provided
     if (widget.audioPath != null && widget.audioPath!.isNotEmpty) {
-      try {
-        final path = widget.audioPath!;
-        _audioPlayer?.setVolume(_isMuted ? 0.0 : 1.0);
-        if (path == 'builtin://whistle' || path.contains('assets/')) {
-          _audioPlayer?.play(
-            AssetSource('audio/test_music.wav'),
-            position: Duration(milliseconds: (_currentTime * 1000).round()),
-          );
-        } else {
-          _audioPlayer?.play(
-            DeviceFileSource(path),
-            position: Duration(milliseconds: (_currentTime * 1000).round()),
-          );
-        }
-      } catch (_) {}
+      final path = widget.audioPath!;
+      _audioPlayer?.setVolume(_isMuted ? 0.0 : 1.0).catchError((Object _) {});
+      final seekPos = Duration(milliseconds: (_currentTime * 1000).round());
+      if (path == 'builtin://whistle' || path.contains('assets/')) {
+        _audioPlayer
+            ?.play(AssetSource('audio/test_music.wav'), position: seekPos)
+            .catchError((Object _) {});
+      } else {
+        _audioPlayer
+            ?.play(DeviceFileSource(path), position: seekPos)
+            .catchError((Object _) {});
+      }
     }
 
     // 2. Playback progress ticker
@@ -251,9 +287,7 @@ class _AudioAnalysisScreenState extends State<AudioAnalysisScreen> {
           _currentTime = _result.durationSeconds;
           _isPlaying = false;
           _playbackTimer?.cancel();
-          try {
-            _audioPlayer?.pause();
-          } catch (_) {}
+          _audioPlayer?.pause().catchError((Object _) {});
         } else {
           _currentTime = nextTime;
         }
