@@ -267,6 +267,57 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             value: _pref.medianFilter,
             onChanged: (v) => _pref.setMedianFilter(v),
           ),
+          SliderPreference(
+            title: 'MPM Cutoff Clarity',
+            subtitle:
+                'Minimum NSDF periodicity clarity required for voiced tone',
+            valueLabel: _pref.mpmCutoffClarity.toStringAsFixed(2),
+            icon: Icons.tune,
+            value: _pref.mpmCutoffClarity,
+            min: 0.10,
+            max: 0.95,
+            divisions: 17,
+            onChanged: (v) =>
+                _pref.setMpmCutoffClarity(double.parse(v.toStringAsFixed(2))),
+          ),
+          SliderPreference(
+            title: 'MPM Peak Threshold Ratio',
+            subtitle: 'Sub-harmonic peak ratio applied to global maximum',
+            valueLabel: _pref.mpmPeakThresholdRatio.toStringAsFixed(2),
+            icon: Icons.compress,
+            value: _pref.mpmPeakThresholdRatio,
+            min: 0.50,
+            max: 0.99,
+            divisions: 49,
+            onChanged: (v) => _pref.setMpmPeakThresholdRatio(
+              double.parse(v.toStringAsFixed(2)),
+            ),
+          ),
+          SliderPreference(
+            title: 'TWM Max Harmonics',
+            subtitle:
+                'Maximum predicted harmonics evaluated in Two-Way Mismatch',
+            valueLabel: '${_pref.twmMaxHarmonics}',
+            icon: Icons.format_list_numbered,
+            value: _pref.twmMaxHarmonics.toDouble(),
+            min: 3.0,
+            max: 25.0,
+            divisions: 22,
+            onChanged: (v) => _pref.setTwmMaxHarmonics(v.round()),
+          ),
+          SliderPreference(
+            title: 'TWM Max Mismatch Error',
+            subtitle: 'Maximum acceptable harmonic mismatch error threshold',
+            valueLabel: _pref.twmMaxMismatchError.toStringAsFixed(2),
+            icon: Icons.error_outline,
+            value: _pref.twmMaxMismatchError,
+            min: 0.10,
+            max: 1.00,
+            divisions: 18,
+            onChanged: (v) => _pref.setTwmMaxMismatchError(
+              double.parse(v.toStringAsFixed(2)),
+            ),
+          ),
 
           const Divider(),
 
@@ -280,6 +331,20 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             icon: Icons.science,
             value: _pref.scientificMode,
             onChanged: (v) => _pref.setScientificMode(v),
+          ),
+          SwitchPreference(
+            title: 'Staff Target Note',
+            subtitle: 'Display target reference note on musical staff (left)',
+            icon: Icons.flag_outlined,
+            value: _pref.showStaffTargetNote,
+            onChanged: (v) => _pref.setShowStaffTargetNote(v),
+          ),
+          SwitchPreference(
+            title: 'Staff Current Note',
+            subtitle: 'Display live detected pitch on musical staff (right)',
+            icon: Icons.graphic_eq,
+            value: _pref.showStaffCurrentNote,
+            onChanged: (v) => _pref.setShowStaffCurrentNote(v),
           ),
           SliderPreference(
             title: l10n?.numMovingAverage ?? 'Moving Average Smoothing',

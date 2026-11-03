@@ -16,7 +16,7 @@ const int middleC = 28; // C4
 
 /// Maximum number of ledger lines drawn above/below the staff;
 /// notes beyond are drawn shifted by octaves and the clef gets an octave mark (8, 15, ...).
-const int maxLedgerLines = 3;
+const int maxLedgerLines = 5;
 
 /// Clef setup of the note staff.
 enum StaffClef {

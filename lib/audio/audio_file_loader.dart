@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/services.dart' show rootBundle;
 
 /// Represents decoded uncompressed single-channel float audio data.
 class DecodedAudio {
@@ -131,6 +132,29 @@ class AudioFileLoader {
     );
   }
 
+  /// Loads and decodes an audio file from Flutter assets bundle.
+  static Future<DecodedAudio> loadFromAsset(String assetPath) async {
+    final byteData = await rootBundle.load(assetPath);
+    final bytes = byteData.buffer.asUint8List();
+    return decodeWavBytes(bytes);
+  }
+
+  /// Loads the built-in test whistle audio sample seamlessly across all platforms.
+  static Future<DecodedAudio> loadDefaultTestWhistle() async {
+    try {
+      return await loadFromAsset('assets/audio/test_music.wav');
+    } catch (_) {
+      // Fallback for standalone test runners or dev paths
+      final candidates = ['assets/audio/test_music.wav', 'docs/test_music.m4a'];
+      for (final p in candidates) {
+        if (File(p).existsSync()) {
+          return await loadFromFile(p);
+        }
+      }
+      rethrow;
+    }
+  }
+
   /// Loads and decodes an audio file from local storage at [path].
   /// Supports direct WAV loading, and transcode fallback (via macOS `afconvert` or `ffmpeg`) for m4a/mp3.
   static Future<DecodedAudio> loadFromFile(String path) async {
@@ -145,24 +169,30 @@ class AudioFileLoader {
       return decodeWavBytes(bytes);
     }
 
-    // For m4a, mp3, aac, flac: try converting via afconvert (macOS built-in) or ffmpeg
+    // For m4a, mp3, aac, flac: try converting via /usr/bin/afconvert or ffmpeg
     final tempDir = Directory.systemTemp;
     final tempWavPath =
         '${tempDir.path}/tuner_transcode_${DateTime.now().millisecondsSinceEpoch}.wav';
 
     ProcessResult? result;
     if (Platform.isMacOS) {
-      // macOS ships with afconvert natively
-      result = await Process.run('afconvert', [
-        '-f',
-        'WAVE',
-        '-d',
-        'LEI16',
-        '-c',
-        '1',
-        path,
-        tempWavPath,
-      ]);
+      // Try absolute path /usr/bin/afconvert first
+      const afconvertPath = '/usr/bin/afconvert';
+      final exe = File(afconvertPath).existsSync()
+          ? afconvertPath
+          : 'afconvert';
+      try {
+        result = await Process.run(exe, [
+          '-f',
+          'WAVE',
+          '-d',
+          'LEI16',
+          '-c',
+          '1',
+          path,
+          tempWavPath,
+        ]);
+      } catch (_) {}
     }
 
     if (result == null || result.exitCode != 0) {
@@ -178,9 +208,7 @@ class AudioFileLoader {
           '44100',
           tempWavPath,
         ]);
-      } catch (_) {
-        // ffmpeg not installed
-      }
+      } catch (_) {}
     }
 
     final tempFile = File(tempWavPath);
@@ -196,7 +224,7 @@ class AudioFileLoader {
     }
 
     throw FormatException(
-      'Cannot decode non-WAV audio format without system converter (afconvert/ffmpeg): $path',
+      'Cannot decode non-WAV audio format without system converter (afconvert/ffmpeg): $path. Please select a standard .wav file.',
     );
   }
 }

@@ -110,6 +110,13 @@ class OfflineAudioAnalyzer {
     int stride = 512,
     PitchAlgorithm algorithm = PitchAlgorithm.mpm,
     AcousticWeightingMode weightingMode = AcousticWeightingMode.none,
+    double mpmCutoffClarity = 0.45,
+    double mpmPeakThresholdRatio = 0.85,
+    int twmMaxHarmonics = 10,
+    double twmInharmonicity = 0.0,
+    double twmMaxMismatchError = 0.40,
+    bool useMedianFilter = true,
+    bool useOctaveJumpGate = true,
   }) async {
     final numSamples = samples.length;
     final durationSeconds = numSamples > 0 ? numSamples / sampleRate : 0.0;
@@ -119,7 +126,13 @@ class OfflineAudioAnalyzer {
       algorithm: algorithm,
       weightingMode: weightingMode,
       smootherOrder: 3,
-      useOctaveJumpGate: true,
+      useMedianFilter: useMedianFilter,
+      useOctaveJumpGate: useOctaveJumpGate,
+      mpmCutoffClarity: mpmCutoffClarity,
+      mpmPeakThresholdRatio: mpmPeakThresholdRatio,
+      twmMaxHarmonics: twmMaxHarmonics,
+      twmInharmonicity: twmInharmonicity,
+      twmMaxMismatchError: twmMaxMismatchError,
     );
 
     final correlator = Correlation(windowSize);

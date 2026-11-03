@@ -126,6 +126,8 @@ class TunerController extends Notifier<TunerAppState> {
 
   void _onAudioAnalysisResult(AudioAnalysisResult result) {
     double? detectedFreq;
+    MusicalNote? detectedNote;
+    double centsDev = 0.0;
     TuningState stateParam = TuningState.unknown;
 
     if (!result.isSilence &&
@@ -134,6 +136,8 @@ class TunerController extends Notifier<TunerAppState> {
       detectedFreq = result.smoothedFrequency;
       final assessment = _pitchConverter.evaluatePitch(detectedFreq);
       stateParam = assessment.tuningState;
+      detectedNote = assessment.target.note;
+      centsDev = assessment.centsDeviation;
     }
 
     LineCoordinates? freqData;
@@ -163,6 +167,9 @@ class TunerController extends Notifier<TunerAppState> {
     state = state.copyWith(
       currentFrequency: detectedFreq,
       clearCurrentFrequency: detectedFreq == null,
+      detectedNote: detectedNote,
+      clearDetectedNote: detectedNote == null,
+      centsDeviation: centsDev,
       tuningState: stateParam,
       spectrumAmplitudes: result.spectrumAmplitudes,
       correlationValues: result.correlationValues,

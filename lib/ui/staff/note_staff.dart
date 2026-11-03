@@ -10,12 +10,18 @@ import 'note_staff_painter.dart';
 import 'staff_models.dart';
 
 /// Interactive five-line musical staff widget displaying the target note,
-/// Gonville clefs, key signatures, and accidentals.
+/// live detected pitch, Gonville clefs, key signatures, and accidentals.
 class NoteStaff extends StatelessWidget {
   const NoteStaff({
     super.key,
-    required this.note,
+    this.note,
+    this.targetNote,
+    this.currentNote,
+    this.centsDeviation = 0.0,
     this.tuningState = TuningState.unknown,
+    this.showTargetNote = true,
+    this.showCurrentNote = true,
+    this.isChromatic = false,
     this.staffClef,
     StaffClef? clef,
     this.onStaffClefChanged,
@@ -27,7 +33,13 @@ class NoteStaff extends StatelessWidget {
        _onStaffClefChanged = onStaffClefChanged ?? onClefChanged;
 
   final MusicalNote? note;
+  final MusicalNote? targetNote;
+  final MusicalNote? currentNote;
+  final double centsDeviation;
   final TuningState tuningState;
+  final bool showTargetNote;
+  final bool showCurrentNote;
+  final bool isChromatic;
   final StaffClef? staffClef;
   final StaffClef _staffClef;
   final ValueChanged<StaffClef>? onStaffClefChanged;
@@ -51,7 +63,13 @@ class NoteStaff extends StatelessWidget {
             size: Size.infinite,
             painter: NoteStaffPainter(
               note: note,
+              targetNote: targetNote,
+              currentNote: currentNote,
+              centsDeviation: centsDeviation,
               tuningState: tuningState,
+              showTargetNote: showTargetNote,
+              showCurrentNote: showCurrentNote,
+              isChromatic: isChromatic,
               staffClef: _staffClef,
               keySignature: keySignature,
               staffColor: theme.colorScheme.onSurface,

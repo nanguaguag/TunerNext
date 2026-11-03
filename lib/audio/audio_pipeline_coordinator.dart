@@ -71,6 +71,13 @@ class AudioPipelineCoordinator {
       _isolate?.configure(
         sensitivity: preferences.sensitivity,
         smootherOrder: preferences.numMovingAverage,
+        useMedianFilter: preferences.medianFilter,
+        useOctaveJumpGate: preferences.octaveJumpGate,
+        mpmCutoffClarity: preferences.mpmCutoffClarity,
+        mpmPeakThresholdRatio: preferences.mpmPeakThresholdRatio,
+        twmMaxHarmonics: preferences.twmMaxHarmonics,
+        twmInharmonicity: preferences.twmInharmonicity,
+        twmMaxMismatchError: preferences.twmMaxMismatchError,
       );
 
       // 2. Initialize Audio Source (Microphone with Mock fallback)
@@ -148,6 +155,13 @@ class AudioPipelineCoordinator {
       stride: stride,
       sensitivity: preferences.sensitivity,
       smootherOrder: preferences.numMovingAverage,
+      useMedianFilter: preferences.medianFilter,
+      useOctaveJumpGate: preferences.octaveJumpGate,
+      mpmCutoffClarity: preferences.mpmCutoffClarity,
+      mpmPeakThresholdRatio: preferences.mpmPeakThresholdRatio,
+      twmMaxHarmonics: preferences.twmMaxHarmonics,
+      twmInharmonicity: preferences.twmInharmonicity,
+      twmMaxMismatchError: preferences.twmMaxMismatchError,
       includeSpectrum: true,
       includeWaveformSnapshot: true,
     );

@@ -42,6 +42,7 @@ class InstrumentTunerScreen extends StatefulWidget {
     this.onOpenScientificMode,
     this.onOpenAudioAnalysis,
     this.onOpenStretchTuning,
+    this.onTogglePreferFlat,
     this.onTemperamentChanged,
     this.onReferenceNoteChanged,
   });
@@ -59,6 +60,7 @@ class InstrumentTunerScreen extends StatefulWidget {
   final VoidCallback? onOpenScientificMode;
   final VoidCallback? onOpenAudioAnalysis;
   final VoidCallback? onOpenStretchTuning;
+  final VoidCallback? onTogglePreferFlat;
   final ValueChanged<Temperament>? onTemperamentChanged;
   final void Function(MusicalNote note, double frequency)?
   onReferenceNoteChanged;
@@ -384,9 +386,13 @@ class _InstrumentTunerScreenState extends State<InstrumentTunerScreen> {
         onTemperamentClicked: _showTemperamentDialog,
         onStretchTuningClicked: widget.onOpenStretchTuning,
         onSharpFlatClicked: () {
-          setState(() {
-            _preferFlat = !_preferFlat;
-          });
+          if (widget.onTogglePreferFlat != null) {
+            widget.onTogglePreferFlat!();
+          } else {
+            setState(() {
+              _preferFlat = !_preferFlat;
+            });
+          }
         },
       ),
     );

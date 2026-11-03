@@ -25,6 +25,13 @@ class ConfigureDspMessage extends MainToWorkerMessage {
     this.sampleRate,
     this.smootherOrder,
     this.sensitivity,
+    this.useMedianFilter,
+    this.useOctaveJumpGate,
+    this.mpmCutoffClarity,
+    this.mpmPeakThresholdRatio,
+    this.twmMaxHarmonics,
+    this.twmInharmonicity,
+    this.twmMaxMismatchError,
     this.includeWaveformSnapshot = true,
     this.snapshotSize = 1024,
     this.includeSpectrum = false,
@@ -37,6 +44,13 @@ class ConfigureDspMessage extends MainToWorkerMessage {
   final int? sampleRate;
   final int? smootherOrder;
   final int? sensitivity;
+  final bool? useMedianFilter;
+  final bool? useOctaveJumpGate;
+  final double? mpmCutoffClarity;
+  final double? mpmPeakThresholdRatio;
+  final int? twmMaxHarmonics;
+  final double? twmInharmonicity;
+  final double? twmMaxMismatchError;
   final bool includeWaveformSnapshot;
   final int snapshotSize;
   final bool includeSpectrum;

@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -193,7 +194,6 @@ class TunerHomeScreen extends ConsumerWidget {
 
   void _openAudioAnalysis(BuildContext context, WidgetRef ref) async {
     final state = ref.read(tunerControllerProvider);
-    final pathController = TextEditingController(text: 'docs/test_music.m4a');
 
     final choice = await showDialog<String>(
       context: context,
@@ -209,21 +209,27 @@ class TunerHomeScreen extends ConsumerWidget {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.music_note, color: Colors.blue),
-                title: const Text('Whistle Audio Sample'),
-                subtitle: const Text('docs/test_music.m4a (18.5s)'),
-                onTap: () => Navigator.of(ctx).pop('docs/test_music.m4a'),
+                title: const Text('Sample Whistle Audio (Built-in)'),
+                subtitle: const Text('High-clarity whistle test WAV (18.5s)'),
+                onTap: () => Navigator.of(ctx).pop('builtin://whistle'),
               ),
               const Divider(),
-              const SizedBox(height: 8),
-              const Text('Or enter audio file path:'),
-              const SizedBox(height: 6),
-              TextField(
-                controller: pathController,
-                decoration: const InputDecoration(
-                  hintText: 'docs/test_music.m4a',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.folder_open, color: Colors.orange),
+                title: const Text('Choose Audio File from Device...'),
+                subtitle: const Text('Standard .wav (uncompressed PCM)'),
+                onTap: () async {
+                  final files = await FilePicker.pickFiles(
+                    type: FileType.custom,
+                    allowedExtensions: ['wav', 'm4a', 'mp3', 'aac', 'flac'],
+                  );
+                  if (files.isNotEmpty && files.first.path != null) {
+                    if (ctx.mounted) {
+                      Navigator.of(ctx).pop(files.first.path);
+                    }
+                  }
+                },
               ),
             ],
           ),
@@ -231,11 +237,6 @@ class TunerHomeScreen extends ConsumerWidget {
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
               child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () =>
-                  Navigator.of(ctx).pop(pathController.text.trim()),
-              child: const Text('Analyze'),
             ),
           ],
         );
@@ -265,17 +266,32 @@ class TunerHomeScreen extends ConsumerWidget {
     );
 
     try {
-      final decoded = await AudioFileLoader.loadFromFile(choice);
+      final DecodedAudio decoded;
+      final String fileName;
+      if (choice == 'builtin://whistle') {
+        decoded = await AudioFileLoader.loadDefaultTestWhistle();
+        fileName = 'Sample Whistle (WAV)';
+      } else {
+        decoded = await AudioFileLoader.loadFromFile(choice);
+        fileName = choice.split('/').last;
+      }
+
       final result = await OfflineAudioAnalyzer.analyze(
         samples: decoded.samples,
         sampleRate: decoded.sampleRate,
         algorithm: state.preferences.pitchAlgorithm,
         weightingMode: state.preferences.acousticWeighting,
+        mpmCutoffClarity: state.preferences.mpmCutoffClarity,
+        mpmPeakThresholdRatio: state.preferences.mpmPeakThresholdRatio,
+        twmMaxHarmonics: state.preferences.twmMaxHarmonics,
+        twmInharmonicity: state.preferences.twmInharmonicity,
+        twmMaxMismatchError: state.preferences.twmMaxMismatchError,
+        useMedianFilter: state.preferences.medianFilter,
+        useOctaveJumpGate: state.preferences.octaveJumpGate,
       );
 
       if (context.mounted) {
         Navigator.of(context).pop(); // dismiss loading
-        final fileName = choice.split('/').last;
         Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (_) => AudioAnalysisScreen(
@@ -292,6 +308,14 @@ class TunerHomeScreen extends ConsumerWidget {
                   sampleRate: decoded.sampleRate,
                   algorithm: algo,
                   weightingMode: weight,
+                  mpmCutoffClarity: state.preferences.mpmCutoffClarity,
+                  mpmPeakThresholdRatio:
+                      state.preferences.mpmPeakThresholdRatio,
+                  twmMaxHarmonics: state.preferences.twmMaxHarmonics,
+                  twmInharmonicity: state.preferences.twmInharmonicity,
+                  twmMaxMismatchError: state.preferences.twmMaxMismatchError,
+                  useMedianFilter: state.preferences.medianFilter,
+                  useOctaveJumpGate: state.preferences.octaveJumpGate,
                 );
                 if (context.mounted) {
                   Navigator.of(context).pushReplacement(
@@ -312,9 +336,23 @@ class TunerHomeScreen extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop(); // dismiss loading
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to load audio: $e')));
+        showDialog<void>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Audio Decoding Notice'),
+            content: Text(
+              e is FormatException
+                  ? e.message
+                  : 'Failed to load audio: $e\n\nPlease select an uncompressed standard WAV (.wav) file, or use the built-in whistle sample.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
       }
     }
   }
@@ -327,6 +365,11 @@ class TunerHomeScreen extends ConsumerWidget {
     if (state.preferences.scientificMode) {
       return ScientificTunerScreen(
         targetNote: state.referenceNote,
+        currentNote: state.detectedNote,
+        centsDeviation: state.centsDeviation,
+        isChromatic: state.currentInstrument.strings.isEmpty,
+        showStaffTargetNote: state.preferences.showStaffTargetNote,
+        showStaffCurrentNote: state.preferences.showStaffCurrentNote,
         targetFrequency: state.referenceFrequency,
         referenceFrequency: state.referenceFrequency,
         referenceNote: state.referenceNote,
@@ -383,6 +426,7 @@ class TunerHomeScreen extends ConsumerWidget {
       onOpenPreferences: () => _openPreferences(context, state),
       onOpenInstrumentList: () => _openInstruments(context, ref, state),
       onOpenStretchTuning: () => _openStretchTuning(context, ref, state),
+      onTogglePreferFlat: notifier.togglePreferFlat,
       onTemperamentChanged: notifier.setCurrentTemperament,
       onReferenceNoteChanged: (note, freq) {
         notifier.setReferenceNote(note);

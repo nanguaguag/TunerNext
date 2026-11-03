@@ -97,12 +97,24 @@ class TunerDspPipeline {
     this.minConfidence = 0.25,
     this.maxNoiseRatio = 0.80,
     this.sensitivity = 50,
+    double mpmCutoffClarity = 0.45,
+    double mpmPeakThresholdRatio = 0.85,
+    int twmMaxHarmonics = 10,
+    double twmInharmonicity = 0.0,
+    double twmMaxMismatchError = 0.40,
   }) : _weightingMode = weightingMode,
        _weighting = AcousticWeighting.fromMode(weightingMode),
        _smootherOrder = smootherOrder,
        _classicDetector = ClassicPitchDetector(frameSize: frameSize),
-       _mpmDetector = McLeodPitchDetector(),
-       _twmDetector = TwoWayMismatchDetector(),
+       _mpmDetector = McLeodPitchDetector(
+         cutoffClarity: mpmCutoffClarity,
+         peakThresholdRatio: mpmPeakThresholdRatio,
+       ),
+       _twmDetector = TwoWayMismatchDetector(
+         maxHarmonics: twmMaxHarmonics,
+         inharmonicity: twmInharmonicity,
+         maxMismatchError: twmMaxMismatchError,
+       ),
        _medianFilter = PitchMedianFilter(),
        _octaveJumpGate = OctaveJumpGate(),
        _smoother = OutlierRemovingSmoother(
@@ -154,8 +166,8 @@ class TunerDspPipeline {
   int _consecutiveNoiseFrames = 0;
 
   final ClassicPitchDetector _classicDetector;
-  final McLeodPitchDetector _mpmDetector;
-  final TwoWayMismatchDetector _twmDetector;
+  McLeodPitchDetector _mpmDetector;
+  TwoWayMismatchDetector _twmDetector;
   final PitchMedianFilter _medianFilter;
   final OctaveJumpGate _octaveJumpGate;
   OutlierRemovingSmoother _smoother;
@@ -163,6 +175,8 @@ class TunerDspPipeline {
   AcousticWeightingMode get weightingMode => _weightingMode;
   AcousticWeighting get acousticWeighting => _weighting;
   int get smootherOrder => _smootherOrder;
+  McLeodPitchDetector get mpmDetector => _mpmDetector;
+  TwoWayMismatchDetector get twmDetector => _twmDetector;
 
   /// Switches the active pitch algorithm at runtime.
   void setAlgorithm(PitchAlgorithm newAlgorithm) {
@@ -195,6 +209,43 @@ class TunerDspPipeline {
   /// Updates detection sensitivity [0, 100].
   void setSensitivity(int value) {
     sensitivity = value.clamp(0, 100);
+  }
+
+  /// Updates McLeod Pitch Method internal parameters at runtime.
+  void setMpmParameters({double? cutoffClarity, double? peakThresholdRatio}) {
+    final newClarity = cutoffClarity ?? _mpmDetector.cutoffClarity;
+    final newRatio = peakThresholdRatio ?? _mpmDetector.peakThresholdRatio;
+    _mpmDetector = McLeodPitchDetector(
+      cutoffClarity: newClarity,
+      peakThresholdRatio: newRatio,
+    );
+  }
+
+  /// Updates Two-Way Mismatch internal parameters at runtime.
+  void setTwmParameters({
+    int? maxHarmonics,
+    double? inharmonicity,
+    double? maxMismatchError,
+  }) {
+    final newHarmonics = maxHarmonics ?? _twmDetector.maxHarmonics;
+    final newInharmonicity = inharmonicity ?? _twmDetector.inharmonicity;
+    final newMismatch = maxMismatchError ?? _twmDetector.maxMismatchError;
+    _twmDetector = TwoWayMismatchDetector(
+      maxHarmonics: newHarmonics,
+      inharmonicity: newInharmonicity,
+      maxMismatchError: newMismatch,
+    );
+  }
+
+  /// Updates filter gate bypass switches at runtime.
+  void setFilterSwitches({
+    bool? useMedianFilter,
+    bool? useOctaveJumpGate,
+    bool? useSmoother,
+  }) {
+    if (useMedianFilter != null) this.useMedianFilter = useMedianFilter;
+    if (useOctaveJumpGate != null) this.useOctaveJumpGate = useOctaveJumpGate;
+    if (useSmoother != null) this.useSmoother = useSmoother;
   }
 
   /// Maps physical signal energy to a normalized 0-100 perceptual logarithmic level.

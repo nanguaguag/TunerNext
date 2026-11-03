@@ -26,6 +26,8 @@ class TunerAppState {
     this.referenceFrequency = 440.0,
     this.referenceNote = const MusicalNote(base: BaseNote.a, octave: 4),
     this.currentFrequency,
+    this.detectedNote,
+    this.centsDeviation = 0.0,
     this.tuningState = TuningState.unknown,
     this.spectrumAmplitudes,
     this.correlationValues,
@@ -61,6 +63,8 @@ class TunerAppState {
   final double referenceFrequency;
   final MusicalNote referenceNote;
   final double? currentFrequency;
+  final MusicalNote? detectedNote;
+  final double centsDeviation;
   final TuningState tuningState;
   final Float32List? spectrumAmplitudes;
   final Float32List? correlationValues;
@@ -84,6 +88,9 @@ class TunerAppState {
     MusicalNote? referenceNote,
     double? currentFrequency,
     bool clearCurrentFrequency = false,
+    MusicalNote? detectedNote,
+    bool clearDetectedNote = false,
+    double? centsDeviation,
     TuningState? tuningState,
     Float32List? spectrumAmplitudes,
     Float32List? correlationValues,
@@ -108,6 +115,10 @@ class TunerAppState {
       currentFrequency: clearCurrentFrequency
           ? null
           : (currentFrequency ?? this.currentFrequency),
+      detectedNote: clearDetectedNote
+          ? null
+          : (detectedNote ?? this.detectedNote),
+      centsDeviation: centsDeviation ?? this.centsDeviation,
       tuningState: tuningState ?? this.tuningState,
       spectrumAmplitudes: spectrumAmplitudes ?? this.spectrumAmplitudes,
       correlationValues: correlationValues ?? this.correlationValues,

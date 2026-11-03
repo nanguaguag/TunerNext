@@ -195,6 +195,29 @@ void _audioWorkerEntry(_IsolateInitParams initParams) async {
       if (message.sensitivity != null) {
         pipeline.setSensitivity(message.sensitivity!);
       }
+      if (message.useMedianFilter != null ||
+          message.useOctaveJumpGate != null) {
+        pipeline.setFilterSwitches(
+          useMedianFilter: message.useMedianFilter,
+          useOctaveJumpGate: message.useOctaveJumpGate,
+        );
+      }
+      if (message.mpmCutoffClarity != null ||
+          message.mpmPeakThresholdRatio != null) {
+        pipeline.setMpmParameters(
+          cutoffClarity: message.mpmCutoffClarity,
+          peakThresholdRatio: message.mpmPeakThresholdRatio,
+        );
+      }
+      if (message.twmMaxHarmonics != null ||
+          message.twmInharmonicity != null ||
+          message.twmMaxMismatchError != null) {
+        pipeline.setTwmParameters(
+          maxHarmonics: message.twmMaxHarmonics,
+          inharmonicity: message.twmInharmonicity,
+          maxMismatchError: message.twmMaxMismatchError,
+        );
+      }
       if (message.sampleRate != null && message.sampleRate! > 0) {
         currentSampleRate = message.sampleRate!;
         autoCorrData = AutoCorrelationData(
@@ -395,6 +418,13 @@ class AudioProcessingIsolate {
     int? sampleRate,
     int? smootherOrder,
     int? sensitivity,
+    bool? useMedianFilter,
+    bool? useOctaveJumpGate,
+    double? mpmCutoffClarity,
+    double? mpmPeakThresholdRatio,
+    int? twmMaxHarmonics,
+    double? twmInharmonicity,
+    double? twmMaxMismatchError,
     bool includeWaveformSnapshot = true,
     int snapshotSize = 1024,
     bool includeSpectrum = false,
@@ -409,6 +439,13 @@ class AudioProcessingIsolate {
         sampleRate: sampleRate,
         smootherOrder: smootherOrder,
         sensitivity: sensitivity,
+        useMedianFilter: useMedianFilter,
+        useOctaveJumpGate: useOctaveJumpGate,
+        mpmCutoffClarity: mpmCutoffClarity,
+        mpmPeakThresholdRatio: mpmPeakThresholdRatio,
+        twmMaxHarmonics: twmMaxHarmonics,
+        twmInharmonicity: twmInharmonicity,
+        twmMaxMismatchError: twmMaxMismatchError,
         includeWaveformSnapshot: includeWaveformSnapshot,
         snapshotSize: snapshotSize,
         includeSpectrum: includeSpectrum,

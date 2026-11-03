@@ -30,6 +30,13 @@ class AppPreferences extends ChangeNotifier {
   static const _kAcousticWeighting = 'pref_acoustic_weighting';
   static const _kOctaveJumpGate = 'pref_octave_jump_gate';
   static const _kMedianFilter = 'pref_median_filter';
+  static const _kMpmCutoffClarity = 'pref_mpm_cutoff_clarity';
+  static const _kMpmPeakThresholdRatio = 'pref_mpm_peak_threshold_ratio';
+  static const _kTwmMaxHarmonics = 'pref_twm_max_harmonics';
+  static const _kTwmInharmonicity = 'pref_twm_inharmonicity';
+  static const _kTwmMaxMismatchError = 'pref_twm_max_mismatch_error';
+  static const _kShowStaffTargetNote = 'pref_show_staff_target_note';
+  static const _kShowStaffCurrentNote = 'pref_show_staff_current_note';
   static const _kScientificMode = 'pref_scientific_mode';
   static const _kNumMovingAverage = 'pref_num_moving_average';
   static const _kStretchTuningName = 'pref_stretch_tuning_name';
@@ -61,6 +68,15 @@ class AppPreferences extends ChangeNotifier {
   AcousticWeightingMode acousticWeighting = AcousticWeightingMode.none;
   bool octaveJumpGate = true;
   bool medianFilter = true;
+  double mpmCutoffClarity = 0.45;
+  double mpmPeakThresholdRatio = 0.85;
+  int twmMaxHarmonics = 10;
+  double twmInharmonicity = 0.0;
+  double twmMaxMismatchError = 0.40;
+
+  // Staff display
+  bool showStaffTargetNote = true;
+  bool showStaffCurrentNote = true;
 
   // Expert / Scientific
   bool scientificMode = false;
@@ -94,6 +110,13 @@ class AppPreferences extends ChangeNotifier {
     acousticWeighting = AcousticWeightingMode.none;
     octaveJumpGate = true;
     medianFilter = true;
+    mpmCutoffClarity = 0.45;
+    mpmPeakThresholdRatio = 0.85;
+    twmMaxHarmonics = 10;
+    twmInharmonicity = 0.0;
+    twmMaxMismatchError = 0.40;
+    showStaffTargetNote = true;
+    showStaffCurrentNote = true;
 
     scientificMode = false;
     numMovingAverage = 3;
@@ -155,6 +178,13 @@ class AppPreferences extends ChangeNotifier {
 
     octaveJumpGate = prefs.getBool(_kOctaveJumpGate) ?? true;
     medianFilter = prefs.getBool(_kMedianFilter) ?? true;
+    mpmCutoffClarity = prefs.getDouble(_kMpmCutoffClarity) ?? 0.45;
+    mpmPeakThresholdRatio = prefs.getDouble(_kMpmPeakThresholdRatio) ?? 0.85;
+    twmMaxHarmonics = prefs.getInt(_kTwmMaxHarmonics) ?? 10;
+    twmInharmonicity = prefs.getDouble(_kTwmInharmonicity) ?? 0.0;
+    twmMaxMismatchError = prefs.getDouble(_kTwmMaxMismatchError) ?? 0.40;
+    showStaffTargetNote = prefs.getBool(_kShowStaffTargetNote) ?? true;
+    showStaffCurrentNote = prefs.getBool(_kShowStaffCurrentNote) ?? true;
 
     scientificMode = prefs.getBool(_kScientificMode) ?? false;
     numMovingAverage = prefs.getInt(_kNumMovingAverage) ?? 3;
@@ -210,6 +240,13 @@ class AppPreferences extends ChangeNotifier {
     await prefs.setInt(_kAcousticWeighting, acousticWeighting.index);
     await prefs.setBool(_kOctaveJumpGate, octaveJumpGate);
     await prefs.setBool(_kMedianFilter, medianFilter);
+    await prefs.setDouble(_kMpmCutoffClarity, mpmCutoffClarity);
+    await prefs.setDouble(_kMpmPeakThresholdRatio, mpmPeakThresholdRatio);
+    await prefs.setInt(_kTwmMaxHarmonics, twmMaxHarmonics);
+    await prefs.setDouble(_kTwmInharmonicity, twmInharmonicity);
+    await prefs.setDouble(_kTwmMaxMismatchError, twmMaxMismatchError);
+    await prefs.setBool(_kShowStaffTargetNote, showStaffTargetNote);
+    await prefs.setBool(_kShowStaffCurrentNote, showStaffCurrentNote);
 
     await prefs.setBool(_kScientificMode, scientificMode);
     await prefs.setInt(_kNumMovingAverage, numMovingAverage);
@@ -437,6 +474,62 @@ class AppPreferences extends ChangeNotifier {
   void setDisplayOnLockScreen(bool value) {
     if (displayOnLockScreen != value) {
       displayOnLockScreen = value;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setMpmCutoffClarity(double value) {
+    if (mpmCutoffClarity != value) {
+      mpmCutoffClarity = value;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setMpmPeakThresholdRatio(double value) {
+    if (mpmPeakThresholdRatio != value) {
+      mpmPeakThresholdRatio = value;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setTwmMaxHarmonics(int value) {
+    if (twmMaxHarmonics != value) {
+      twmMaxHarmonics = value;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setTwmInharmonicity(double value) {
+    if (twmInharmonicity != value) {
+      twmInharmonicity = value;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setTwmMaxMismatchError(double value) {
+    if (twmMaxMismatchError != value) {
+      twmMaxMismatchError = value;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setShowStaffTargetNote(bool value) {
+    if (showStaffTargetNote != value) {
+      showStaffTargetNote = value;
+      notifyListeners();
+      save();
+    }
+  }
+
+  void setShowStaffCurrentNote(bool value) {
+    if (showStaffCurrentNote != value) {
+      showStaffCurrentNote = value;
       notifyListeners();
       save();
     }

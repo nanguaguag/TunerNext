@@ -32,28 +32,44 @@ const String bassClefPathData =
 /// CustomPainter for rendering classical note staff, Gonville clefs, notes, and accidentals.
 class NoteStaffPainter extends CustomPainter {
   NoteStaffPainter({
-    required this.note,
+    MusicalNote? note,
+    this.targetNote,
+    this.currentNote,
+    this.centsDeviation = 0.0,
     required this.tuningState,
     required this.staffClef,
     this.keySignature,
+    this.showTargetNote = true,
+    this.showCurrentNote = true,
+    this.isChromatic = false,
     required this.staffColor,
     required this.inTuneColor,
     required this.outOfTuneColor,
     required this.unknownTuningColor,
+    Color? targetNoteColor,
     required this.borderColor,
     this.borderRadius = 8.0,
     this.borderWidth = 1.0,
-  }) : _trebleClefPath = SvgPathParser.parse(trebleClefPathData),
+  }) : _effectiveTargetNote = targetNote ?? (currentNote == null ? note : null),
+       _targetNoteColor = targetNoteColor ?? staffColor.withValues(alpha: 0.65),
+       _trebleClefPath = SvgPathParser.parse(trebleClefPathData),
        _bassClefPath = SvgPathParser.parse(bassClefPathData);
 
-  final MusicalNote? note;
+  final MusicalNote? targetNote;
+  final MusicalNote? currentNote;
+  final MusicalNote? _effectiveTargetNote;
+  final double centsDeviation;
   final TuningState tuningState;
   final StaffClef staffClef;
   final int? keySignature;
+  final bool showTargetNote;
+  final bool showCurrentNote;
+  final bool isChromatic;
   final Color staffColor;
   final Color inTuneColor;
   final Color outOfTuneColor;
   final Color unknownTuningColor;
+  final Color _targetNoteColor;
   final Color borderColor;
   final double borderRadius;
   final double borderWidth;
@@ -61,7 +77,10 @@ class NoteStaffPainter extends CustomPainter {
   final Path _trebleClefPath;
   final Path _bassClefPath;
 
-  Color get noteColor {
+  /// Backwards-compatible accessor for primary note.
+  MusicalNote? get note => _effectiveTargetNote ?? currentNote;
+
+  Color get currentNoteColor {
     switch (tuningState) {
       case TuningState.inTune:
         return inTuneColor;
@@ -72,6 +91,8 @@ class NoteStaffPainter extends CustomPainter {
         return unknownTuningColor;
     }
   }
+
+  Color get noteColor => currentNoteColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -170,71 +191,178 @@ class NoteStaffPainter extends CustomPainter {
       }
     }
 
-    // 5. Calculate note placement & drawing
-    final spelled = note != null
-        ? spellNote(note!, keySignature: keySignature)
+    // 5. Calculate note placement & dual-note drawing
+    final target = _effectiveTargetNote;
+    final current = currentNote;
+    final shouldDrawTarget = showTargetNote && !isChromatic && target != null;
+    final shouldDrawCurrent = showCurrentNote && current != null;
+
+    final spelledTarget = shouldDrawTarget
+        ? spellNote(target, keySignature: keySignature)
         : null;
-    final soundingPos = note != null ? staffPosition(note!) : null;
-    final placement = soundingPos != null
-        ? staffPlacement(soundingPos, staffClef)
+    final placementTarget = shouldDrawTarget
+        ? staffPlacement(staffPosition(target), staffClef)
         : null;
 
-    final noteX = math.max(
-      keySignatureX +
-          (numKeyAccidentals * keySignatureSpacing + 3.5) * staffSpace,
-      0.45 * size.width,
+    final spelledCurrent = shouldDrawCurrent
+        ? spellNote(current, keySignature: keySignature)
+        : null;
+    final placementCurrent = shouldDrawCurrent
+        ? staffPlacement(staffPosition(current), staffClef)
+        : null;
+
+    // Union of dynamic ledger lines for both target note and current note
+    final targetLedgers = placementTarget != null
+        ? ledgerLinePositions(placementTarget.position, staffClef)
+        : const <int>[];
+    final currentLedgers = placementCurrent != null
+        ? ledgerLinePositions(placementCurrent.position, staffClef)
+        : const <int>[];
+    final allLedgerLines = <int>{...targetLedgers, ...currentLedgers}.toList()
+      ..sort();
+
+    final keySigEndX =
+        keySignatureX + numKeyAccidentals * keySignatureSpacing * staffSpace;
+    final availableLeft = math.max(
+      keySigEndX + 3.0 * staffSpace,
+      left + 4.5 * staffSpace,
     );
+    final availableRight = size.width - 2.5 * staffSpace;
 
-    if (placement != null) {
-      final noteY = y(placement.position);
+    final double targetX;
+    final double currentX;
 
-      // Ledger lines
-      for (final p in ledgerLinePositions(placement.position, staffClef)) {
-        final lineY = y(p);
+    if (shouldDrawTarget && shouldDrawCurrent) {
+      targetX = availableLeft + 0.28 * (availableRight - availableLeft);
+      currentX = availableLeft + 0.72 * (availableRight - availableLeft);
+    } else if (shouldDrawTarget) {
+      targetX = availableLeft + 0.45 * (availableRight - availableLeft);
+      currentX = targetX;
+    } else {
+      currentX = availableLeft + 0.45 * (availableRight - availableLeft);
+      targetX = currentX;
+    }
+
+    // 5.1 Draw dynamic ledger lines (simultaneously across both left & right columns)
+    for (final p in allLedgerLines) {
+      final lineY = y(p);
+      if (shouldDrawTarget && shouldDrawCurrent) {
         canvas.drawLine(
-          Offset(noteX - 1.1 * staffSpace, lineY),
-          Offset(noteX + 1.1 * staffSpace, lineY),
+          Offset(targetX - 1.1 * staffSpace, lineY),
+          Offset(targetX + 1.1 * staffSpace, lineY),
           linePaint,
         );
-      }
-
-      // Draw skewed note head
-      canvas.save();
-      canvas.translate(noteX, noteY);
-      canvas.scale(staffSpace, staffSpace);
-      final skewMatrix = Matrix4.identity()..setEntry(0, 1, -noteHeadSkew);
-      canvas.transform(skewMatrix.storage);
-      final headPaint = Paint()
-        ..color = noteColor
-        ..style = PaintingStyle.fill;
-      canvas.drawOval(
-        Rect.fromCenter(
-          center: Offset.zero,
-          width: 2 * noteHeadRadiusX,
-          height: 2 * noteHeadRadiusY,
-        ),
-        headPaint,
-      );
-      canvas.restore();
-
-      // Draw accidental if needed
-      if (spelled != null && spelled.showAccidental) {
-        final sym = _accidentalSymbol(spelled.note.modifier);
-        final fallbackSym = _accidentalFallbackSymbol(spelled.note.modifier);
-        _drawAccidental(
-          canvas: canvas,
-          symbol: sym,
-          fallbackSymbol: fallbackSym,
-          rightX: noteX - 1.1 * staffSpace,
-          noteY: noteY,
-          staffSpace: staffSpace,
-          color: noteColor,
+        canvas.drawLine(
+          Offset(currentX - 1.1 * staffSpace, lineY),
+          Offset(currentX + 1.1 * staffSpace, lineY),
+          linePaint,
+        );
+      } else if (shouldDrawTarget) {
+        canvas.drawLine(
+          Offset(targetX - 1.1 * staffSpace, lineY),
+          Offset(targetX + 1.1 * staffSpace, lineY),
+          linePaint,
+        );
+      } else if (shouldDrawCurrent) {
+        canvas.drawLine(
+          Offset(currentX - 1.1 * staffSpace, lineY),
+          Offset(currentX + 1.1 * staffSpace, lineY),
+          linePaint,
         );
       }
     }
 
+    // 5.2 Draw Left Target Note (Nominal target, strictly on-line/space)
+    if (placementTarget != null && spelledTarget != null) {
+      final noteY = y(placementTarget.position);
+
+      _drawNoteHead(
+        canvas: canvas,
+        noteX: targetX,
+        noteY: noteY,
+        staffSpace: staffSpace,
+        color: _targetNoteColor,
+      );
+
+      if (spelledTarget.showAccidental) {
+        final sym = _accidentalSymbol(spelledTarget.note.modifier);
+        final fallbackSym = _accidentalFallbackSymbol(
+          spelledTarget.note.modifier,
+        );
+        _drawAccidental(
+          canvas: canvas,
+          symbol: sym,
+          fallbackSymbol: fallbackSym,
+          rightX: targetX - 1.1 * staffSpace,
+          noteY: noteY,
+          staffSpace: staffSpace,
+          color: _targetNoteColor,
+        );
+      }
+
+      // Small target label
+      final labelText = shouldDrawCurrent
+          ? 'Target: ${spelledTarget.note.name}'
+          : spelledTarget.note.name;
+      _drawNoteLabel(
+        canvas: canvas,
+        text: labelText,
+        color: _targetNoteColor,
+        x: targetX + 1.2 * staffSpace,
+        y: noteY,
+        size: size,
+      );
+    }
+
+    // 5.3 Draw Right Current Note (Continuous cent-deviation float & status coloring)
+    if (placementCurrent != null && spelledCurrent != null) {
+      final clampedCents = centsDeviation.clamp(-120.0, 120.0);
+      final centsOffset = -(clampedCents / 100.0) * (0.5 * staffSpace);
+      final currentNoteY = y(placementCurrent.position) + centsOffset;
+
+      _drawNoteHead(
+        canvas: canvas,
+        noteX: currentX,
+        noteY: currentNoteY,
+        staffSpace: staffSpace,
+        color: currentNoteColor,
+      );
+
+      if (spelledCurrent.showAccidental) {
+        final sym = _accidentalSymbol(spelledCurrent.note.modifier);
+        final fallbackSym = _accidentalFallbackSymbol(
+          spelledCurrent.note.modifier,
+        );
+        _drawAccidental(
+          canvas: canvas,
+          symbol: sym,
+          fallbackSymbol: fallbackSym,
+          rightX: currentX - 1.1 * staffSpace,
+          noteY: currentNoteY,
+          staffSpace: staffSpace,
+          color: currentNoteColor,
+        );
+      }
+
+      // Current note label with cents deviation
+      final devSign = centsDeviation > 0 ? '+' : '';
+      final devStr = '$devSign${centsDeviation.toStringAsFixed(1)}¢';
+      final labelText = shouldDrawTarget
+          ? '${spelledCurrent.note.name} ($devStr)'
+          : '${spelledCurrent.note.name} ($devStr)';
+      _drawNoteLabel(
+        canvas: canvas,
+        text: labelText,
+        color: currentNoteColor,
+        x: currentX + 1.2 * staffSpace,
+        y: currentNoteY,
+        size: size,
+      );
+    }
+
     // 6. Draw clef octave transposition mark (e.g. 8 for tenor clef or shifted note)
-    final octaveMark = placement?.octaveMark ?? layout.writtenOctaves;
+    final activePlacement = placementCurrent ?? placementTarget;
+    final octaveMark = activePlacement?.octaveMark ?? layout.writtenOctaves;
     if (octaveMark != 0) {
       final staff = octaveMark > 0 ? layout.staves.last : layout.staves.first;
       final clefEdge = octaveMark > 0
@@ -257,33 +385,63 @@ class NoteStaffPainter extends CustomPainter {
                 staffSpace,
         clefEdgeY: y(staff.clefLine) + clefEdge * staffSpace,
         staffSpace: staffSpace,
-        color: isClefOwnMark ? staffColor : noteColor,
+        color: isClefOwnMark ? staffColor : currentNoteColor,
       );
     }
 
-    // 7. Note name label (right of note head)
-    if (spelled != null) {
-      final labelText = spelled.note.name;
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: labelText,
-          style: TextStyle(
-            color: noteColor,
-            fontSize: 16.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-
-      final labelY = placement != null ? y(placement.position) : centerY;
-      final top = (labelY - 0.5 * textPainter.height)
-          .clamp(0.0, math.max(0.0, size.height - textPainter.height))
-          .toDouble();
-      textPainter.paint(canvas, Offset(noteX + 1.5 * staffSpace, top));
-    }
-
     canvas.restore();
+  }
+
+  void _drawNoteHead({
+    required Canvas canvas,
+    required double noteX,
+    required double noteY,
+    required double staffSpace,
+    required Color color,
+  }) {
+    canvas.save();
+    canvas.translate(noteX, noteY);
+    canvas.scale(staffSpace, staffSpace);
+    final skewMatrix = Matrix4.identity()..setEntry(0, 1, -noteHeadSkew);
+    canvas.transform(skewMatrix.storage);
+    final headPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset.zero,
+        width: 2 * noteHeadRadiusX,
+        height: 2 * noteHeadRadiusY,
+      ),
+      headPaint,
+    );
+    canvas.restore();
+  }
+
+  void _drawNoteLabel({
+    required Canvas canvas,
+    required String text,
+    required Color color,
+    required double x,
+    required double y,
+    required Size size,
+  }) {
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: color,
+          fontSize: 13.0,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    final top = (y - 0.5 * textPainter.height)
+        .clamp(4.0, math.max(4.0, size.height - textPainter.height - 4.0))
+        .toDouble();
+    textPainter.paint(canvas, Offset(x, top));
   }
 
   void _drawAccidental({
@@ -404,7 +562,12 @@ class NoteStaffPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant NoteStaffPainter oldDelegate) {
-    return oldDelegate.note != note ||
+    return oldDelegate.targetNote != targetNote ||
+        oldDelegate.currentNote != currentNote ||
+        oldDelegate.centsDeviation != centsDeviation ||
+        oldDelegate.showTargetNote != showTargetNote ||
+        oldDelegate.showCurrentNote != showCurrentNote ||
+        oldDelegate.isChromatic != isChromatic ||
         oldDelegate.tuningState != tuningState ||
         oldDelegate.staffClef != staffClef ||
         oldDelegate.keySignature != keySignature ||

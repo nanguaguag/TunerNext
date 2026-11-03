@@ -24,6 +24,11 @@ class ScientificTunerScreen extends StatefulWidget {
   const ScientificTunerScreen({
     super.key,
     this.targetNote = const MusicalNote(base: BaseNote.a, octave: 4),
+    this.currentNote,
+    this.centsDeviation = 0.0,
+    this.isChromatic = false,
+    this.showStaffTargetNote = true,
+    this.showStaffCurrentNote = true,
     this.targetFrequency = 440.0,
     this.referenceFrequency = 440.0,
     this.referenceNote = const MusicalNote(base: BaseNote.a, octave: 4),
@@ -56,6 +61,11 @@ class ScientificTunerScreen extends StatefulWidget {
   });
 
   final MusicalNote targetNote;
+  final MusicalNote? currentNote;
+  final double centsDeviation;
+  final bool isChromatic;
+  final bool showStaffTargetNote;
+  final bool showStaffCurrentNote;
   final double targetFrequency;
   final double referenceFrequency;
   final MusicalNote referenceNote;
@@ -412,8 +422,13 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
             ),
             clipBehavior: Clip.antiAlias,
             child: NoteStaff(
-              note: widget.targetNote,
+              targetNote: widget.targetNote,
+              currentNote: widget.currentNote,
+              centsDeviation: widget.centsDeviation,
               tuningState: widget.tuningState,
+              showTargetNote: widget.showStaffTargetNote,
+              showCurrentNote: widget.showStaffCurrentNote,
+              isChromatic: widget.isChromatic,
               staffClef: _staffClef,
               onStaffClefChanged: (clef) {
                 setState(() {
@@ -506,8 +521,13 @@ class _ScientificTunerScreenState extends State<ScientificTunerScreen> {
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: NoteStaff(
-                    note: widget.targetNote,
+                    targetNote: widget.targetNote,
+                    currentNote: widget.currentNote,
+                    centsDeviation: widget.centsDeviation,
                     tuningState: widget.tuningState,
+                    showTargetNote: widget.showStaffTargetNote,
+                    showCurrentNote: widget.showStaffCurrentNote,
+                    isChromatic: widget.isChromatic,
                     staffClef: _staffClef,
                     onStaffClefChanged: (clef) {
                       setState(() {
