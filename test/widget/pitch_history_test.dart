@@ -107,5 +107,30 @@ void main() {
 
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets(
+      'high-frequency pitch (whistle at 1600 Hz) expands viewport dynamically without clamping',
+      (tester) async {
+        final state = PitchHistoryState(capacity: 20);
+        // Target note C3 (130.8 Hz, MIDI 48)
+        const targetC3 = MusicalNote(base: BaseNote.c, octave: 3);
+        await tester.pumpWidget(
+          buildTestWidget(state: state, targetNote: targetC3),
+        );
+        await tester.pumpAndSettle();
+
+        // Feed whistle tone (1600 Hz, MIDI ~91.3)
+        state.addFrequency(1600.0);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300)); // allow animation
+
+        expect(tester.takeException(), isNull);
+
+        // Add extreme octave jump from 1600 Hz to 120 Hz, verifying no exceptions thrown
+        state.addFrequency(120.0);
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 }

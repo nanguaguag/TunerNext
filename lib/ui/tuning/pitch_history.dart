@@ -208,17 +208,13 @@ class _PitchHistoryState extends State<PitchHistory>
         targetMidi + visibleRangeInIndices,
       );
     } else {
-      final clampedCurrentMidi = currentMidi.clamp(
-        targetMidi - 4.0,
-        targetMidi + 4.0,
-      );
       final lower = math.min(
         targetMidi - visibleRangeInIndices,
-        clampedCurrentMidi.floorToDouble() - visibleRangeInIndices2,
+        currentMidi.floorToDouble() - visibleRangeInIndices2,
       );
       final upper = math.max(
         targetMidi + visibleRangeInIndices,
-        clampedCurrentMidi.ceilToDouble() + visibleRangeInIndices2,
+        currentMidi.ceilToDouble() + visibleRangeInIndices2,
       );
       return (lower, upper);
     }
@@ -650,8 +646,22 @@ class _PitchHistoryPainter extends CustomPainter {
         final x1 = plotLeft + ((i + 1) * xStep);
         final m0 = 69.0 + (12.0 * math.log(f0 / 440.0) / math.ln2);
         final m1 = 69.0 + (12.0 * math.log(f1 / 440.0) / math.ln2);
+
+        // Break polyline across large pitch jumps (> 3.5 semitones between adjacent frames)
+        if ((m1 - m0).abs() > 3.5) {
+          lastPoint = null;
+          continue;
+        }
+
         final y0 = midiToY(m0);
         final y1 = midiToY(m1);
+
+        // Suppress vertical line artifacts: discard segments traversing completely across the viewport
+        if ((y0 < plotTop && y1 > plotBottom) ||
+            (y0 > plotBottom && y1 < plotTop)) {
+          lastPoint = null;
+          continue;
+        }
 
         _clipSegmentLiangBarsky(x0, y0, x1, y1, plotRect, (cx0, cy0, cx1, cy1) {
           if (lastPoint == null ||
